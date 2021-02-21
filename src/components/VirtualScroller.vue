@@ -3,7 +3,7 @@
     class="virtual-scroller-container"
     ref="virtualScroller"
     :style="{ height: `${viewportHeight}px` }"
-    @scroll="onScroll"
+    @scroll.passive="handleScroll"
   >
     <div
       class="virtual-scroller-content"
@@ -34,69 +34,107 @@
 </template>
 
 <script>
+import {
+  defineComponent,
+  toRefs,
+  ref,
+  computed,
+  onMounted,
+  watch,
+  nextTick,
+} from "vue";
 import { slice } from "lodash";
 
-export default {
+export default defineComponent({
   name: "VirtualScroller",
   props: {
     data: {
       type: Array,
       default: () => [],
     },
-  },
-  data() {
-    return {
-      itemHeight: 40,
-      scrollTop: 300,
-      tolerance: 2,
-      viewportHeight: 200,
-      visibleNodes: [],
-      offsetY: 0,
-    };
-  },
-  mounted() {
-    this.setScrollState();
-  },
-  watch: {
+    viewportHeight: {
+      type: Number,
+      default: () => 0,
+    },
+    itemHeight: {
+      type: Number,
+      default: () => 40,
+    },
     scrollTop: {
-      handler() {
-        this.setScrollState();
-      },
+      type: Number,
+      default: () => 0,
+    },
+    tolerance: {
+      type: Number,
+      default: () => 2,
     },
   },
-  methods: {
-    setScrollState() {
-      // total content height
-      this.totalHeight = this.data.length * this.itemHeight;
+  setup(props, { emit }) {
+    console.log(props);
+    const { data, viewportHeight, itemHeight, tolerance } = toRefs(props);
+    const scrollTop = computed({
+      get: () => props.scrollTop,
+      set: (value) => {
+        emit("update:scrollTop", value);
+      },
+    });
+    const virtualScroller = ref(null);
+    // total content height
+    const totalHeight = ref(data.value.length * itemHeight.value);
+    // offset start node
+    const offsetY = ref(0);
+    // visible nodes
+    const visibleNodes = ref([]);
+
+    const setScrollState = async () => {
       // start of visible node's index
       const startIndex = Math.max(
         0,
-        Math.floor(this.scrollTop / this.itemHeight) - this.tolerance
+        Math.floor(scrollTop.value / itemHeight.value) - tolerance.value
       );
       // amount of visible nodes
       const visibleNodeCount = Math.min(
-        this.data.length - startIndex,
-        Math.ceil(this.viewportHeight / this.itemHeight) + this.tolerance * 2
+        data.value.length - startIndex,
+        Math.ceil(viewportHeight.value / itemHeight.value) + tolerance.value * 2
       );
-      // offset total content
-      this.offsetY = startIndex * this.itemHeight;
+      // set offset based on the index of start node
+      offsetY.value = startIndex * itemHeight.value;
       // set visible nodes
-      this.visibleNodes = slice(
-        this.data,
+      visibleNodes.value = slice(
+        data.value,
         startIndex,
         startIndex + visibleNodeCount
       );
-      this.$nextTick(() =>
-        this.$refs.virtualScroller.scrollTo({ top: this.scrollTop })
-      );
-    },
-    onScroll(e) {
+
+      await nextTick();
+      virtualScroller.value.scrollTo({ top: scrollTop.value });
+    };
+
+    const handleScroll = () => {
       requestAnimationFrame(() => {
-        this.scrollTop = e.target.scrollTop;
+        scrollTop.value = virtualScroller.value.scrollTop;
       });
-    },
+    };
+
+    onMounted(async () => {
+      await setScrollState();
+    });
+
+    watch(
+      () => scrollTop.value,
+      async () => await setScrollState()
+    );
+
+    return {
+      virtualScroller,
+      totalHeight,
+      offsetY,
+      visibleNodes,
+      setScrollState,
+      handleScroll,
+    };
   },
-};
+});
 </script>
 
 <style>

@@ -2,7 +2,13 @@
   <div>
     <img alt="Vue logo" src="./assets/logo.png" />
     <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
-    <virtual-scroller :data="data"></virtual-scroller>
+    <virtual-scroller
+      :data="data"
+      :viewport-height="200"
+      :item-height="40"
+      :tolerance="2"
+      v-model:scrollTop="scrollTop"
+    ></virtual-scroller>
   </div>
 </template>
 
@@ -15,6 +21,7 @@ export default {
   data() {
     return {
       data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+      scrollTop: 300,
     };
   },
   components: {
