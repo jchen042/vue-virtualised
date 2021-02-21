@@ -46,6 +46,7 @@ import {
   computed,
   onMounted,
   watch,
+  watchEffect,
   nextTick,
 } from "vue";
 import { slice } from "lodash";
@@ -223,10 +224,8 @@ export default defineComponent({
         );
       }
     );
-    watch(
-      () => scrollTop.value,
-      async () => await setScrollState()
-    );
+
+    watchEffect(async () => await setScrollState());
 
     return {
       virtualScroller,
