@@ -1,7 +1,7 @@
 <template>
   <div
-    class="virtual-scroller-container"
     ref="virtualScroller"
+    class="virtual-scroller-container"
     :style="{ height: `${viewportHeight}px` }"
     @scroll.passive="handleScroll"
   >
@@ -20,13 +20,13 @@
       >
         <div
           v-for="item in visibleNodes"
-          :key="item"
+          :key="item.index"
           :style="{
-            height: `${itemHeight}px`,
+            height: `${getNodeHeight(item)}px`,
             borderBottom: '1px solid black',
           }"
         >
-          {{ item }}
+          {{ item.label }}
         </div>
       </div>
     </div>
@@ -34,6 +34,11 @@
 </template>
 
 <script>
+/**
+ * inspired by Adam Klein
+ * https://dev.to/adamklein/build-your-own-virtual-scroll-part-i-11ib
+ * https://dev.to/adamklein/build-your-own-virtual-scroll-part-ii-3j86
+ */
 import {
   defineComponent,
   toRefs,
@@ -56,10 +61,6 @@ export default defineComponent({
       type: Number,
       default: () => 0,
     },
-    itemHeight: {
-      type: Number,
-      default: () => 40,
-    },
     scrollTop: {
       type: Number,
       default: () => 0,
@@ -68,10 +69,18 @@ export default defineComponent({
       type: Number,
       default: () => 2,
     },
+    getNodeHeight: {
+      type: Function,
+      default: () =>
+        function () {
+          return 40;
+        },
+    },
   },
+  emits: ["update:scrollTop"],
   setup(props, { emit }) {
-    console.log(props);
-    const { data, viewportHeight, itemHeight, tolerance } = toRefs(props);
+    const { data, viewportHeight, tolerance, getNodeHeight } = toRefs(props);
+
     const scrollTop = computed({
       get: () => props.scrollTop,
       set: (value) => {
@@ -79,26 +88,106 @@ export default defineComponent({
       },
     });
     const virtualScroller = ref(null);
-    // total content height
-    const totalHeight = ref(data.value.length * itemHeight.value);
+
+    // store an array of child nodes positions
+    const getChildPositions = (nodes, getNodeHeight) => {
+      let results = [0];
+      for (let i = 1; i < nodes.length; i++) {
+        results.push(results[i - 1] + getNodeHeight(nodes[i - 1]));
+      }
+      return results;
+    };
+    const childPositions = ref(
+      getChildPositions(data.value, getNodeHeight.value)
+    );
+
+    // calculte total content height
+    const getTotalHeight = (nodes, childPositions, getNodeHeight) => {
+      return (
+        childPositions[nodes.length - 1] +
+        getNodeHeight(nodes[nodes.length - 1])
+      );
+    };
+    const totalHeight = ref(
+      getTotalHeight(data.value, childPositions.value, getNodeHeight.value)
+    );
+
     // offset start node
     const offsetY = ref(0);
     // visible nodes
     const visibleNodes = ref([]);
 
+    // binary search to find the first visible node's index in viewport
+    const findFirstVisibleIndex = (scrollTop, childPositions, itemCount) => {
+      let startRange = 0;
+      let endRange = itemCount - 1;
+      while (startRange !== endRange) {
+        const middle = Math.floor((endRange - startRange) / 2 + startRange);
+        if (
+          childPositions[middle] < scrollTop &&
+          childPositions[middle + 1] > scrollTop
+        )
+          return middle;
+        if (middle === startRange) return endRange;
+        else {
+          if (childPositions[middle] <= scrollTop) startRange = middle;
+          else endRange = middle;
+        }
+      }
+      return itemCount;
+    };
+
+    // find the last node's index in the viewport
+    const findLastVisibleIndex = (
+      childPositions,
+      firstVisibleIndex,
+      itemCount,
+      viewportHeight
+    ) => {
+      let lastVisibleIndex;
+      for (
+        lastVisibleIndex = firstVisibleIndex;
+        lastVisibleIndex < itemCount;
+        lastVisibleIndex++
+      ) {
+        if (
+          childPositions[lastVisibleIndex] >
+          childPositions[firstVisibleIndex] + viewportHeight
+        ) {
+          return lastVisibleIndex;
+        }
+      }
+      return lastVisibleIndex;
+    };
+
+    // calculate nodes to be rendered to the view
+    // and offset to be set to the rendered nodes
     const setScrollState = async () => {
-      // start of visible node's index
-      const startIndex = Math.max(
-        0,
-        Math.floor(scrollTop.value / itemHeight.value) - tolerance.value
+      // first visible node's index
+      const firstVisibleIndex = findFirstVisibleIndex(
+        scrollTop.value,
+        childPositions.value,
+        data.value.length
       );
-      // amount of visible nodes
-      const visibleNodeCount = Math.min(
-        data.value.length - startIndex,
-        Math.ceil(viewportHeight.value / itemHeight.value) + tolerance.value * 2
+      // start of rendered node's index
+      const startIndex = Math.max(0, firstVisibleIndex - tolerance.value);
+
+      // last visible node's index
+      const lastVisibleIndex = findLastVisibleIndex(
+        childPositions.value,
+        firstVisibleIndex,
+        data.value.length,
+        viewportHeight.value
       );
+      const endIndex = Math.min(
+        data.value.length,
+        lastVisibleIndex + tolerance.value
+      );
+
+      // amount of nodes needs to be rendered
+      const visibleNodeCount = endIndex - startIndex + 1;
       // set offset based on the index of start node
-      offsetY.value = startIndex * itemHeight.value;
+      offsetY.value = childPositions.value[startIndex];
       // set visible nodes
       visibleNodes.value = slice(
         data.value,
@@ -120,6 +209,20 @@ export default defineComponent({
       await setScrollState();
     });
 
+    watch(
+      () => getNodeHeight.value,
+      () => {
+        childPositions.value = getChildPositions(
+          data.value,
+          getNodeHeight.value
+        );
+        totalHeight.value = getTotalHeight(
+          data.value,
+          childPositions.value,
+          getNodeHeight.value
+        );
+      }
+    );
     watch(
       () => scrollTop.value,
       async () => await setScrollState()

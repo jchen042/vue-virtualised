@@ -6,8 +6,8 @@
       v-model:scrollTop="scrollTop"
       :data="data"
       :viewport-height="200"
-      :item-height="40"
       :tolerance="2"
+      :get-node-height="getNodeHeight"
     ></virtual-scroller>
   </div>
 </template>
@@ -24,8 +24,12 @@ export default {
   },
   data() {
     return {
-      data: Array.from({ length: 100000 }, (_, i) => i + 1),
+      data: Array.from({ length: 100000 }, (_, i) => ({
+        index: i,
+        label: i + 1,
+      })),
       scrollTop: 300,
+      getNodeHeight: (node) => 30 + (node.index % 10),
     };
   },
 };
