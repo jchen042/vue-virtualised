@@ -3,11 +3,11 @@
     <img alt="Vue logo" src="./assets/logo.png" />
     <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
     <virtual-scroller
+      v-model:scrollTop="scrollTop"
       :data="data"
       :viewport-height="200"
       :item-height="40"
       :tolerance="2"
-      v-model:scrollTop="scrollTop"
     ></virtual-scroller>
   </div>
 </template>
@@ -18,15 +18,15 @@ import VirtualScroller from "./components/VirtualScroller.vue";
 
 export default {
   name: "App",
-  data() {
-    return {
-      data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-      scrollTop: 300,
-    };
-  },
   components: {
     HelloWorld,
     VirtualScroller,
+  },
+  data() {
+    return {
+      data: Array.from({ length: 100000 }, (_, i) => i + 1),
+      scrollTop: 300,
+    };
   },
 };
 </script>
