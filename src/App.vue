@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
+    <img alt="Vue logo" src="./assets/logo.png" />
     <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
     <virtual-scroller :data="data"></virtual-scroller>
   </div>

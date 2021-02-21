@@ -6,21 +6,28 @@
     @scroll="onScroll"
   >
     <div
+      class="virtual-scroller-content"
       :style="{
         height: `${totalHeight}px`,
         willChange: 'transform',
-        transform: `translateY(${offsetY}px)`,
       }"
     >
       <div
-        v-for="item in visibleNodes"
-        :key="item"
         :style="{
-          height: `${itemHeight}px`,
-          borderBottom: '1px solid black',
+          willChange: 'transform',
+          transform: `translateY(${offsetY}px)`,
         }"
       >
-        {{ item }}
+        <div
+          v-for="item in visibleNodes"
+          :key="item"
+          :style="{
+            height: `${itemHeight}px`,
+            borderBottom: '1px solid black',
+          }"
+        >
+          {{ item }}
+        </div>
       </div>
     </div>
   </div>
@@ -48,10 +55,18 @@ export default {
     };
   },
   mounted() {
-    this.setInitialState();
+    this.setScrollState();
+  },
+  watch: {
+    scrollTop: {
+      handler() {
+        this.setScrollState();
+      },
+    },
   },
   methods: {
-    setInitialState() {
+    setScrollState() {
+      // total content height
       this.totalHeight = this.data.length * this.itemHeight;
       // start of visible node's index
       const startIndex = Math.max(
@@ -65,6 +80,7 @@ export default {
       );
       // offset total content
       this.offsetY = startIndex * this.itemHeight;
+      // set visible nodes
       this.visibleNodes = slice(
         this.data,
         startIndex,
@@ -75,7 +91,9 @@ export default {
       );
     },
     onScroll(e) {
-      //   console.log(e);
+      requestAnimationFrame(() => {
+        this.scrollTop = e.target.scrollTop;
+      });
     },
   },
 };
@@ -84,5 +102,9 @@ export default {
 <style>
 .virtual-scroller-container {
   overflow: auto;
+}
+.virtual-scroller-content {
+  overflow: hidden;
+  position: relative;
 }
 </style>
