@@ -19,14 +19,14 @@
         }"
       >
         <div
-          v-for="item in visibleNodes"
-          :key="item.index"
+          v-for="(item, index) in visibleNodes"
+          :key="index"
           :style="{
             height: `${getNodeHeight(item)}px`,
             borderBottom: '1px solid black',
           }"
         >
-          {{ item.label }}
+          <slot name="label" :node="item">{{ item.name ?? item.label }}</slot>
         </div>
       </div>
     </div>
@@ -80,6 +80,7 @@ export default defineComponent({
   },
   emits: ["update:scrollTop"],
   setup(props, { emit }) {
+    // TODO: dynamic data attributes
     const { data, viewportHeight, tolerance, getNodeHeight } = toRefs(props);
 
     const scrollTop = computed({
@@ -93,9 +94,13 @@ export default defineComponent({
     // store an array of child nodes positions
     const getChildPositions = (nodes, getNodeHeight) => {
       let results = [0];
-      for (let i = 1; i < nodes.length; i++) {
-        results.push(results[i - 1] + getNodeHeight(nodes[i - 1]));
+      if (nodes.length > 0) {
+        // TODO: handle the scenario that the getNodeHeight method returns an invalid value
+        for (let i = 1; i < nodes.length; i++) {
+          results.push(results[i - 1] + getNodeHeight(nodes[i - 1]));
+        }
       }
+
       return results;
     };
     const childPositions = ref(
@@ -104,10 +109,10 @@ export default defineComponent({
 
     // calculte total content height
     const getTotalHeight = (nodes, childPositions, getNodeHeight) => {
-      return (
-        childPositions[nodes.length - 1] +
-        getNodeHeight(nodes[nodes.length - 1])
-      );
+      return nodes.length > 0
+        ? childPositions[nodes.length - 1] +
+            getNodeHeight(nodes[nodes.length - 1])
+        : 0;
     };
     const totalHeight = ref(
       getTotalHeight(data.value, childPositions.value, getNodeHeight.value)
@@ -118,6 +123,7 @@ export default defineComponent({
     // visible nodes
     const visibleNodes = ref([]);
 
+    // TODO: handle edge case
     // binary search to find the first visible node's index in viewport
     const findFirstVisibleIndex = (scrollTop, childPositions, itemCount) => {
       let startRange = 0;
