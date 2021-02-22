@@ -23,10 +23,13 @@
           :key="index"
           :style="{
             height: `${getNodeHeight(item)}px`,
-            borderBottom: '1px solid black',
+            borderLeft: '1px solid black',
+            textAlign: 'left',
+            marginLeft: `${item.deepness * 30}px`,
           }"
         >
-          <slot name="label" :node="item">{{ item.name ?? item.label }}</slot>
+          <span>{{ item.state.expanded ? "-" : "+" }}</span
+          ><span>{{ item.name ?? item.label }}</span>
         </div>
       </div>
     </div>

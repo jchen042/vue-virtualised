@@ -3,7 +3,7 @@
     <virtual-scroller
       v-model:scrollTop="scrollTop"
       :data="flattenedTree"
-      :viewport-height="200"
+      :viewport-height="400"
       :tolerance="2"
       :get-node-height="getNodeHeight"
     ></virtual-scroller>
@@ -25,6 +25,7 @@ export default defineComponent({
   },
   setup(props) {
     const { nodes } = toRefs(props);
+    console.log(nodes);
 
     const isNodeExpanded = (node) => node.state && node.state.expanded;
     const nodeHasChildren = (node) => node.children && node.children.length;
@@ -46,6 +47,7 @@ export default defineComponent({
       }, []);
 
     const flattenedTree = ref(getFlattenedTree(nodes.value));
+    console.log(flattenedTree);
 
     const scrollTop = ref(900);
 
