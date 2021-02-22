@@ -28,8 +28,14 @@
             marginLeft: `${item.deepness * 30}px`,
           }"
         >
-          <span>{{ item.state.expanded ? "-" : "+" }}</span
-          ><span>{{ item.name ?? item.label }}</span>
+          <button
+            :style="{ width: '20px' }"
+            :disabled="item.isLeaf"
+            @click="$emit('toggleChildNodes', item)"
+          >
+            {{ item.isLeaf ? "" : item.state.expanded ? "-" : "+" }}
+          </button>
+          <span>{{ item.name ?? item.label }}</span>
         </div>
       </div>
     </div>
@@ -52,7 +58,6 @@ import {
   watchEffect,
   nextTick,
 } from "vue";
-import { slice } from "lodash";
 
 export default defineComponent({
   name: "VirtualScroller",
@@ -199,8 +204,7 @@ export default defineComponent({
       // set offset based on the index of start node
       offsetY.value = childPositions.value[startIndex];
       // set visible nodes
-      visibleNodes.value = slice(
-        data.value,
+      visibleNodes.value = data.value.slice(
         startIndex,
         startIndex + visibleNodeCount
       );
@@ -234,7 +238,25 @@ export default defineComponent({
       }
     );
 
-    watchEffect(async () => await setScrollState());
+    watch(
+      () => data.value,
+      () => {
+        childPositions.value = getChildPositions(
+          data.value,
+          getNodeHeight.value
+        );
+        totalHeight.value = getTotalHeight(
+          data.value,
+          childPositions.value,
+          getNodeHeight.value
+        );
+      }
+    );
+
+    watchEffect(async () => {
+      // console.log("set state");
+      await setScrollState();
+    });
 
     return {
       virtualScroller,

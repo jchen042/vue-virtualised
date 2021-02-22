@@ -9,7 +9,7 @@
       :tolerance="2"
       :get-node-height="getNodeHeight"
     ></virtual-scroller> -->
-    <tree :nodes="nodes"></tree>
+    <tree v-model:nodes="nodes"></tree>
   </div>
 </template>
 
@@ -33,7 +33,7 @@ export default {
       })),
       scrollTop: 300,
       getNodeHeight: (node) => 30 + (node.index % 10),
-      nodes: this.constructTree(4, 30, 500),
+      nodes: this.constructTree(6, 30, 5),
     };
   },
   methods: {
@@ -43,7 +43,7 @@ export default {
       minNumOfNodes,
       deepness = 1
     ) {
-      return new Array(minNumOfNodes).fill(deepness).map((si, i) => {
+      return new Array(minNumOfNodes).fill(deepness).map((value, i) => {
         const id = i;
         const numberOfChildren =
           deepness === maxDeepness
@@ -52,7 +52,7 @@ export default {
 
         return {
           id,
-          name: `Leaf ${id}`,
+          name: `Leaf ${i}`,
           children: numberOfChildren
             ? this.constructTree(
                 maxDeepness,
