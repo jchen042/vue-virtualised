@@ -6,13 +6,13 @@
       :viewport-height="400"
       :tolerance="2"
       :get-node-height="getNodeHeight"
-      @toggle-child-nodes="onToggleChildNodes"
+      :cell-renderer="cellRenderer"
     ></virtual-scroller>
   </div>
 </template>
 
 <script>
-import { defineComponent, toRefs, ref, computed, watch } from "vue";
+import { defineComponent, toRefs, ref, computed, watch, h } from "vue";
 import VirtualScroller from "./VirtualScroller.vue";
 
 export default defineComponent({
@@ -44,21 +44,22 @@ export default defineComponent({
     const isNodeExpanded = (node) => node.state && node.state.expanded;
     const nodeHasChildren = (node) => node.children && node.children.length;
 
+    // flatten tree structure to one dimension for virtualised list
     const getFlattenedTree = (nodes, parents = []) =>
       nodes.reduce((flattenedTree, node, index) => {
         const deepness = parents.length;
-        const nodeWithHelpers = { ...node, deepness, parents, index };
+        const nodeWithHelperAttributes = { ...node, deepness, parents, index };
 
         if (!nodeHasChildren(node) || !isNodeExpanded(node)) {
           return [
             ...flattenedTree,
-            { ...nodeWithHelpers, isLeaf: !nodeHasChildren(node) },
+            { ...nodeWithHelperAttributes, isLeaf: !nodeHasChildren(node) },
           ];
         }
 
         return [
           ...flattenedTree,
-          nodeWithHelpers,
+          nodeWithHelperAttributes,
           ...getFlattenedTree(node.children, [...parents, index]),
         ];
       }, []);
@@ -82,18 +83,35 @@ export default defineComponent({
       flattenedTree.value = getFlattenedTree(nodes.value);
     };
 
-    // watch(
-    //   () => nodes.value,
-    //   () => {
-    //     console.log("node change");
-    //     flattenedTree.value = getFlattenedTree(nodes.value);
-    //   }
-    //   // { deep: true }
-    // );
-
     const scrollTop = ref(900);
 
-    return { scrollTop, flattenedTree, onToggleChildNodes };
+    const cellRenderer = (node, index) => [
+      h(
+        "div",
+        {
+          style: {
+            height: "100%",
+            textAlign: "left",
+            borderLeft: "1px solid black",
+            marginLeft: `${node.deepness * 30}px`,
+          },
+        },
+        [
+          h(
+            "button",
+            {
+              style: { width: "20px" },
+              disabled: node.isLeaf,
+              onClick: () => onToggleChildNodes(node),
+            },
+            node.isLeaf ? "" : node.state.expanded ? "-" : "+"
+          ),
+          node.name,
+        ]
+      ),
+    ];
+
+    return { scrollTop, flattenedTree, cellRenderer };
   },
   data() {
     return {

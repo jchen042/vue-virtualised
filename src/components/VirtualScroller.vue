@@ -18,25 +18,11 @@
           transform: `translateY(${offsetY}px)`,
         }"
       >
-        <div
-          v-for="(item, index) in visibleNodes"
-          :key="index"
-          :style="{
-            height: `${getNodeHeight(item)}px`,
-            borderLeft: '1px solid black',
-            textAlign: 'left',
-            marginLeft: `${item.deepness * 30}px`,
-          }"
-        >
-          <button
-            :style="{ width: '20px' }"
-            :disabled="item.isLeaf"
-            @click="$emit('toggleChildNodes', item)"
-          >
-            {{ item.isLeaf ? "" : item.state.expanded ? "-" : "+" }}
-          </button>
-          <span>{{ item.name ?? item.label }}</span>
-        </div>
+        <cell
+          :visible-nodes="visibleNodes"
+          :get-node-height="getNodeHeight"
+          :cell-renderer="cellRenderer"
+        ></cell>
       </div>
     </div>
   </div>
@@ -57,10 +43,14 @@ import {
   watch,
   watchEffect,
   nextTick,
+  h,
 } from "vue";
+
+import Cell from "./Cell.vue";
 
 export default defineComponent({
   name: "VirtualScroller",
+  components: { Cell },
   props: {
     data: {
       type: Array,
@@ -80,10 +70,11 @@ export default defineComponent({
     },
     getNodeHeight: {
       type: Function,
-      default: () =>
-        function () {
-          return 40;
-        },
+      default: () => 40,
+    },
+    cellRenderer: {
+      type: Function,
+      default: (node, index) => [h("div", {}, node.name)],
     },
   },
   emits: ["update:scrollTop"],
@@ -263,7 +254,6 @@ export default defineComponent({
       totalHeight,
       offsetY,
       visibleNodes,
-      setScrollState,
       handleScroll,
     };
   },
