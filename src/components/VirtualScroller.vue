@@ -233,8 +233,9 @@ export default defineComponent({
     );
 
     watch(
-      () => data.value,
+      () => data.value.length,
       () => {
+        // console.log("update height");
         childPositions.value = getChildPositions(
           data.value,
           getNodeHeight.value

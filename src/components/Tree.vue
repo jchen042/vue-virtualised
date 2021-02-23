@@ -15,6 +15,8 @@
 import { defineComponent, toRefs, ref, computed, watch, h } from "vue";
 import VirtualScroller from "./VirtualScroller.vue";
 
+import { cloneDeep } from "lodash";
+
 export default defineComponent({
   name: "Tree",
   components: { VirtualScroller },
@@ -67,6 +69,10 @@ export default defineComponent({
     const flattenedTree = ref(getFlattenedTree(nodes.value));
     console.log(flattenedTree);
 
+    const changeAffectFlattenedTree = (node, updatedNode) => {
+      return isNodeExpanded(node) !== isNodeExpanded(updatedNode);
+    };
+
     const getNumberOfVisibleDescendants = (node, index, flattenedTree) => {
       const nodePath = [...node.parents, node.index];
       let count = 0;
@@ -90,35 +96,68 @@ export default defineComponent({
     };
 
     // update nodes
-    const updateNodes = (node, index, updatedNode) => {
+    const updateNodes = (nodes, node, index, updatedNode, flattenedTree) => {
       console.log(node, index);
 
       // traverse tree to get target node to update
-      let parentNodes = nodes.value;
+      let parentNodes = nodes;
       node.parents.forEach((i) => {
         // console.log(i);
         parentNodes = parentNodes[i].children;
         // console.log(parentNodes);
       });
-      // console.log(parentNodes[node.index]);
+      // tree will be updated
       parentNodes[node.index] = updatedNode;
-
       console.log(nodes);
-      // flattenedTree.value = getFlattenedTree(nodes.value);
-      if (isNodeExpanded(updatedNode)) {
-        /**/
-      } else {
-        // collapse node by removing current node's descendants from flattened tree
-        const numberOfVisibleDescendants = getNumberOfVisibleDescendants(
-          node,
-          index,
-          flattenedTree.value
-        );
-        console.log(numberOfVisibleDescendants);
-        flattenedTree.value.splice(index + 1, numberOfVisibleDescendants);
+
+      /**
+       * expensive operation if we call this method to update all flattened tree list:
+       * flattenedTree = getFlattenedTree(nodes);
+       * instead, we only update affected area in the list
+       */
+      if (changeAffectFlattenedTree) {
+        if (isNodeExpanded(updatedNode)) {
+          // console.log(
+          //   getFlattenedTree(
+          //     [...updatedNode.children],
+          //     [...updatedNode.parents, updatedNode.index]
+          //   )
+          // );
+          // flattenedTree = [
+          //   ...flattenedTree.slice(0, index + 1),
+          //   ...ref(
+          //     getFlattenedTree(
+          //       [...updatedNode.children],
+          //       [...updatedNode.parents, updatedNode.index]
+          //     )
+          //   ).value,
+          //   ...flattenedTree.slice(index + 1, flattenedTree.length),
+          // ];
+          // console.log(flattenedTree);
+          flattenedTree.splice(
+            index + 1,
+            0,
+            ...ref(
+              getFlattenedTree(
+                [...updatedNode.children],
+                [...updatedNode.parents, updatedNode.index]
+              )
+            ).value
+          );
+        } else {
+          // collapse node by removing current node's descendants from flattened tree
+          const numberOfVisibleDescendants = getNumberOfVisibleDescendants(
+            node,
+            index,
+            flattenedTree
+          );
+          // console.log(numberOfVisibleDescendants);
+          flattenedTree.splice(index + 1, numberOfVisibleDescendants);
+        }
       }
 
-      flattenedTree.value[index] = updatedNode;
+      flattenedTree[index] = updatedNode;
+      console.log(flattenedTree);
     };
 
     const scrollTop = ref(900);
@@ -141,10 +180,16 @@ export default defineComponent({
               style: { width: "20px" },
               disabled: node.isLeaf,
               onClick: () =>
-                updateNodes(node, index, {
-                  ...node,
-                  state: { ...node.state, expanded: !node.state.expanded },
-                }),
+                updateNodes(
+                  nodes.value,
+                  node,
+                  index,
+                  {
+                    ...node,
+                    state: { ...node.state, expanded: !node.state.expanded },
+                  },
+                  flattenedTree.value
+                ),
             },
             node.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),
