@@ -1,6 +1,7 @@
 <template>
   <div>
     <virtual-scroller
+      :key="key"
       v-model:scrollTop="scrollTop"
       :data="flattenedTree"
       :viewport-height="400"
@@ -26,6 +27,8 @@ export default defineComponent({
   },
   emits: ["update:nodes"],
   setup(props, { emit }) {
+    const key = ref(0);
+
     const nodes = computed({
       get: () => props.nodes,
       set: (value) => emit("update:nodes", value),
@@ -74,7 +77,7 @@ export default defineComponent({
 
       return flattenedTree;
     };
-    const flattenedTree = ref(getFlattenedTree(nodes.value));
+    const flattenedTree = getFlattenedTree(nodes.value);
     console.log("iteration", flattenedTree);
 
     const changeAffectFlattenedTree = (node, updatedNode) => {
@@ -129,12 +132,10 @@ export default defineComponent({
           flattenedTree.splice(
             index + 1,
             0,
-            ...ref(
-              getFlattenedTree(
-                [...updatedNode.children],
-                [...updatedNode.parents, updatedNode.index]
-              )
-            ).value
+            ...getFlattenedTree(
+              [...updatedNode.children],
+              [...updatedNode.parents, updatedNode.index]
+            )
           );
         } else {
           // collapse node by removing current node's descendants from flattened tree
@@ -150,6 +151,7 @@ export default defineComponent({
 
       flattenedTree[index] = updatedNode;
       // console.log(flattenedTree);
+      key.value++;
     };
 
     const scrollTop = ref(900);
@@ -180,7 +182,7 @@ export default defineComponent({
                     ...node,
                     state: { ...node.state, expanded: !node.state.expanded },
                   },
-                  flattenedTree.value
+                  flattenedTree
                 ),
             },
             node.isLeaf ? "" : node.state.expanded ? "-" : "+"
@@ -190,7 +192,7 @@ export default defineComponent({
       ),
     ];
 
-    return { scrollTop, flattenedTree, cellRenderer };
+    return { scrollTop, flattenedTree, cellRenderer, key };
   },
   data() {
     return {

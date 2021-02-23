@@ -77,11 +77,19 @@ export default defineComponent({
       type: Function,
       default: (node, index) => [h("div", {}, node.name)],
     },
+    key: {
+      type: Number,
+      default: () => 0,
+    },
   },
   emits: ["update:scrollTop"],
   setup(props, { emit }) {
     // TODO: dynamic data attributes
-    const { data, viewportHeight, tolerance, getNodeHeight } = toRefs(props);
+    const { viewportHeight, tolerance, getNodeHeight, key } = toRefs(props);
+
+    const data = computed({
+      get: () => props.data,
+    });
 
     const scrollTop = computed({
       get: () => props.scrollTop,
@@ -234,6 +242,22 @@ export default defineComponent({
 
     watch(
       () => data.value.length,
+      () => {
+        // console.log("update height");
+        childPositions.value = getChildPositions(
+          data.value,
+          getNodeHeight.value
+        );
+        totalHeight.value = getTotalHeight(
+          data.value,
+          childPositions.value,
+          getNodeHeight.value
+        );
+      }
+    );
+
+    watch(
+      () => key.value,
       () => {
         // console.log("update height");
         childPositions.value = getChildPositions(
