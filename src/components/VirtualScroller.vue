@@ -39,6 +39,7 @@ import {
   defineComponent,
   toRefs,
   ref,
+  triggerRef,
   computed,
   onMounted,
   watch,
@@ -77,15 +78,11 @@ export default defineComponent({
       type: Function,
       default: (node, index) => [h("div", {}, node.name)],
     },
-    key: {
-      type: Number,
-      default: () => 0,
-    },
   },
   emits: ["update:scrollTop"],
   setup(props, { emit }) {
     // TODO: dynamic data attributes
-    const { viewportHeight, tolerance, getNodeHeight, key } = toRefs(props);
+    const { viewportHeight, tolerance, getNodeHeight } = toRefs(props);
 
     const data = computed({
       get: () => props.data,
@@ -240,37 +237,15 @@ export default defineComponent({
       }
     );
 
-    watch(
-      () => data.value.length,
-      () => {
-        // console.log("update height");
-        childPositions.value = getChildPositions(
-          data.value,
-          getNodeHeight.value
-        );
-        totalHeight.value = getTotalHeight(
-          data.value,
-          childPositions.value,
-          getNodeHeight.value
-        );
-      }
-    );
-
-    watch(
-      () => key.value,
-      () => {
-        // console.log("update height");
-        childPositions.value = getChildPositions(
-          data.value,
-          getNodeHeight.value
-        );
-        totalHeight.value = getTotalHeight(
-          data.value,
-          childPositions.value,
-          getNodeHeight.value
-        );
-      }
-    );
+    const refreshData = () => {
+      triggerRef(data);
+      childPositions.value = getChildPositions(data.value, getNodeHeight.value);
+      totalHeight.value = getTotalHeight(
+        data.value,
+        childPositions.value,
+        getNodeHeight.value
+      );
+    };
 
     watchEffect(async () => {
       // console.log("set state");
@@ -284,6 +259,7 @@ export default defineComponent({
       offsetY,
       visibleNodes,
       handleScroll,
+      refreshData,
     };
   },
 });

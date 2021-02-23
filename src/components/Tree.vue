@@ -1,7 +1,7 @@
 <template>
   <div>
     <virtual-scroller
-      :key="key"
+      ref="virtualScroller"
       v-model:scrollTop="scrollTop"
       :data="flattenedTree"
       :viewport-height="400"
@@ -27,7 +27,8 @@ export default defineComponent({
   },
   emits: ["update:nodes"],
   setup(props, { emit }) {
-    const key = ref(0);
+    // const key = ref(0);
+    const virtualScroller = ref(null);
 
     const nodes = computed({
       get: () => props.nodes,
@@ -151,7 +152,7 @@ export default defineComponent({
 
       flattenedTree[index] = updatedNode;
       // console.log(flattenedTree);
-      key.value++;
+      virtualScroller.value.refreshData();
     };
 
     const scrollTop = ref(900);
@@ -192,7 +193,7 @@ export default defineComponent({
       ),
     ];
 
-    return { scrollTop, flattenedTree, cellRenderer, key };
+    return { virtualScroller, scrollTop, flattenedTree, cellRenderer };
   },
   data() {
     return {
