@@ -67,20 +67,58 @@ export default defineComponent({
     const flattenedTree = ref(getFlattenedTree(nodes.value));
     console.log(flattenedTree);
 
-    const onToggleChildNodes = (node) => {
-      // console.log("toggle", node);
+    const getNumberOfVisibleDescendants = (node, index, flattenedTree) => {
+      const nodePath = [...node.parents, node.index];
+      let count = 0;
+
+      for (let i = index + 1; i < flattenedTree.length; i++) {
+        const parents = [...flattenedTree[i].parents];
+        // console.log(
+        //   i,
+        //   nodePath,
+        //   parents,
+        //   parents.slice(0, nodePath.length).toString() !== nodePath.toString()
+        // );
+        if (
+          parents.slice(0, nodePath.length).toString() !== nodePath.toString()
+        )
+          break;
+        else count++;
+      }
+
+      return count;
+    };
+
+    // update nodes
+    const updateNodes = (node, index, updatedNode) => {
+      console.log(node, index);
+
+      // traverse tree to get target node to update
       let parentNodes = nodes.value;
-      node.parents.forEach((index) => {
-        // console.log(index);
-        parentNodes = parentNodes[index].children;
+      node.parents.forEach((i) => {
+        // console.log(i);
+        parentNodes = parentNodes[i].children;
         // console.log(parentNodes);
       });
       // console.log(parentNodes[node.index]);
-      parentNodes[node.index].state.expanded = !parentNodes[node.index].state
-        .expanded;
+      parentNodes[node.index] = updatedNode;
 
       console.log(nodes);
-      flattenedTree.value = getFlattenedTree(nodes.value);
+      // flattenedTree.value = getFlattenedTree(nodes.value);
+      if (isNodeExpanded(updatedNode)) {
+        /**/
+      } else {
+        // collapse node by removing current node's descendants from flattened tree
+        const numberOfVisibleDescendants = getNumberOfVisibleDescendants(
+          node,
+          index,
+          flattenedTree.value
+        );
+        console.log(numberOfVisibleDescendants);
+        flattenedTree.value.splice(index + 1, numberOfVisibleDescendants);
+      }
+
+      flattenedTree.value[index] = updatedNode;
     };
 
     const scrollTop = ref(900);
@@ -102,7 +140,11 @@ export default defineComponent({
             {
               style: { width: "20px" },
               disabled: node.isLeaf,
-              onClick: () => onToggleChildNodes(node),
+              onClick: () =>
+                updateNodes(node, index, {
+                  ...node,
+                  state: { ...node.state, expanded: !node.state.expanded },
+                }),
             },
             node.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),

@@ -19,6 +19,7 @@
         }"
       >
         <cell
+          :start-index="startIndex"
           :visible-nodes="visibleNodes"
           :get-node-height="getNodeHeight"
           :cell-renderer="cellRenderer"
@@ -117,6 +118,8 @@ export default defineComponent({
       getTotalHeight(data.value, childPositions.value, getNodeHeight.value)
     );
 
+    // start of rendered node's index
+    const startIndex = ref(0);
     // offset start node
     const offsetY = ref(0);
     // visible nodes
@@ -175,8 +178,8 @@ export default defineComponent({
         childPositions.value,
         data.value.length
       );
-      // start of rendered node's index
-      const startIndex = Math.max(0, firstVisibleIndex - tolerance.value);
+      // set start of rendered node's index
+      startIndex.value = Math.max(0, firstVisibleIndex - tolerance.value);
 
       // last visible node's index
       const lastVisibleIndex = findLastVisibleIndex(
@@ -191,13 +194,13 @@ export default defineComponent({
       );
 
       // amount of nodes needs to be rendered
-      const visibleNodeCount = endIndex - startIndex + 1;
+      const visibleNodeCount = endIndex - startIndex.value + 1;
       // set offset based on the index of start node
-      offsetY.value = childPositions.value[startIndex];
+      offsetY.value = childPositions.value[startIndex.value];
       // set visible nodes
       visibleNodes.value = data.value.slice(
-        startIndex,
-        startIndex + visibleNodeCount
+        startIndex.value,
+        startIndex.value + visibleNodeCount
       );
 
       await nextTick();
@@ -252,6 +255,7 @@ export default defineComponent({
     return {
       virtualScroller,
       totalHeight,
+      startIndex,
       offsetY,
       visibleNodes,
       handleScroll,

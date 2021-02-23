@@ -4,12 +4,12 @@ import { h } from "vue";
 export default {
   name: "Cell",
   props: {
+    startIndex: { type: Number, default: () => 0 },
     visibleNodes: { type: Array, default: () => [] },
     getNodeHeight: {
       type: Function,
       default: () => 40,
     },
-    getNodeName: { type: Function, default: (node) => node.name },
     cellRenderer: {
       type: Function,
       default: (node, index) => [h("div", {}, node.name)],
@@ -22,7 +22,7 @@ export default {
         h(
           "div",
           { key: index, style: { height: `${props.getNodeHeight(node)}px` } },
-          props.cellRenderer(node, index, { name: props.getNodeName(node) })
+          props.cellRenderer(node, index + props.startIndex)
         )
       );
   },
