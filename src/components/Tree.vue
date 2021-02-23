@@ -15,8 +15,6 @@
 import { defineComponent, toRefs, ref, computed, watch, h } from "vue";
 import VirtualScroller from "./VirtualScroller.vue";
 
-import { cloneDeep } from "lodash";
-
 export default defineComponent({
   name: "Tree",
   components: { VirtualScroller },
@@ -46,33 +44,44 @@ export default defineComponent({
     const isNodeExpanded = (node) => node.state && node.state.expanded;
     const nodeHasChildren = (node) => node.children && node.children.length;
 
-    // flatten tree structure to one dimension for virtualised list
-    const getFlattenedTree = (nodes, parents = []) =>
-      nodes.reduce((flattenedTree, node, index) => {
-        const deepness = parents.length;
-        const nodeWithHelperAttributes = { ...node, deepness, parents, index };
+    /**
+     * use iteration to flatten tree structure to one dimension for virtualised list
+     * use recursive method might cause stack overflow exception
+     */
+    const getFlattenedTree = (nodes, parents = []) => {
+      let stack = nodes.map((node, index) => ({
+        ...node,
+        index,
+        parents,
+        isLeaf: !nodeHasChildren(node),
+      }));
+      const flattenedTree = [];
 
-        if (!nodeHasChildren(node) || !isNodeExpanded(node)) {
-          return [
-            ...flattenedTree,
-            { ...nodeWithHelperAttributes, isLeaf: !nodeHasChildren(node) },
+      while (stack.length > 0) {
+        const node = stack.shift();
+        flattenedTree.push(node);
+        if (nodeHasChildren(node) && isNodeExpanded(node))
+          stack = [
+            ...node.children.map((n, index) => ({
+              ...n,
+              index,
+              parents: [...node.parents, node.index],
+              isLeaf: !nodeHasChildren(n),
+            })),
+            ...stack,
           ];
-        }
+      }
 
-        return [
-          ...flattenedTree,
-          nodeWithHelperAttributes,
-          ...getFlattenedTree(node.children, [...parents, index]),
-        ];
-      }, []);
-
+      return flattenedTree;
+    };
     const flattenedTree = ref(getFlattenedTree(nodes.value));
-    console.log(flattenedTree);
+    console.log("iteration", flattenedTree);
 
     const changeAffectFlattenedTree = (node, updatedNode) => {
       return isNodeExpanded(node) !== isNodeExpanded(updatedNode);
     };
 
+    // count the amount of visible descendants based on the node
     const getNumberOfVisibleDescendants = (node, index, flattenedTree) => {
       const nodePath = [...node.parents, node.index];
       let count = 0;
@@ -111,29 +120,12 @@ export default defineComponent({
       console.log(nodes);
 
       /**
-       * expensive operation if we call this method to update all flattened tree list:
+       * operation is expensive if we call this method to update all flattened tree list:
        * flattenedTree = getFlattenedTree(nodes);
        * instead, we only update affected area in the list
        */
       if (changeAffectFlattenedTree) {
         if (isNodeExpanded(updatedNode)) {
-          // console.log(
-          //   getFlattenedTree(
-          //     [...updatedNode.children],
-          //     [...updatedNode.parents, updatedNode.index]
-          //   )
-          // );
-          // flattenedTree = [
-          //   ...flattenedTree.slice(0, index + 1),
-          //   ...ref(
-          //     getFlattenedTree(
-          //       [...updatedNode.children],
-          //       [...updatedNode.parents, updatedNode.index]
-          //     )
-          //   ).value,
-          //   ...flattenedTree.slice(index + 1, flattenedTree.length),
-          // ];
-          // console.log(flattenedTree);
           flattenedTree.splice(
             index + 1,
             0,
@@ -157,7 +149,7 @@ export default defineComponent({
       }
 
       flattenedTree[index] = updatedNode;
-      console.log(flattenedTree);
+      // console.log(flattenedTree);
     };
 
     const scrollTop = ref(900);
@@ -170,7 +162,7 @@ export default defineComponent({
             height: "100%",
             textAlign: "left",
             borderLeft: "1px solid black",
-            marginLeft: `${node.deepness * 30}px`,
+            marginLeft: `${node.parents.length * 30}px`,
           },
         },
         [
