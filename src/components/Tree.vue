@@ -16,6 +16,8 @@
 import { defineComponent, toRefs, ref, computed, watch, h } from "vue";
 import VirtualScroller from "./VirtualScroller.vue";
 
+import { chunk } from "lodash";
+
 export default defineComponent({
   name: "Tree",
   components: { VirtualScroller },
@@ -128,16 +130,25 @@ export default defineComponent({
        * flattenedTree = getFlattenedTree(nodes);
        * instead, we only update affected area in the list
        */
-      if (changeAffectFlattenedTree) {
+      if (changeAffectFlattenedTree(node, updatedNode)) {
         if (isNodeExpanded(updatedNode)) {
-          flattenedTree.splice(
-            index + 1,
-            0,
-            ...getFlattenedTree(
-              [...updatedNode.children],
-              [...updatedNode.parents, updatedNode.index]
-            )
+          // expand node by inserting node's visible descendants to flattened tree
+          const visibleDescendants = getFlattenedTree(
+            [...updatedNode.children],
+            [...updatedNode.parents, updatedNode.index]
           );
+          console.log(visibleDescendants);
+          /**
+           * hack: chunk large array into small sub arrays and run splice() method for each
+           * to avoid RangeError: Maximum call stack size exceeded exception
+           * this exception is due to the limitation of JS engine
+           */
+          const chunkedNodes = chunk(visibleDescendants, 100000);
+          let i = index + 1;
+          chunkedNodes.forEach((nodes) => {
+            flattenedTree.splice(i, 0, ...nodes);
+            i = i + nodes.length;
+          });
         } else {
           // collapse node by removing current node's descendants from flattened tree
           const numberOfVisibleDescendants = getNumberOfVisibleDescendants(
@@ -152,6 +163,8 @@ export default defineComponent({
 
       flattenedTree[index] = updatedNode;
       // console.log(flattenedTree);
+
+      // force refresh data in child component to trigger UI update
       virtualScroller.value.refreshData();
     };
 
