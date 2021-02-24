@@ -13,7 +13,15 @@
 </template>
 
 <script>
-import { defineComponent, toRefs, ref, computed, watch, h } from "vue";
+import {
+  defineComponent,
+  toRefs,
+  ref,
+  reactive,
+  computed,
+  watch,
+  h,
+} from "vue";
 import VirtualScroller from "./VirtualScroller.vue";
 
 import { chunk } from "lodash";
@@ -26,17 +34,22 @@ export default defineComponent({
       type: Array,
       default: () => [],
     },
+    // scrollTop: {
+    //   type: Number,
+    //   default: () => 0,
+    // },
   },
-  emits: ["update:nodes"],
+  emits: ["update:nodes", "update:scrollTop"],
   setup(props, { emit }) {
-    // const key = ref(0);
-    const virtualScroller = ref(null);
-
     const nodes = computed({
       get: () => props.nodes,
       set: (value) => emit("update:nodes", value),
     });
     console.log(nodes);
+
+    const scrollTop = ref(900);
+
+    const virtualScroller = ref(null);
 
     const traverse = (obj, cb) => {
       for (let k in obj) {
@@ -54,6 +67,7 @@ export default defineComponent({
      * use iteration to flatten tree structure to one dimension for virtualised list
      * use recursive method might cause stack overflow exception
      */
+    // TODO: handle non-exist properties
     const getFlattenedTree = (nodes, parents = []) => {
       let stack = nodes.map((node, index) => ({
         ...node,
@@ -80,6 +94,13 @@ export default defineComponent({
 
       return flattenedTree;
     };
+    /**
+     * avoid to use reactive() to make flattenedTree reactive will cause performance issue
+     * because it triggered multiple get() and set() when Vue detecting data changes
+     * it's expensive for large array
+     * instead, we force refreshing Virtual Scroller view when updating nodes
+     * as it contains limited amount of visible nodes so it's much faster
+     */
     const flattenedTree = getFlattenedTree(nodes.value);
     console.log("iteration", flattenedTree);
 
@@ -117,11 +138,9 @@ export default defineComponent({
       // traverse tree to get target node to update
       let parentNodes = nodes;
       node.parents.forEach((i) => {
-        // console.log(i);
         parentNodes = parentNodes[i].children;
-        // console.log(parentNodes);
       });
-      // tree will be updated
+      // the node referred from the tree will be updated
       parentNodes[node.index] = updatedNode;
       console.log(nodes);
 
@@ -143,7 +162,7 @@ export default defineComponent({
            * to avoid RangeError: Maximum call stack size exceeded exception
            * this exception is due to the limitation of JS engine
            */
-          const chunkedNodes = chunk(visibleDescendants, 100000);
+          const chunkedNodes = chunk(visibleDescendants, 50000);
           let i = index + 1;
           chunkedNodes.forEach((nodes) => {
             flattenedTree.splice(i, 0, ...nodes);
@@ -156,7 +175,6 @@ export default defineComponent({
             index,
             flattenedTree
           );
-          // console.log(numberOfVisibleDescendants);
           flattenedTree.splice(index + 1, numberOfVisibleDescendants);
         }
       }
@@ -165,10 +183,8 @@ export default defineComponent({
       // console.log(flattenedTree);
 
       // force refresh data in child component to trigger UI update
-      virtualScroller.value.refreshData();
+      virtualScroller.value.refreshView();
     };
-
-    const scrollTop = ref(900);
 
     const cellRenderer = (node, index) => [
       h(
@@ -206,7 +222,7 @@ export default defineComponent({
       ),
     ];
 
-    return { virtualScroller, scrollTop, flattenedTree, cellRenderer };
+    return { scrollTop, virtualScroller, flattenedTree, cellRenderer };
   },
   data() {
     return {

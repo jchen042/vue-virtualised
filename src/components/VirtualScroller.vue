@@ -132,7 +132,7 @@ export default defineComponent({
 
     // TODO: handle edge case
     // binary search to find the first visible node's index in viewport
-    const findFirstVisibleIndex = (scrollTop, childPositions, itemCount) => {
+    const getFirstVisibleIndex = (scrollTop, childPositions, itemCount) => {
       let startRange = 0;
       let endRange = itemCount - 1;
       while (startRange !== endRange) {
@@ -152,7 +152,7 @@ export default defineComponent({
     };
 
     // find the last node's index in the viewport
-    const findLastVisibleIndex = (
+    const getLastVisibleIndex = (
       childPositions,
       firstVisibleIndex,
       itemCount,
@@ -178,7 +178,7 @@ export default defineComponent({
     // and offset to be set to the rendered nodes
     const setScrollState = async () => {
       // first visible node's index
-      const firstVisibleIndex = findFirstVisibleIndex(
+      const firstVisibleIndex = getFirstVisibleIndex(
         scrollTop.value,
         childPositions.value,
         data.value.length
@@ -187,7 +187,7 @@ export default defineComponent({
       startIndex.value = Math.max(0, firstVisibleIndex - tolerance.value);
 
       // last visible node's index
-      const lastVisibleIndex = findLastVisibleIndex(
+      const lastVisibleIndex = getLastVisibleIndex(
         childPositions.value,
         firstVisibleIndex,
         data.value.length,
@@ -222,23 +222,7 @@ export default defineComponent({
       await setScrollState();
     });
 
-    watch(
-      () => getNodeHeight.value,
-      () => {
-        childPositions.value = getChildPositions(
-          data.value,
-          getNodeHeight.value
-        );
-        totalHeight.value = getTotalHeight(
-          data.value,
-          childPositions.value,
-          getNodeHeight.value
-        );
-      }
-    );
-
-    const refreshData = () => {
-      triggerRef(data);
+    const reCalculateHeights = () => {
       childPositions.value = getChildPositions(data.value, getNodeHeight.value);
       totalHeight.value = getTotalHeight(
         data.value,
@@ -246,6 +230,16 @@ export default defineComponent({
         getNodeHeight.value
       );
     };
+
+    const refreshView = () => {
+      triggerRef(data);
+      reCalculateHeights();
+    };
+
+    watch(
+      () => getNodeHeight.value,
+      () => reCalculateHeights()
+    );
 
     watchEffect(async () => {
       // console.log("set state");
@@ -259,7 +253,7 @@ export default defineComponent({
       offsetY,
       visibleNodes,
       handleScroll,
-      refreshData,
+      refreshView,
     };
   },
 });

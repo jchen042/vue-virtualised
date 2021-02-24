@@ -9,7 +9,7 @@
       :tolerance="2"
       :get-node-height="getNodeHeight"
     ></virtual-scroller> -->
-    <tree v-model:nodes="nodes"></tree>
+    <tree v-model:scrollTop="scrollTop" v-model:nodes="nodes"></tree>
   </div>
 </template>
 
