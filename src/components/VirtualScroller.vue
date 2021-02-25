@@ -60,7 +60,7 @@ export default defineComponent({
     },
     viewportHeight: {
       type: Number,
-      default: () => 0,
+      default: () => 200,
     },
     initialScrollTop: {
       type: Number,
@@ -175,8 +175,10 @@ export default defineComponent({
       return lastVisibleIndex;
     };
 
-    // calculate nodes to be rendered to the view
-    // and offset to be set to the rendered nodes
+    /**
+     * calculate nodes to be rendered to the view
+     * and offset to be set to the rendered nodes
+     */
     const setScrollState = async () => {
       // first visible node's index
       const firstVisibleIndex = getFirstVisibleIndex(

@@ -3,8 +3,8 @@
     <virtual-scroller
       ref="virtualScroller"
       :data="flattenedTree"
+      :viewport-height="viewportHeight"
       :initial-scroll-top="initialScrollTop"
-      :viewport-height="400"
       :tolerance="2"
       :get-node-height="getNodeHeight"
       :cell-renderer="cellRenderer"
@@ -33,6 +33,10 @@ export default defineComponent({
     nodes: {
       type: Array,
       default: () => [],
+    },
+    viewportHeight: {
+      type: Number,
+      default: () => 400,
     },
     initialScrollTop: {
       type: Number,
