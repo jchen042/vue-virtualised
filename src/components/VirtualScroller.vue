@@ -62,7 +62,7 @@ export default defineComponent({
       type: Number,
       default: () => 0,
     },
-    scrollTop: {
+    initialScrollTop: {
       type: Number,
       default: () => 0,
     },
@@ -79,22 +79,23 @@ export default defineComponent({
       default: (node, index) => [h("div", {}, node.name)],
     },
   },
-  emits: ["update:scrollTop"],
+  emits: ["onScroll"],
   setup(props, { emit }) {
     // TODO: dynamic data attributes
-    const { viewportHeight, tolerance, getNodeHeight } = toRefs(props);
+    const {
+      initialScrollTop,
+      viewportHeight,
+      tolerance,
+      getNodeHeight,
+    } = toRefs(props);
 
     const data = computed({
       get: () => props.data,
     });
 
-    const scrollTop = computed({
-      get: () => props.scrollTop,
-      set: (value) => {
-        emit("update:scrollTop", value);
-      },
-    });
     const virtualScroller = ref(null);
+
+    const scrollTop = ref(initialScrollTop.value);
 
     // store an array of child nodes positions
     const getChildPositions = (nodes, getNodeHeight) => {
@@ -215,6 +216,7 @@ export default defineComponent({
     const handleScroll = () => {
       requestAnimationFrame(() => {
         scrollTop.value = virtualScroller.value.scrollTop;
+        emit("onScroll", virtualScroller.value.scrollTop);
       });
     };
 

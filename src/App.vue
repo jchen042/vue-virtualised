@@ -1,16 +1,7 @@
 <template>
-  <div>
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
-    <!-- <virtual-scroller
-      v-model:scrollTop="scrollTop"
-      :data="data"
-      :viewport-height="200"
-      :tolerance="2"
-      :get-node-height="getNodeHeight"
-    ></virtual-scroller> -->
-    <tree v-model:scrollTop="scrollTop" v-model:nodes="nodes"></tree>
-  </div>
+  <img alt="Vue logo" src="./assets/logo.png" />
+  <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
+  <tree v-model:nodes="nodes" :initial-scroll-top="initialScrollTop"></tree>
 </template>
 
 <script>
@@ -31,7 +22,7 @@ export default {
         index: i,
         label: i + 1,
       })),
-      scrollTop: 300,
+      initialScrollTop: 300,
       getNodeHeight: (node) => 30 + (node.index % 10),
       nodes: this.constructTree(6, 30, 5),
     };

@@ -2,8 +2,8 @@
   <div>
     <virtual-scroller
       ref="virtualScroller"
-      v-model:scrollTop="scrollTop"
       :data="flattenedTree"
+      :initial-scroll-top="initialScrollTop"
       :viewport-height="400"
       :tolerance="2"
       :get-node-height="getNodeHeight"
@@ -34,10 +34,10 @@ export default defineComponent({
       type: Array,
       default: () => [],
     },
-    // scrollTop: {
-    //   type: Number,
-    //   default: () => 0,
-    // },
+    initialScrollTop: {
+      type: Number,
+      default: () => 0,
+    },
   },
   emits: ["update:nodes", "update:scrollTop"],
   setup(props, { emit }) {
@@ -46,8 +46,6 @@ export default defineComponent({
       set: (value) => emit("update:nodes", value),
     });
     console.log(nodes);
-
-    const scrollTop = ref(900);
 
     const virtualScroller = ref(null);
 
@@ -222,7 +220,12 @@ export default defineComponent({
       ),
     ];
 
-    return { scrollTop, virtualScroller, flattenedTree, cellRenderer };
+    return {
+      // handleScroll,
+      virtualScroller,
+      flattenedTree,
+      cellRenderer,
+    };
   },
   data() {
     return {
