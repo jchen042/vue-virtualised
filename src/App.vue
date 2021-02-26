@@ -2,7 +2,7 @@
   <img alt="Vue logo" src="./assets/logo.png" />
   <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
   <tree
-    ref="tree"
+    ref="treeView"
     :nodes="nodes"
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
@@ -23,67 +23,13 @@ export default {
     VirtualScroller,
     Tree,
   },
-  data() {
-    return {
-      data: Array.from({ length: 100000 }, (_, i) => ({
-        index: i,
-        label: i + 1,
-      })),
-      viewportHeight: 400,
-      initialScrollTop: 300,
-      getNodeHeight: (node) => 30 + (node.index % 10),
-    };
-  },
-  computed: {
-    nodes() {
-      return this.constructTree(6, 30, 5);
-    },
-    cellRenderer() {
-      return (node, index) => [
-        h(
-          "div",
-          {
-            style: {
-              height: "100%",
-              textAlign: "left",
-              borderLeft: "1px solid black",
-              marginLeft: `${node.parents.length * 30}px`,
-            },
-          },
-          [
-            h(
-              "button",
-              {
-                style: { width: "20px" },
-                disabled: node.state.isLeaf,
-                onClick: () =>
-                  this.$refs.tree.updateNode(
-                    this.nodes,
-                    node,
-                    index,
-                    (node) => ({
-                      ...node,
-                      state: { ...node.state, expanded: !node.state.expanded },
-                    })
-                  ),
-                // console.log(this.$refs.tree),
-              },
-              node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
-            ),
-            node.name,
-          ]
-        ),
-      ];
-    },
-  },
-  mounted() {},
-  methods: {
-    constructTree(
+  setup() {
+    const constructTree = (
       maxDeepness,
       maxNumberOfChildren,
       minNumOfNodes,
       deepness = 1
-    ) {
+    ) => {
       return new Array(minNumOfNodes).fill(deepness).map((value, i) => {
         const id = i;
         const numberOfChildren =
@@ -95,7 +41,7 @@ export default {
           id,
           name: `Leaf ${i}`,
           children: numberOfChildren
-            ? this.constructTree(
+            ? constructTree(
                 maxDeepness,
                 maxNumberOfChildren,
                 numberOfChildren,
@@ -111,7 +57,133 @@ export default {
           },
         };
       });
-    },
+    };
+
+    const treeView = ref(null);
+
+    const nodes = constructTree(6, 30, 5);
+
+    const cellRenderer = (node, index) => [
+      h(
+        "div",
+        {
+          style: {
+            height: "100%",
+            textAlign: "left",
+            borderLeft: "1px solid black",
+            marginLeft: `${node.parents.length * 30}px`,
+          },
+        },
+        [
+          h(
+            "button",
+            {
+              style: { width: "20px" },
+              disabled: node.state.isLeaf,
+              onClick: () =>
+                treeView.value.updateNode(nodes, node, index, (node) => ({
+                  ...node,
+                  state: { ...node.state, expanded: !node.state.expanded },
+                })),
+              // console.log(this.$refs.tree),
+            },
+            node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
+          ),
+          node.name,
+        ]
+      ),
+    ];
+
+    return { treeView, nodes, cellRenderer };
+  },
+  data() {
+    return {
+      data: Array.from({ length: 100000 }, (_, i) => ({
+        index: i,
+        label: i + 1,
+      })),
+      viewportHeight: 400,
+      initialScrollTop: 300,
+      getNodeHeight: (node) => 30 + (node.index % 10),
+    };
+  },
+  computed: {
+    // nodes() {
+    //   return this.constructTree(6, 30, 5);
+    // },
+    //   cellRenderer() {
+    //     return (node, index) => [
+    //       h(
+    //         "div",
+    //         {
+    //           style: {
+    //             height: "100%",
+    //             textAlign: "left",
+    //             borderLeft: "1px solid black",
+    //             marginLeft: `${node.parents.length * 30}px`,
+    //           },
+    //         },
+    //         [
+    //           h(
+    //             "button",
+    //             {
+    //               style: { width: "20px" },
+    //               disabled: node.state.isLeaf,
+    //               onClick: () =>
+    //                 this.$refs.treeView.updateNode(
+    //                   this.nodes,
+    //                   node,
+    //                   index,
+    //                   (node) => ({
+    //                     ...node,
+    //                     state: { ...node.state, expanded: !node.state.expanded },
+    //                   })
+    //                 ),
+    //               // console.log(this.$refs.tree),
+    //             },
+    //             node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
+    //           ),
+    //           node.name,
+    //         ]
+    //       ),
+    //     ];
+    //   },
+    // },
+    // mounted() {},
+    // methods: {
+    //   constructTree(
+    //     maxDeepness,
+    //     maxNumberOfChildren,
+    //     minNumOfNodes,
+    //     deepness = 1
+    //   ) {
+    //     return new Array(minNumOfNodes).fill(deepness).map((value, i) => {
+    //       const id = i;
+    //       const numberOfChildren =
+    //         deepness === maxDeepness
+    //           ? 0
+    //           : Math.round(Math.random() * maxNumberOfChildren);
+    //       return {
+    //         id,
+    //         name: `Leaf ${i}`,
+    //         children: numberOfChildren
+    //           ? this.constructTree(
+    //               maxDeepness,
+    //               maxNumberOfChildren,
+    //               numberOfChildren,
+    //               deepness + 1
+    //             )
+    //           : [],
+    //         state: {
+    //           expanded: numberOfChildren
+    //             ? Boolean(Math.round(Math.random()))
+    //             : false,
+    //           // favorite: Boolean(Math.round(Math.random())),
+    //           // deletable: Boolean(Math.round(Math.random())),
+    //         },
+    //       };
+    //     });
+    //   },
   },
 };
 </script>
