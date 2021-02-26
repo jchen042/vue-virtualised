@@ -131,11 +131,10 @@ export default defineComponent({
     // visible nodes
     const visibleNodes = ref([]);
 
-    // TODO: handle edge case
     // binary search to find the first visible node's index in viewport
     const getFirstVisibleIndex = (scrollTop, childPositions, itemCount) => {
       let startRange = 0;
-      let endRange = itemCount - 1;
+      let endRange = itemCount - 1 < 0 ? 0 : itemCount - 1;
       while (startRange !== endRange) {
         const middle = Math.floor((endRange - startRange) / 2 + startRange);
         if (

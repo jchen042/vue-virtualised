@@ -2,13 +2,16 @@
   <img alt="Vue logo" src="./assets/logo.png" />
   <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
   <tree
-    v-model:nodes="nodes"
+    ref="tree"
+    :nodes="nodes"
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
+    :cell-renderer="cellRenderer"
   ></tree>
 </template>
 
 <script>
+import { ref, reactive, h, onMounted } from "vue";
 import HelloWorld from "./components/HelloWorld.vue";
 import VirtualScroller from "./components/VirtualScroller.vue";
 import Tree from "./components/Tree.vue";
@@ -29,9 +32,51 @@ export default {
       viewportHeight: 400,
       initialScrollTop: 300,
       getNodeHeight: (node) => 30 + (node.index % 10),
-      nodes: this.constructTree(6, 30, 5),
     };
   },
+  computed: {
+    nodes() {
+      return this.constructTree(6, 30, 5);
+    },
+    cellRenderer() {
+      return (node, index) => [
+        h(
+          "div",
+          {
+            style: {
+              height: "100%",
+              textAlign: "left",
+              borderLeft: "1px solid black",
+              marginLeft: `${node.parents.length * 30}px`,
+            },
+          },
+          [
+            h(
+              "button",
+              {
+                style: { width: "20px" },
+                disabled: node.state.isLeaf,
+                onClick: () =>
+                  this.$refs.tree.updateNode(
+                    this.nodes,
+                    node,
+                    index,
+                    (node) => ({
+                      ...node,
+                      state: { ...node.state, expanded: !node.state.expanded },
+                    })
+                  ),
+                // console.log(this.$refs.tree),
+              },
+              node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
+            ),
+            node.name,
+          ]
+        ),
+      ];
+    },
+  },
+  mounted() {},
   methods: {
     constructTree(
       maxDeepness,

@@ -40,13 +40,14 @@ export default defineComponent({
       type: Number,
       default: () => 0,
     },
+    cellRenderer: {
+      type: Function,
+      default: (node, index) => [h("div", {}, node.name)],
+    },
   },
   emits: ["update:nodes"],
   setup(props, { emit }) {
-    const nodes = computed({
-      get: () => props.nodes,
-      set: (value) => emit("update:nodes", value),
-    });
+    const { nodes } = toRefs(props);
     console.log(nodes);
 
     const virtualScroller = ref(null);
@@ -75,7 +76,7 @@ export default defineComponent({
         parents,
         state: {
           ...node.state,
-          expanded: !!node.state.expanded,
+          expanded: !!(node.state && node.state.expanded),
           isLeaf: !nodeHasChildren(node),
         },
       }));
@@ -208,46 +209,16 @@ export default defineComponent({
       virtualScroller.value.refreshView();
     };
 
-    const cellRenderer = (node, index) => [
-      h(
-        "div",
-        {
-          style: {
-            height: "100%",
-            textAlign: "left",
-            borderLeft: "1px solid black",
-            marginLeft: `${node.parents.length * 30}px`,
-          },
-        },
-        [
-          h(
-            "button",
-            {
-              style: { width: "20px" },
-              disabled: node.state.isLeaf,
-              onClick: () =>
-                updateNode(nodes.value, node, index, (node) => ({
-                  ...node,
-                  state: { ...node.state, expanded: !node.state.expanded },
-                })),
-            },
-            node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
-          ),
-          node.name,
-        ]
-      ),
-    ];
-
     return {
       // handleScroll,
       virtualScroller,
       flattenedTree,
-      cellRenderer,
+      updateNode,
     };
   },
   data() {
     return {
-      getNodeHeight: (node) => 30 + (node.id % 10),
+      getNodeHeight: (node) => 30 + (node.index % 10),
     };
   },
 });
