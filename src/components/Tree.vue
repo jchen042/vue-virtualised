@@ -1,15 +1,13 @@
 <template>
-  <div>
-    <virtual-scroller
-      ref="virtualScroller"
-      :data="flattenedTree"
-      :viewport-height="viewportHeight"
-      :initial-scroll-top="initialScrollTop"
-      :tolerance="2"
-      :get-node-height="getNodeHeight"
-      :cell-renderer="cellRenderer"
-    ></virtual-scroller>
-  </div>
+  <virtual-scroller
+    ref="virtualScroller"
+    :data="flattenedTree"
+    :viewport-height="viewportHeight"
+    :initial-scroll-top="initialScrollTop"
+    :tolerance="2"
+    :get-node-height="getNodeHeight"
+    :cell-renderer="cellRenderer"
+  ></virtual-scroller>
 </template>
 
 <script>
@@ -43,7 +41,7 @@ export default defineComponent({
       default: () => 0,
     },
   },
-  emits: ["update:nodes", "update:scrollTop"],
+  emits: ["update:nodes"],
   setup(props, { emit }) {
     const nodes = computed({
       get: () => props.nodes,
@@ -70,6 +68,7 @@ export default defineComponent({
      * use recursive method might cause stack overflow exception
      */
     // TODO: handle non-exist properties
+    // TODO: extract traverse function
     const getFlattenedTree = (nodes, parents = []) => {
       let stack = nodes.map((node, index) => ({
         ...node,
@@ -96,10 +95,11 @@ export default defineComponent({
 
       return flattenedTree;
     };
+
     /**
      * avoid to use reactive() to make flattenedTree reactive will cause performance issue
      * because it triggered multiple get() and set() when Vue detecting data changes
-     * it's expensive for large array
+     * it's expensive to apply reactive attribute for large array
      * instead, we force refreshing Virtual Scroller view when updating nodes
      * as it contains limited amount of visible nodes so it's much faster
      */
@@ -133,24 +133,30 @@ export default defineComponent({
       return count;
     };
 
-    // update nodes
-    const updateNodes = (nodes, node, index, updatedNode, flattenedTree) => {
-      console.log(node, index);
-
-      // traverse tree to get target node to update
+    const updateTreeNodes = (nodes, node, updateFn, broadcast = false) => {
+      // traverse tree by path to get target node to update
       let parentNodes = nodes;
       node.parents.forEach((i) => {
         parentNodes = parentNodes[i].children;
       });
       // the node referred from the tree will be updated
-      parentNodes[node.index] = updatedNode;
+      parentNodes[node.index] = updateFn(node);
       console.log(nodes);
+    };
+
+    // update nodes
+    const updateNodes = (nodes, node, index, updateFn, broadcast = false) => {
+      console.log(node, index);
+
+      updateTreeNodes(nodes, node, updateFn, broadcast);
 
       /**
        * operation is expensive if we call this method to update all flattened tree list:
        * flattenedTree = getFlattenedTree(nodes);
        * instead, we only update affected area in the list
        */
+      const updatedNode = updateFn(node);
+
       if (changeAffectFlattenedTree(node, updatedNode)) {
         if (isNodeExpanded(updatedNode)) {
           // expand node by inserting node's visible descendants to flattened tree
@@ -164,9 +170,9 @@ export default defineComponent({
            * to avoid RangeError: Maximum call stack size exceeded exception
            * this exception is due to the limitation of JS engine
            */
-          const chunkedNodes = chunk(visibleDescendants, 50000);
+          const chunkedVisibleDescendants = chunk(visibleDescendants, 50000);
           let i = index + 1;
-          chunkedNodes.forEach((nodes) => {
+          chunkedVisibleDescendants.forEach((nodes) => {
             flattenedTree.splice(i, 0, ...nodes);
             i = i + nodes.length;
           });
@@ -206,16 +212,10 @@ export default defineComponent({
               style: { width: "20px" },
               disabled: node.isLeaf,
               onClick: () =>
-                updateNodes(
-                  nodes.value,
-                  node,
-                  index,
-                  {
-                    ...node,
-                    state: { ...node.state, expanded: !node.state.expanded },
-                  },
-                  flattenedTree
-                ),
+                updateNodes(nodes.value, node, index, (node) => ({
+                  ...node,
+                  state: { ...node.state, expanded: !node.state.expanded },
+                })),
             },
             node.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),
