@@ -60,21 +60,24 @@ export default defineComponent({
       cb(obj);
     };
 
-    const isNodeExpanded = (node) => node.state && node.state.expanded;
     const nodeHasChildren = (node) => node.children && node.children.length;
+
+    const isNodeExpanded = (node) => node.state && node.state.expanded;
 
     /**
      * use iteration to flatten tree structure to one dimension for virtualised list
      * use recursive method might cause stack overflow exception
      */
-    // TODO: handle non-exist properties
-    // TODO: extract traverse function
     const getFlattenedTree = (nodes, parents = []) => {
       let stack = nodes.map((node, index) => ({
         ...node,
         index,
         parents,
-        isLeaf: !nodeHasChildren(node),
+        state: {
+          ...node.state,
+          expanded: !!node.state.expanded,
+          isLeaf: !nodeHasChildren(node),
+        },
       }));
       const flattenedTree = [];
 
@@ -87,7 +90,11 @@ export default defineComponent({
               ...n,
               index,
               parents: [...node.parents, node.index],
-              isLeaf: !nodeHasChildren(n),
+              state: {
+                ...n.state,
+                expanded: !!n.state.expanded,
+                isLeaf: !nodeHasChildren(n),
+              },
             })),
             ...stack,
           ];
@@ -106,6 +113,30 @@ export default defineComponent({
     const flattenedTree = getFlattenedTree(nodes.value);
     console.log("iteration", flattenedTree);
 
+    // const traverse = (nodes, cb) => {
+    //   let stack = [...nodes];
+
+    //   while (stack.length > 0) {
+    //     const node = stack.shift();
+    //     stack = [...node.children, ...stack];
+    //     cb(node);
+    //   }
+    // };
+
+    const updateTreeNode = (nodes, node, updateFn) => {
+      // traverse tree by path to get target node to update
+      let parentNodes = nodes;
+      node.parents.forEach((i) => {
+        parentNodes = parentNodes[i].children;
+      });
+
+      /**
+       * the node referred from the tree will be updated
+       */
+      parentNodes[node.index] = updateFn(node);
+      console.log(nodes);
+    };
+
     const changeAffectFlattenedTree = (node, updatedNode) => {
       return isNodeExpanded(node) !== isNodeExpanded(updatedNode);
     };
@@ -117,12 +148,6 @@ export default defineComponent({
 
       for (let i = index + 1; i < flattenedTree.length; i++) {
         const parents = [...flattenedTree[i].parents];
-        // console.log(
-        //   i,
-        //   nodePath,
-        //   parents,
-        //   parents.slice(0, nodePath.length).toString() !== nodePath.toString()
-        // );
         if (
           parents.slice(0, nodePath.length).toString() !== nodePath.toString()
         )
@@ -133,22 +158,11 @@ export default defineComponent({
       return count;
     };
 
-    const updateTreeNodes = (nodes, node, updateFn, broadcast = false) => {
-      // traverse tree by path to get target node to update
-      let parentNodes = nodes;
-      node.parents.forEach((i) => {
-        parentNodes = parentNodes[i].children;
-      });
-      // the node referred from the tree will be updated
-      parentNodes[node.index] = updateFn(node);
-      console.log(nodes);
-    };
-
-    // update nodes
-    const updateNodes = (nodes, node, index, updateFn, broadcast = false) => {
+    // update single node
+    const updateNode = (nodes, node, index, updateFn) => {
       console.log(node, index);
 
-      updateTreeNodes(nodes, node, updateFn, broadcast);
+      updateTreeNode(nodes, node, updateFn);
 
       /**
        * operation is expensive if we call this method to update all flattened tree list:
@@ -210,14 +224,14 @@ export default defineComponent({
             "button",
             {
               style: { width: "20px" },
-              disabled: node.isLeaf,
+              disabled: node.state.isLeaf,
               onClick: () =>
-                updateNodes(nodes.value, node, index, (node) => ({
+                updateNode(nodes.value, node, index, (node) => ({
                   ...node,
                   state: { ...node.state, expanded: !node.state.expanded },
                 })),
             },
-            node.isLeaf ? "" : node.state.expanded ? "-" : "+"
+            node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),
           node.name,
         ]
@@ -233,10 +247,6 @@ export default defineComponent({
   },
   data() {
     return {
-      data: Array.from({ length: 100000 }, (_, i) => ({
-        index: i,
-        label: i + 1,
-      })),
       getNodeHeight: (node) => 30 + (node.id % 10),
     };
   },
