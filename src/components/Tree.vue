@@ -245,8 +245,11 @@ export default defineComponent({
 
       // udpate flattened Tree nodes
       const updatedNode = updateFn(node);
-      collapseNodes(node, index, flattenedTree);
-      expandNodes(updatedNode, index, flattenedTree);
+      if (isNodeExpanded(updatedNode)) {
+        collapseNodes(node, index, flattenedTree);
+        expandNodes(updatedNode, index, flattenedTree);
+      }
+
       flattenedTree[index] = updatedNode;
 
       // force refresh data in child component to trigger UI update

@@ -49,9 +49,9 @@ export default {
               )
             : [],
           state: {
-            expanded: numberOfChildren
-              ? Boolean(Math.round(Math.random()))
-              : false,
+            // expanded: numberOfChildren
+            //   ? Boolean(Math.round(Math.random()))
+            //   : false,
             // favorite: Boolean(Math.round(Math.random())),
             // deletable: Boolean(Math.round(Math.random())),
           },

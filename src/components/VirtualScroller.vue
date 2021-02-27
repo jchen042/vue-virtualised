@@ -132,7 +132,15 @@ export default defineComponent({
     const visibleNodes = ref([]);
 
     // binary search to find the first visible node's index in viewport
-    const getFirstVisibleIndex = (scrollTop, childPositions, itemCount) => {
+    const getFirstVisibleIndex = (
+      scrollTop,
+      viewportHeight,
+      totalHeight,
+      childPositions,
+      itemCount
+    ) => {
+      // in the case we don't have enough elements to scroll, return index
+      if (totalHeight < scrollTop || totalHeight < viewportHeight) return 0;
       let startRange = 0;
       let endRange = itemCount - 1 < 0 ? 0 : itemCount - 1;
       while (startRange !== endRange) {
@@ -182,6 +190,8 @@ export default defineComponent({
       // first visible node's index
       const firstVisibleIndex = getFirstVisibleIndex(
         scrollTop.value,
+        viewportHeight.value,
+        totalHeight.value,
         childPositions.value,
         data.value.length
       );
