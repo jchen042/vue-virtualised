@@ -15,7 +15,7 @@ import {
   defineComponent,
   toRefs,
   ref,
-  reactive,
+  unref,
   onMounted,
   computed,
   watch,
@@ -46,21 +46,21 @@ export default defineComponent({
       default: (node, index) => [h("div", {}, node.name)],
     },
   },
-  emits: ["update:nodes"],
+  emits: [],
   setup(props, { emit }) {
     const { nodes } = toRefs(props);
     console.log(nodes);
 
     const virtualScroller = ref(null);
 
-    const traverse = (obj, cb) => {
-      for (let k in obj) {
-        if (obj[k] && Array.isArray(obj[k])) {
-          obj[k].forEach((el) => traverse(el, cb));
-        }
-      }
-      cb(obj);
-    };
+    // const traverse = (obj, cb) => {
+    //   for (let k in obj) {
+    //     if (obj[k] && Array.isArray(obj[k])) {
+    //       obj[k].forEach((el) => traverse(el, cb));
+    //     }
+    //   }
+    //   cb(obj);
+    // };
 
     const nodeHasChildren = (node) => node.children && node.children.length;
 
@@ -70,7 +70,7 @@ export default defineComponent({
      * use iteration to flatten tree structure to one dimension for virtualised list
      * use recursive method might cause stack overflow exception
      */
-    const getFlattenedTree = (nodes, parents = []) => {
+    const traverse = (nodes, parents = [], cb, shouldTraverse) => {
       let stack = nodes.map((node, index) => ({
         ...node,
         index,
@@ -81,12 +81,11 @@ export default defineComponent({
           isLeaf: !nodeHasChildren(node),
         },
       }));
-      const flattenedTree = [];
 
       while (stack.length > 0) {
         const node = stack.shift();
-        flattenedTree.push(node);
-        if (nodeHasChildren(node) && isNodeExpanded(node))
+        cb(node);
+        if (shouldTraverse(node)) {
           stack = [
             ...node.children.map((n, index) => ({
               ...n,
@@ -94,13 +93,27 @@ export default defineComponent({
               parents: [...node.parents, node.index],
               state: {
                 ...n.state,
-                expanded: !!n.state.expanded,
+                expanded: !!(n.state && n.state.expanded),
                 isLeaf: !nodeHasChildren(n),
               },
             })),
             ...stack,
           ];
+        }
       }
+    };
+
+    const getFlattenedTree = (nodes, parents = []) => {
+      const flattenedTree = [];
+
+      traverse(
+        nodes,
+        parents,
+        (node) => {
+          flattenedTree.push(node);
+        },
+        (node) => nodeHasChildren(node) && isNodeExpanded(node)
+      );
 
       return flattenedTree;
     };
@@ -114,16 +127,6 @@ export default defineComponent({
      */
     const flattenedTree = getFlattenedTree(nodes.value);
     console.log("iteration", flattenedTree);
-
-    // const traverse = (nodes, cb) => {
-    //   let stack = [...nodes];
-
-    //   while (stack.length > 0) {
-    //     const node = stack.shift();
-    //     stack = [...node.children, ...stack];
-    //     cb(node);
-    //   }
-    // };
 
     const updateTreeNode = (nodes, node, updateFn) => {
       // traverse tree by path to get target node to update
@@ -210,11 +213,25 @@ export default defineComponent({
       virtualScroller.value.refreshView();
     };
 
+    const updateNodes = (nodes, node, index, updateFn) => {
+      let parentsList = [node.parents];
+      traverse(
+        [...node.children],
+        [...node.parents, node.index],
+        (n) => {
+          parentsList.push(n.parents);
+        },
+        () => true
+      );
+      console.log(parentsList);
+    };
+
     return {
       // handleScroll,
       virtualScroller,
       flattenedTree,
       updateNode,
+      updateNodes,
     };
   },
   data() {

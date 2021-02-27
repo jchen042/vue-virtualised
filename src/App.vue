@@ -90,9 +90,21 @@ export default {
             node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),
           node.name,
+          h(
+            "button",
+            {
+              style: { width: "20px" },
+              onClick: () =>
+                treeView.value.updateNodes(nodes, node, index, () => {}),
+            },
+            "C"
+          ),
         ]
       ),
     ];
+    // const cellRenderer = (node, index) => (
+    //   <div style={{ height: "100%" }}>{node.name}</div>
+    // );
 
     return { treeView, nodes, cellRenderer };
   },
