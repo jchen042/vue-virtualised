@@ -95,7 +95,10 @@ export default {
             {
               style: { width: "20px" },
               onClick: () =>
-                treeView.value.updateNodes(nodes, node, index, () => {}),
+                treeView.value.updateNodes(nodes, node, index, (node) => ({
+                  ...node,
+                  name: "test",
+                })),
             },
             "C"
           ),

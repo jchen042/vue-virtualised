@@ -128,18 +128,20 @@ export default defineComponent({
     const flattenedTree = getFlattenedTree(nodes.value);
     console.log("iteration", flattenedTree);
 
-    const updateTreeNode = (nodes, node, updateFn) => {
+    const updateTreeNode = (nodes, path, updateFn) => {
       // traverse tree by path to get target node to update
       let parentNodes = nodes;
-      node.parents.forEach((i) => {
+      path.slice(0, path.length - 1).forEach((i) => {
         parentNodes = parentNodes[i].children;
       });
 
       /**
        * the node referred from the tree will be updated
        */
-      parentNodes[node.index] = updateFn(node);
-      console.log(nodes);
+      parentNodes[path[path.length - 1]] = updateFn(
+        parentNodes[path[path.length - 1]]
+      );
+      // console.log(nodes);
     };
 
     const changeAffectFlattenedTree = (node, updatedNode) => {
@@ -163,11 +165,41 @@ export default defineComponent({
       return count;
     };
 
+    const expandNodes = (updatedNode, index, flattenedTree) => {
+      // expand node by inserting node's visible descendants to flattened tree
+      const visibleDescendants = getFlattenedTree(
+        [...updatedNode.children],
+        [...updatedNode.parents, updatedNode.index]
+      );
+      console.log(visibleDescendants);
+      /**
+       * hack: chunk large array into small sub arrays and run splice() method for each
+       * to avoid RangeError: Maximum call stack size exceeded exception
+       * this exception is due to the limitation of JS engine
+       */
+      const chunkedVisibleDescendants = chunk(visibleDescendants, 50000);
+      let i = index + 1;
+      chunkedVisibleDescendants.forEach((nodes) => {
+        flattenedTree.splice(i, 0, ...nodes);
+        i = i + nodes.length;
+      });
+    };
+
+    const collapseNodes = (node, index, flattenedTree) => {
+      // collapse node by removing current node's descendants from flattened tree
+      const numberOfVisibleDescendants = getNumberOfVisibleDescendants(
+        node,
+        index,
+        flattenedTree
+      );
+      flattenedTree.splice(index + 1, numberOfVisibleDescendants);
+    };
+
     // update single node
     const updateNode = (nodes, node, index, updateFn) => {
       console.log(node, index);
 
-      updateTreeNode(nodes, node, updateFn);
+      updateTreeNode(nodes, [...node.parents, node.index], updateFn);
 
       /**
        * operation is expensive if we call this method to update all flattened tree list:
@@ -178,31 +210,9 @@ export default defineComponent({
 
       if (changeAffectFlattenedTree(node, updatedNode)) {
         if (isNodeExpanded(updatedNode)) {
-          // expand node by inserting node's visible descendants to flattened tree
-          const visibleDescendants = getFlattenedTree(
-            [...updatedNode.children],
-            [...updatedNode.parents, updatedNode.index]
-          );
-          console.log(visibleDescendants);
-          /**
-           * hack: chunk large array into small sub arrays and run splice() method for each
-           * to avoid RangeError: Maximum call stack size exceeded exception
-           * this exception is due to the limitation of JS engine
-           */
-          const chunkedVisibleDescendants = chunk(visibleDescendants, 50000);
-          let i = index + 1;
-          chunkedVisibleDescendants.forEach((nodes) => {
-            flattenedTree.splice(i, 0, ...nodes);
-            i = i + nodes.length;
-          });
+          expandNodes(updatedNode, index, flattenedTree);
         } else {
-          // collapse node by removing current node's descendants from flattened tree
-          const numberOfVisibleDescendants = getNumberOfVisibleDescendants(
-            node,
-            index,
-            flattenedTree
-          );
-          flattenedTree.splice(index + 1, numberOfVisibleDescendants);
+          collapseNodes(node, index, flattenedTree);
         }
       }
 
@@ -214,16 +224,33 @@ export default defineComponent({
     };
 
     const updateNodes = (nodes, node, index, updateFn) => {
-      let parentsList = [node.parents];
+      // update tree nodes
+      let pathsList = [[...node.parents, node.index]];
       traverse(
         [...node.children],
         [...node.parents, node.index],
         (n) => {
-          parentsList.push(n.parents);
+          pathsList.push([...n.parents, n.index]);
         },
         () => true
       );
-      console.log(parentsList);
+      console.log(pathsList);
+
+      /**
+       * this iteration will not only update props tree nodes
+       * but also affect all descendant nodes of the current node in the view
+       * because these descendant nodes are passed by references
+       */
+      pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
+
+      // udpate flattened Tree nodes
+      const updatedNode = updateFn(node);
+      collapseNodes(node, index, flattenedTree);
+      expandNodes(updatedNode, index, flattenedTree);
+      flattenedTree[index] = updatedNode;
+
+      // force refresh data in child component to trigger UI update
+      virtualScroller.value.refreshView();
     };
 
     return {
