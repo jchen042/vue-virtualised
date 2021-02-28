@@ -100,8 +100,6 @@ export default defineComponent({
 
     const virtualScroller = ref(null);
 
-    const scrollTop = ref(initialScrollTop.value);
-
     // store an array of child nodes positions
     const getChildPositions = (nodes, getNodeHeight) => {
       let results = [0];
@@ -119,13 +117,12 @@ export default defineComponent({
     );
 
     console.log(initialScrollIndex, initialScrollIndex.value);
-    const scrollIndex = ref(initialScrollIndex.value);
-    console.log(scrollIndex, scrollIndex.value);
-    // if (scrollIndex.value && scrollIndex.value < data.value.length)
-    //   scrollTop.value = Math.min(
-    //     Math.max(0, childPositions.value[scrollIndex.value]),
-    //     totalHeight.value - viewportHeight.value
-    //   );
+    const scrollTop = ref(
+      initialScrollIndex.value && initialScrollIndex.value < data.value.length
+        ? // TODO: handle edge case when scroll to last few elements
+          childPositions.value[Math.max(0, initialScrollIndex.value)]
+        : initialScrollTop.value
+    );
 
     // calculte total content height
     const getTotalHeight = (nodes, childPositions, getNodeHeight) => {
