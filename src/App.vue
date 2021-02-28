@@ -4,6 +4,7 @@
   <tree
     ref="treeView"
     :nodes="nodes"
+    :on-change="onChange"
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
     :cell-renderer="cellRenderer"
@@ -49,9 +50,9 @@ export default {
               )
             : [],
           state: {
-            // expanded: numberOfChildren
-            //   ? Boolean(Math.round(Math.random()))
-            //   : false,
+            expanded: numberOfChildren
+              ? Boolean(Math.round(Math.random()))
+              : false,
             // favorite: Boolean(Math.round(Math.random())),
             // deletable: Boolean(Math.round(Math.random())),
           },
@@ -62,6 +63,8 @@ export default {
     const treeView = ref(null);
 
     const nodes = constructTree(6, 30, 5);
+
+    const onChange = (nodes) => console.log("on change", nodes);
 
     const cellRenderer = (node, index) => [
       h(
@@ -85,7 +88,6 @@ export default {
                   ...node,
                   state: { ...node.state, expanded: !node.state.expanded },
                 })),
-              // console.log(this.$refs.tree),
             },
             node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),
@@ -109,7 +111,7 @@ export default {
     //   <div style={{ height: "100%" }}>{node.name}</div>
     // );
 
-    return { treeView, nodes, cellRenderer };
+    return { treeView, nodes, onChange, cellRenderer };
   },
   data() {
     return {

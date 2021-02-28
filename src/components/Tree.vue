@@ -4,6 +4,7 @@
     :data="flattenedTree"
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
+    :initial-scroll-index="initialScrollIndex"
     :tolerance="2"
     :get-node-height="getNodeHeight"
     :cell-renderer="cellRenderer"
@@ -33,6 +34,7 @@ export default defineComponent({
       type: Array,
       default: () => [],
     },
+    onChange: { type: Function, default: (nodes) => {} },
     viewportHeight: {
       type: Number,
       default: () => 400,
@@ -48,7 +50,7 @@ export default defineComponent({
   },
   emits: [],
   setup(props, { emit }) {
-    const { nodes } = toRefs(props);
+    const { nodes, onChange } = toRefs(props);
     console.log(nodes);
 
     const virtualScroller = ref(null);
@@ -200,6 +202,7 @@ export default defineComponent({
       console.log(node, index);
 
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
+      onChange.value(nodes);
 
       /**
        * operation is expensive if we call this method to update all flattened tree list:
@@ -242,6 +245,7 @@ export default defineComponent({
        * because these descendant nodes are passed by references
        */
       pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
+      onChange.value(nodes);
 
       // udpate flattened Tree nodes
       const updatedNode = updateFn(node);
@@ -256,12 +260,15 @@ export default defineComponent({
       virtualScroller.value.refreshView();
     };
 
+    const initialScrollIndex = ref(20);
+
     return {
       // handleScroll,
       virtualScroller,
       flattenedTree,
       updateNode,
       updateNodes,
+      initialScrollIndex,
     };
   },
   data() {

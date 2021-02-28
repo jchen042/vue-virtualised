@@ -66,6 +66,10 @@ export default defineComponent({
       type: Number,
       default: () => 0,
     },
+    initialScrollIndex: {
+      type: Number,
+      default: () => null,
+    },
     tolerance: {
       type: Number,
       default: () => 2,
@@ -84,6 +88,7 @@ export default defineComponent({
     // TODO: dynamic data attributes
     const {
       initialScrollTop,
+      initialScrollIndex,
       viewportHeight,
       tolerance,
       getNodeHeight,
@@ -112,6 +117,15 @@ export default defineComponent({
     const childPositions = ref(
       getChildPositions(data.value, getNodeHeight.value)
     );
+
+    console.log(initialScrollIndex, initialScrollIndex.value);
+    const scrollIndex = ref(initialScrollIndex.value);
+    console.log(scrollIndex, scrollIndex.value);
+    // if (scrollIndex.value && scrollIndex.value < data.value.length)
+    //   scrollTop.value = Math.min(
+    //     Math.max(0, childPositions.value[scrollIndex.value]),
+    //     totalHeight.value - viewportHeight.value
+    //   );
 
     // calculte total content height
     const getTotalHeight = (nodes, childPositions, getNodeHeight) => {
