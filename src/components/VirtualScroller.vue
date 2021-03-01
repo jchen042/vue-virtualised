@@ -50,6 +50,9 @@ import {
 
 import Cell from "./Cell.vue";
 
+import invariant from "invariant";
+import { isNil } from "lodash";
+
 export default defineComponent({
   name: "VirtualScroller",
   components: { Cell },
@@ -98,6 +101,36 @@ export default defineComponent({
       get: () => props.data,
     });
 
+    // TODO: test invalid cases
+    invariant(Array.isArray(data.value), "data is not Array");
+    invariant(
+      !Number.isNaN(initialScrollTop.value),
+      `initialScrollTop value ${initialScrollTop.value} is not Number`
+    );
+    invariant(
+      isNil(initialScrollIndex.value) ||
+        !Number.isNaN(initialScrollIndex.value),
+      `initialScrollIndex value ${initialScrollIndex.value} is not Number`
+    );
+    invariant(
+      initialScrollIndex.value >= 0,
+      `initialScrollIndex value out of range: requested index ${initialScrollIndex.value} but minimum is 0`
+    );
+    invariant(
+      initialScrollIndex.value < data.value.length,
+      `initialScrollIndex value out of range: requested index ${
+        initialScrollIndex.value
+      } is out of 0 to ${data.value.length - 1}`
+    );
+    invariant(
+      !Number.isNaN(viewportHeight.value),
+      `viewportHeight value ${viewportHeight.value} is not Number`
+    );
+    invariant(
+      !Number.isNaN(tolerance.value),
+      `tolerance value ${tolerance.value} is not Number`
+    );
+
     const virtualScroller = ref(null);
 
     // store an array of child nodes positions
@@ -106,6 +139,12 @@ export default defineComponent({
       if (nodes.length > 0) {
         // TODO: handle the scenario that the getNodeHeight method returns an invalid value
         for (let i = 1; i < nodes.length; i++) {
+          invariant(
+            !Number.isNaN(getNodeHeight(nodes[i - 1])),
+            `getNodeHeight(node) method returns an invalid value ${getNodeHeight(
+              nodes[i - 1]
+            )} at index ${i - 1}`
+          );
           results.push(results[i - 1] + getNodeHeight(nodes[i - 1]));
         }
       }
@@ -119,8 +158,7 @@ export default defineComponent({
     console.log(initialScrollIndex, initialScrollIndex.value);
     const scrollTop = ref(
       initialScrollIndex.value && initialScrollIndex.value < data.value.length
-        ? // TODO: handle edge case when scroll to last few elements
-          childPositions.value[Math.max(0, initialScrollIndex.value)]
+        ? childPositions.value[Math.max(0, initialScrollIndex.value)]
         : initialScrollTop.value
     );
 

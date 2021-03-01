@@ -121,9 +121,10 @@ export default defineComponent({
     };
 
     /**
-     * avoid to use reactive() to make flattenedTree reactive will cause performance issue
-     * because it triggered multiple get() and set() when Vue detecting data changes
-     * it's expensive to apply reactive attribute for large array
+     * avoid to use reactive() to make flattenedTree reactive
+     * because it will cause performance issue
+     * as it triggered multiple get() and set() when Vue detecting data changes
+     * so it's expensive to apply reactive attribute for large array
      * instead, we force refreshing Virtual Scroller view when updating nodes
      * as it contains limited amount of visible nodes so it's much faster
      */
