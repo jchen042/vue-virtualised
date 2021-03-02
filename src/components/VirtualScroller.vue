@@ -155,7 +155,6 @@ export default defineComponent({
       getChildPositions(data.value, getNodeHeight.value)
     );
 
-    console.log(initialScrollIndex, initialScrollIndex.value);
     const scrollTop = ref(
       initialScrollIndex.value && initialScrollIndex.value < data.value.length
         ? childPositions.value[Math.max(0, initialScrollIndex.value)]
@@ -304,7 +303,6 @@ export default defineComponent({
     );
 
     watchEffect(async () => {
-      // console.log("set state");
       await setScrollState();
     });
 

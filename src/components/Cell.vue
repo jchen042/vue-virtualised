@@ -10,9 +10,24 @@ export default {
       type: Function,
       default: () => 40,
     },
+    /**
+     * Takes an item from data and renders it into the list
+     */
     cellRenderer: {
       type: Function,
-      default: (node, index) => [h("div", {}, node.name)],
+      default: (node, index) => [
+        h("div", {}, `${index} - ${node.name ?? node}`),
+      ],
+      required: true,
+    },
+    /**
+     * A unique identifier for this list.
+     * If there are multiple VirtualScroller at the same level of nesting within another VirtualScroller,
+     * this key is necessary for virtualisation to work properly.
+     */
+    getNodeKey: {
+      type: Function,
+      default: (node, index) => `${index}_${node.key}`,
     },
   },
   emits: ["toggleChildNodes"],
@@ -21,7 +36,10 @@ export default {
       props.visibleNodes.map((node, index) =>
         h(
           "div",
-          { key: index, style: { height: `${props.getNodeHeight(node)}px` } },
+          {
+            key: props.getNodeKey(node, index),
+            style: { height: `${props.getNodeHeight(node)}px` },
+          },
           props.cellRenderer(node, index + props.startIndex)
         )
       );

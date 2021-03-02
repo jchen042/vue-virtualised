@@ -75,6 +75,9 @@ export default defineComponent({
     const traverse = (nodes, parents = [], cb, shouldTraverse) => {
       let stack = nodes.map((node, index) => ({
         ...node,
+        key: node.key
+          ? node.key
+          : crypto.getRandomValues(new Uint32Array(2)).join(""),
         index,
         parents,
         state: {
@@ -91,6 +94,9 @@ export default defineComponent({
           stack = [
             ...node.children.map((n, index) => ({
               ...n,
+              key: n.key
+                ? n.key
+                : crypto.getRandomValues(new Uint32Array(2)).join(""),
               index,
               parents: [...node.parents, node.index],
               state: {
