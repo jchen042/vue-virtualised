@@ -69,15 +69,14 @@ export default defineComponent({
     const isNodeExpanded = (node) => node.state && node.state.expanded;
 
     /**
-     * use iteration to flatten tree structure to one dimension for virtualised list
-     * use recursive method might cause stack overflow exception
+     * build a named function for traverse() method to leverage
+     * to avoid creating multiple anonymous functions
+     * which is expensive
      */
-    const traverse = (nodes, parents = [], cb, shouldTraverse) => {
-      let stack = nodes.map((node, index) => ({
+    const constructBfsTraverseStack = (nodes, parents = [], stack = []) => [
+      ...nodes.map((node, index) => ({
         ...node,
-        key: node.key
-          ? node.key
-          : crypto.getRandomValues(new Uint32Array(2)).join(""),
+        key: node.key ? node.key : [...parents, index].toString(),
         index,
         parents,
         state: {
@@ -85,28 +84,26 @@ export default defineComponent({
           expanded: !!(node.state && node.state.expanded),
           isLeaf: !nodeHasChildren(node),
         },
-      }));
+      })),
+      ...stack,
+    ];
+
+    /**
+     * use iteration to flatten tree structure to one dimension for virtualised list
+     * use recursive method might cause stack overflow exception
+     */
+    const traverse = (nodes, parents = [], cb, shouldTraverse) => {
+      let stack = constructBfsTraverseStack(nodes, parents);
 
       while (stack.length > 0) {
         const node = stack.shift();
         cb(node);
         if (shouldTraverse(node)) {
-          stack = [
-            ...node.children.map((n, index) => ({
-              ...n,
-              key: n.key
-                ? n.key
-                : crypto.getRandomValues(new Uint32Array(2)).join(""),
-              index,
-              parents: [...node.parents, node.index],
-              state: {
-                ...n.state,
-                expanded: !!(n.state && n.state.expanded),
-                isLeaf: !nodeHasChildren(n),
-              },
-            })),
-            ...stack,
-          ];
+          stack = constructBfsTraverseStack(
+            node.children,
+            [...node.parents, node.index],
+            stack
+          );
         }
       }
     };
