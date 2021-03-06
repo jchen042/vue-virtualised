@@ -1,0 +1,27 @@
+{
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[vue]": {
+        "editor.defaultFormatter": "octref.vetur"
+    },
+    "eslint.validate": [
+        "vue",
+        "html",
+        "javascript",
+        "graphql",
+        "javascriptreact",
+        "json",
+        "typescript",
+        "typescriptreact"
+    ],
+    "eslint.format.enable":true,
+    "vetur.format.defaultFormatter.js": "prettier-eslint",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "vetur.validation.template": false
+}
