@@ -50,8 +50,10 @@ export default defineComponent({
   },
   emits: [],
   setup(props, { emit }) {
-    const { nodes, onChange } = toRefs(props);
-    console.log(nodes);
+    // const { nodes, onChange } = toRefs(props);
+    // NO REACTIVE
+    // eslint-disable-next-line vue/no-setup-props-destructure
+    const { nodes, onChange } = props;
 
     const virtualScroller = ref(null);
 
@@ -73,20 +75,32 @@ export default defineComponent({
      * to avoid creating multiple anonymous functions
      * which is expensive
      */
-    const constructBfsTraverseStack = (nodes, parents = [], stack = []) => [
-      ...nodes.map((node, index) => ({
-        ...node,
-        key: node.key ? node.key : [...parents, index].toString(),
-        index,
-        parents,
-        state: {
-          ...node.state,
-          expanded: !!(node.state && node.state.expanded),
-          isLeaf: !nodeHasChildren(node),
-        },
-      })),
-      ...stack,
-    ];
+    const constructBfsTraverseStack = (nodes, parents = [], stack = []) => {
+      let _nodes = stack;
+
+      // NO MAP AND ARROW
+      for (let index = nodes.length - 1; index >= 0; index--) {
+        const node = nodes[index];
+
+        _nodes.unshift({
+          // NO SPREAD
+          // ...node,
+          children: node.children,
+          id: node.id,
+          name: node.name,
+          key: node.key ? node.key : parents.concat(index).toString(), //[...parents, index].toString(),
+          index,
+          parents,
+          state: {
+            // NO SPREAD
+            // ...node.state,
+            expanded: !!(node.state && node.state.expanded),
+            isLeaf: !nodeHasChildren(node),
+          },
+        });
+      }
+      return _nodes;
+    };
 
     /**
      * use iteration to flatten tree structure to one dimension for virtualised list
@@ -101,7 +115,8 @@ export default defineComponent({
         if (shouldTraverse(node)) {
           stack = constructBfsTraverseStack(
             node.children,
-            [...node.parents, node.index],
+            //[...node.parents, node.index],
+            node.parents.concat(node.index),
             stack
           );
         }
@@ -131,15 +146,18 @@ export default defineComponent({
      * instead, we force refreshing Virtual Scroller view when updating nodes
      * as it contains limited amount of visible nodes so it's much faster
      */
-    const flattenedTree = getFlattenedTree(nodes.value);
+    // const flattenedTree = getFlattenedTree(nodes.value);
+    const flattenedTree = getFlattenedTree(nodes);
     console.log("iteration", flattenedTree);
 
     const updateTreeNode = (nodes, path, updateFn) => {
       // traverse tree by path to get target node to update
       let parentNodes = nodes;
-      path.slice(0, path.length - 1).forEach((i) => {
-        parentNodes = parentNodes[i].children;
-      });
+      // path.slice(0, path.length - 1).forEach((i) => {
+      //   parentNodes = parentNodes[i].children;
+      // });
+      const size = path.length - 1;
+      for (let i = 0; i < size; i++) parentNodes = parentNodes[i].children;
 
       /**
        * the node referred from the tree will be updated
@@ -206,7 +224,8 @@ export default defineComponent({
       console.log(node, index);
 
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
-      onChange.value(nodes);
+      // onChange.value(nodes);
+      onChange(nodes);
 
       /**
        * operation is expensive if we call this method to update all flattened tree list:
@@ -249,7 +268,8 @@ export default defineComponent({
        * because these descendant nodes are passed by references
        */
       pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
-      onChange.value(nodes);
+      // onChange.value(nodes);
+      onChange(nodes);
 
       // udpate flattened Tree nodes
       const updatedNode = updateFn(node);
