@@ -82,23 +82,20 @@ export default defineComponent({
       for (let index = nodes.length - 1; index >= 0; index--) {
         const node = nodes[index];
 
-        _nodes.unshift({
-          // NO SPREAD
-          // ...node,
-          children: node.children,
-          id: node.id,
-          name: node.name,
-          key: node.key ? node.key : parents.concat(index).toString(), //[...parents, index].toString(),
-          index,
-          parents,
-          state: {
-            // NO SPREAD
-            // ...node.state,
-            expanded: !!(node.state && node.state.expanded),
-            isLeaf: !nodeHasChildren(node),
-          },
-        });
+        // NO SPREAD
+        // ...node,
+        node.key = node.key ? node.key : parents.concat(index).toString(); //[...parents, index].toString()
+        node.parents = parents;
+        node.index = index;
+        // NO SPREAD
+        // ...node.state,
+        node.state = node.state ? node.state : {};
+        node.state.expanded = !!isNodeExpanded(node);
+        node.state.isLeaf = !nodeHasChildren(node);
+
+        _nodes.unshift(node);
       }
+
       return _nodes;
     };
 
@@ -157,7 +154,8 @@ export default defineComponent({
       //   parentNodes = parentNodes[i].children;
       // });
       const size = path.length - 1;
-      for (let i = 0; i < size; i++) parentNodes = parentNodes[i].children;
+      for (let i = 0; i < size; i++)
+        parentNodes = parentNodes[path[i]].children;
 
       /**
        * the node referred from the tree will be updated
@@ -252,12 +250,15 @@ export default defineComponent({
     const updateNodes = (nodes, node, index, updateFn) => {
       // update tree nodes
       let pathsList = [[...node.parents, node.index]];
+
+      // avoid creating multiple anonymous functions inside traverse()
+      const addNodeToPathsList = (node) =>
+        pathsList.push(node.parents.concat(node.index));
+
       traverse(
         [...node.children],
         [...node.parents, node.index],
-        (n) => {
-          pathsList.push([...n.parents, n.index]);
-        },
+        addNodeToPathsList,
         () => true
       );
       console.log(pathsList);
@@ -266,8 +267,12 @@ export default defineComponent({
        * this iteration will not only update props tree nodes
        * but also affect all descendant nodes of the current node in the view
        * because these descendant nodes are passed by references
+       * also, to improve performance, avoid using forEach
+       * pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
        */
-      pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
+      for (let i = 0; i < pathsList.length; i++)
+        updateTreeNode(nodes, pathsList[i], updateFn);
+
       // onChange.value(nodes);
       onChange(nodes);
 
