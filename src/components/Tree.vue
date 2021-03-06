@@ -17,6 +17,9 @@ import {
   toRefs,
   ref,
   unref,
+  isProxy,
+  isReactive,
+  markRaw,
   onMounted,
   computed,
   watch,
@@ -121,16 +124,20 @@ export default defineComponent({
     };
 
     const getFlattenedTree = (nodes, parents = []) => {
-      const flattenedTree = [];
+      /**
+       * reactive object makes the iteration time-consuming
+       * to avoid expensive traversal, we have to markRaw object
+       */
+      const flattenedTree = markRaw([]);
 
-      traverse(
-        nodes,
-        parents,
-        (node) => {
-          flattenedTree.push(node);
-        },
-        (node) => nodeHasChildren(node) && isNodeExpanded(node)
-      );
+      // make sure node pushed to the flattened tree is not reactive
+      const addNodeToFlattenedTree = (node) =>
+        flattenedTree.push(markRaw(node));
+
+      const shouldTraverse = (node) =>
+        nodeHasChildren(node) && isNodeExpanded(node);
+
+      traverse(nodes, parents, addNodeToFlattenedTree, shouldTraverse);
 
       return flattenedTree;
     };
@@ -144,7 +151,7 @@ export default defineComponent({
      * as it contains limited amount of visible nodes so it's much faster
      */
     // const flattenedTree = getFlattenedTree(nodes.value);
-    const flattenedTree = getFlattenedTree(nodes);
+    const flattenedTree = markRaw(getFlattenedTree(nodes));
     console.log("iteration", flattenedTree);
 
     const updateTreeNode = (nodes, path, updateFn) => {
@@ -255,11 +262,13 @@ export default defineComponent({
       const addNodeToPathsList = (node) =>
         pathsList.push(node.parents.concat(node.index));
 
+      const shouldTraverse = () => true;
+
       traverse(
         [...node.children],
         [...node.parents, node.index],
         addNodeToPathsList,
-        () => true
+        shouldTraverse
       );
       console.log(pathsList);
 

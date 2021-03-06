@@ -92,7 +92,7 @@ export default {
 
     const treeView = ref(null);
 
-    const nodes = constructFixedTree(6, 12, 5);
+    const nodes = constructFixedTree(6, 15, 5);
 
     const onChange = (nodes) => console.log("on change", nodes);
 
