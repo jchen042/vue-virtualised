@@ -264,7 +264,7 @@ export default defineComponent({
       virtualScroller.value.refreshView();
     };
 
-    const initialScrollIndex = ref(20);
+    const initialScrollIndex = ref(0);
 
     return {
       // handleScroll,

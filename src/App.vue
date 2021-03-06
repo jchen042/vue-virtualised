@@ -25,7 +25,7 @@ export default {
     Tree,
   },
   setup() {
-    const constructTree = (
+    const constructRandomTree = (
       maxDeepness,
       maxNumberOfChildren,
       minNumOfNodes,
@@ -42,7 +42,7 @@ export default {
           id,
           name: `Leaf ${i}`,
           children: numberOfChildren
-            ? constructTree(
+            ? constructRandomTree(
                 maxDeepness,
                 maxNumberOfChildren,
                 numberOfChildren,
@@ -60,9 +60,39 @@ export default {
       });
     };
 
+    const constructFixedTree = (
+      maxDeepness,
+      numberOfChildren,
+      numOfNodes,
+      deepness = 1
+    ) => {
+      return new Array(numOfNodes).fill(deepness).map((value, i) => {
+        const id = i;
+
+        return {
+          id,
+          name: `Leaf ${i}`,
+          children:
+            deepness !== maxDeepness
+              ? constructFixedTree(
+                  maxDeepness,
+                  numberOfChildren,
+                  numberOfChildren,
+                  deepness + 1
+                )
+              : [],
+          state: {
+            expanded: deepness !== maxDeepness ? Boolean(i % 3) : false,
+            // favorite: Boolean(Math.round(Math.random())),
+            // deletable: Boolean(Math.round(Math.random())),
+          },
+        };
+      });
+    };
+
     const treeView = ref(null);
 
-    const nodes = constructTree(6, 30, 5);
+    const nodes = constructFixedTree(6, 12, 5);
 
     const onChange = (nodes) => console.log("on change", nodes);
 
@@ -167,40 +197,6 @@ export default {
     //   },
     // },
     // mounted() {},
-    // methods: {
-    //   constructTree(
-    //     maxDeepness,
-    //     maxNumberOfChildren,
-    //     minNumOfNodes,
-    //     deepness = 1
-    //   ) {
-    //     return new Array(minNumOfNodes).fill(deepness).map((value, i) => {
-    //       const id = i;
-    //       const numberOfChildren =
-    //         deepness === maxDeepness
-    //           ? 0
-    //           : Math.round(Math.random() * maxNumberOfChildren);
-    //       return {
-    //         id,
-    //         name: `Leaf ${i}`,
-    //         children: numberOfChildren
-    //           ? this.constructTree(
-    //               maxDeepness,
-    //               maxNumberOfChildren,
-    //               numberOfChildren,
-    //               deepness + 1
-    //             )
-    //           : [],
-    //         state: {
-    //           expanded: numberOfChildren
-    //             ? Boolean(Math.round(Math.random()))
-    //             : false,
-    //           // favorite: Boolean(Math.round(Math.random())),
-    //           // deletable: Boolean(Math.round(Math.random())),
-    //         },
-    //       };
-    //     });
-    //   },
   },
 };
 </script>
