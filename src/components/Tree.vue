@@ -33,7 +33,6 @@ import {
   isNodeExpanded,
   constructBfsTraverseStack,
 } from "../utils/nodesHelper";
-import NodesTraversalWorker from "../utils/worker/nodesTraversal.worker";
 import { chunk } from "lodash";
 
 export default defineComponent({
@@ -81,9 +80,10 @@ export default defineComponent({
      * use recursive method might cause stack overflow exception
      */
     const traverse = async (nodes, parents = [], cb, shouldTraverse) => {
+      console.log("traverse:start", performance.now());
       let stack = constructBfsTraverseStack(nodes, parents);
       let i = 1;
-      console.log("_while:before", performance.now());
+      console.log("_while:start", performance.now());
 
       while (stack.length > 0) {
         const node = stack.shift();
@@ -102,8 +102,8 @@ export default defineComponent({
           await sleep(1);
         }
       }
-
-      console.log("_while:after", performance.now());
+      console.log("_while:end", performance.now());
+      console.log("traverse:end", performance.now());
     };
 
     const getFlattenedTree = async (nodes, parents = []) => {
@@ -236,11 +236,24 @@ export default defineComponent({
       virtualScroller.value.refreshView();
     };
 
-    const _updateNodes = async (nodes, node, pathsList, index, updateFn) => {
-      // console.log(pathsList);
-      console.log("_updateNodes:before", performance.now());
-      console.log("_for:before", performance.now());
+    const updateNodes = async (nodes, node, index, updateFn) => {
+      console.log("updateNodes:start", performance.now());
+      // update tree nodes
+      let pathsList = [[...node.parents, node.index]];
+      // give functions names to avoid creating multiple anonymous functions inside traverse()
+      const addNodeToPathsList = (node) =>
+        pathsList.push(node.parents.concat(node.index));
 
+      const shouldTraverse = () => true;
+
+      await traverse(
+        [...node.children],
+        [...node.parents, node.index],
+        addNodeToPathsList,
+        shouldTraverse
+      );
+
+      console.log("_for:start", performance.now());
       /**
        * this iteration will not only update props tree nodes
        * but also affect all descendant nodes of the current node in the view
@@ -255,10 +268,8 @@ export default defineComponent({
           await sleep(1);
         }
       }
+      console.log("_for:end", performance.now());
 
-      console.log("_for:after", performance.now());
-
-      // onChange.value(nodes);
       onChange(nodes);
 
       // udpate flattened Tree nodes
@@ -272,47 +283,7 @@ export default defineComponent({
 
       // force refresh data in child component to trigger UI update
       virtualScroller.value.refreshView();
-      console.log("updateNodes:after", performance.now());
-    };
-
-    const updateNodes = async (nodes, node, index, updateFn) => {
-      console.log("updateNodes:before", performance.now());
-      // update tree nodes
-      // eslint-disable-next-line no-constant-condition
-      if (window.Worker && false) {
-        const nodesTraversalWorker = new NodesTraversalWorker();
-        console.log("postMessage:before", performance.now());
-        nodesTraversalWorker.postMessage({
-          nodes: [...node.children],
-          parents: [...node.parents, node.index],
-          shouldTraverseInvisibleNodes: true,
-        });
-        console.log("postMessage:after", performance.now());
-        nodesTraversalWorker.onmessage = (e) => {
-          console.log("onMessage:before", performance.now());
-          // console.log(e);
-          let { pathsList } = e.data;
-          pathsList = [[...node.parents, node.index], ...pathsList];
-
-          _updateNodes(nodes, node, pathsList, index, updateFn);
-        };
-      } else {
-        let pathsList = [[...node.parents, node.index]];
-        // avoid creating multiple anonymous functions inside traverse()
-        const addNodeToPathsList = (node) =>
-          pathsList.push(node.parents.concat(node.index));
-
-        const shouldTraverse = () => true;
-
-        await traverse(
-          [...node.children],
-          [...node.parents, node.index],
-          addNodeToPathsList,
-          shouldTraverse
-        );
-
-        _updateNodes(nodes, node, pathsList, index, updateFn);
-      }
+      console.log("updateNodes:end", performance.now());
     };
 
     const initialScrollIndex = ref(0);
