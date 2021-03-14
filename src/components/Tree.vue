@@ -71,15 +71,6 @@ export default defineComponent({
     //   cb(obj);
     // };
 
-    let nodesTraversalWorker = null;
-    // const URL = window.URL || window.webkitURL;
-    // const reader = new FileReader();
-    // console.log(file);
-    // const blob = new Blob([file], { type: "application/javascript" });
-    // const objectURL = URL.createObjectURL(blob);
-    if (window.Worker) nodesTraversalWorker = new NodesTraversalWorker();
-    console.log(nodesTraversalWorker);
-
     /**
      * build a named function for traverse() method to leverage
      * to avoid creating multiple anonymous functions
@@ -270,13 +261,15 @@ export default defineComponent({
 
       const shouldTraverse = () => true;
 
-      nodesTraversalWorker
-        ? nodesTraversalWorker.postMessage("test worker")
-        : null;
-
-      nodesTraversalWorker
-        ? (nodesTraversalWorker.onMessage = (e) => console.log(e))
-        : null;
+      if (window.Worker) {
+        const nodesTraversalWorker = new NodesTraversalWorker();
+        nodesTraversalWorker.postMessage({
+          nodes: [...node.children],
+          parents: [...node.parents, node.index],
+          shouldTraverseInvisibleNodes: true,
+        });
+        nodesTraversalWorker.onmessage = (e) => console.log(e);
+      }
 
       traverse(
         [...node.children],
