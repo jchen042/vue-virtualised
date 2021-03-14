@@ -226,8 +226,12 @@ export default defineComponent({
       virtualScroller.value.refreshView();
     };
 
-    const _updateNodes = (nodes, node, pathsList, index, updateFn) => {
-      console.log(pathsList);
+    const _updateNodes = async (nodes, node, pathsList, index, updateFn) => {
+      const sleep = (time) => new Promise((rs) => setTimeout(() => rs(), time));
+
+      // console.log(pathsList);
+      console.log("_updateNodes:before", performance.now());
+
       /**
        * this iteration will not only update props tree nodes
        * but also affect all descendant nodes of the current node in the view
@@ -235,8 +239,22 @@ export default defineComponent({
        * also, to improve performance, avoid using forEach
        * pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
        */
-      for (let i = 0; i < pathsList.length; i++)
-        updateTreeNode(nodes, pathsList[i], updateFn);
+      // for (let i = 0; i < pathsList.length; i++)
+      //   updateTreeNode(nodes, pathsList[i], updateFn);
+      const arraySize = pathsList.length;
+      const chunkSize = 100000;
+      const chunkNumb = Math.floor(arraySize / chunkSize);
+      console.log("_for:before", performance.now(), arraySize, chunkNumb);
+      for (let c = 0; c < chunkNumb; c++) {
+        for (let i = 0; i < chunkSize; i++) {
+          const index = c * chunkSize + i;
+          if (!index < arraySize - 1) break;
+          updateTreeNode(nodes, pathsList[index], updateFn);
+        }
+        console.log("_for:body", performance.now(), c);
+        await sleep(60);
+      }
+      console.log("_for:after", performance.now());
 
       // onChange.value(nodes);
       onChange(nodes);
@@ -252,19 +270,25 @@ export default defineComponent({
 
       // force refresh data in child component to trigger UI update
       virtualScroller.value.refreshView();
+      console.log("updateNodes:after", performance.now());
     };
 
     const updateNodes = (nodes, node, index, updateFn) => {
+      console.log("updateNodes:before", performance.now());
       // update tree nodes
-      if (window.Worker) {
+      // eslint-disable-next-line no-constant-condition
+      if (window.Worker && false) {
         const nodesTraversalWorker = new NodesTraversalWorker();
+        console.log("postMessage:before", performance.now());
         nodesTraversalWorker.postMessage({
           nodes: [...node.children],
           parents: [...node.parents, node.index],
           shouldTraverseInvisibleNodes: true,
         });
-        nodesTraversalWorker.onmessage = async (e) => {
-          console.log(e);
+        console.log("postMessage:after", performance.now());
+        nodesTraversalWorker.onmessage = (e) => {
+          console.log("onMessage:before", performance.now());
+          // console.log(e);
           let { pathsList } = e.data;
           pathsList = [[...node.parents, node.index], ...pathsList];
 
