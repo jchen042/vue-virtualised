@@ -8,6 +8,7 @@
       :on-change="onChange"
       :viewport-height="viewportHeight"
       :initial-scroll-top="initialScrollTop"
+      :get-node-height="getNodeHeight"
       :cell-renderer="cellRenderer"
     ></tree>
   </suspense>
@@ -155,50 +156,6 @@ export default {
       initialScrollTop: 300,
       getNodeHeight: (node) => 30 + (node.index % 10),
     };
-  },
-  computed: {
-    // nodes() {
-    //   return this.constructTree(6, 30, 5);
-    // },
-    //   cellRenderer() {
-    //     return (node, index) => [
-    //       h(
-    //         "div",
-    //         {
-    //           style: {
-    //             height: "100%",
-    //             textAlign: "left",
-    //             borderLeft: "1px solid black",
-    //             marginLeft: `${node.parents.length * 30}px`,
-    //           },
-    //         },
-    //         [
-    //           h(
-    //             "button",
-    //             {
-    //               style: { width: "20px" },
-    //               disabled: node.state.isLeaf,
-    //               onClick: () =>
-    //                 this.$refs.treeView.updateNode(
-    //                   this.nodes,
-    //                   node,
-    //                   index,
-    //                   (node) => ({
-    //                     ...node,
-    //                     state: { ...node.state, expanded: !node.state.expanded },
-    //                   })
-    //                 ),
-    //               // console.log(this.$refs.tree),
-    //             },
-    //             node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
-    //           ),
-    //           node.name,
-    //         ]
-    //       ),
-    //     ];
-    //   },
-    // },
-    // mounted() {},
   },
 };
 </script>

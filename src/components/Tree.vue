@@ -27,7 +27,7 @@ import {
 } from "vue";
 import VirtualScroller from "./VirtualScroller.vue";
 
-import { sleep } from "../utils/index";
+import { sleep, sliceTask } from "../utils/index";
 import {
   nodeHasChildren,
   isNodeExpanded,
@@ -51,6 +51,10 @@ export default defineComponent({
     initialScrollTop: {
       type: Number,
       default: () => 0,
+    },
+    getNodeHeight: {
+      type: Function,
+      default: () => 40,
     },
     cellRenderer: {
       type: Function,
@@ -96,11 +100,11 @@ export default defineComponent({
             stack
           );
         }
+
         i++;
-        if (i % 1000 === 0) {
-          console.log("_while:body", performance.now(), i);
-          await sleep(1);
-        }
+        await sliceTask(i, 1000, 1, () =>
+          console.log("_while:body", performance.now(), i)
+        );
       }
       console.log("_while:end", performance.now());
       console.log("traverse:end", performance.now());
@@ -139,9 +143,6 @@ export default defineComponent({
     const updateTreeNode = (nodes, path, updateFn) => {
       // traverse tree by path to get target node to update
       let parentNodes = nodes;
-      // path.slice(0, path.length - 1).forEach((i) => {
-      //   parentNodes = parentNodes[i].children;
-      // });
       const size = path.length - 1;
       for (let i = 0; i < size; i++)
         parentNodes = parentNodes[path[i]].children;
@@ -152,7 +153,6 @@ export default defineComponent({
       parentNodes[path[path.length - 1]] = updateFn(
         parentNodes[path[path.length - 1]]
       );
-      // console.log(nodes);
     };
 
     const changeAffectFlattenedTree = (node, updatedNode) => {
@@ -230,7 +230,6 @@ export default defineComponent({
       }
 
       flattenedTree[index] = updatedNode;
-      // console.log(flattenedTree);
 
       // force refresh data in child component to trigger UI update
       virtualScroller.value.refreshView();
@@ -252,6 +251,7 @@ export default defineComponent({
         addNodeToPathsList,
         shouldTraverse
       );
+      console.log(pathsList);
 
       console.log("_for:start", performance.now());
       /**
@@ -263,10 +263,10 @@ export default defineComponent({
        */
       for (let i = 0; i < pathsList.length; i++) {
         updateTreeNode(nodes, pathsList[i], updateFn);
-        if (i % 1000 === 0) {
-          console.log("_for:body", performance.now(), i);
-          await sleep(1);
-        }
+
+        await sliceTask(i, 1000, 1, () =>
+          console.log("_for:body", performance.now(), i)
+        );
       }
       console.log("_for:end", performance.now());
 
@@ -295,11 +295,6 @@ export default defineComponent({
       updateNode,
       updateNodes,
       initialScrollIndex,
-    };
-  },
-  data() {
-    return {
-      getNodeHeight: (node) => 30 + (node.index % 10),
     };
   },
 });
