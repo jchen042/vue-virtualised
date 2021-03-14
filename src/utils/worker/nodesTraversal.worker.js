@@ -33,13 +33,17 @@ const constructBfsTraverseStack = (nodes, parents = [], stack = []) => {
  * use iteration to flatten tree structure to one dimension for virtualised list
  * use recursive method might cause stack overflow exception
  */
-const traverse = (nodes, shouldTraverse, parents = []) => {
+const traverse = (nodes, shouldTraverseInvisibleNodes, parents = []) => {
   let stack = constructBfsTraverseStack(nodes, parents);
+  let pathsList = [];
 
   while (stack.length > 0) {
     const node = stack.shift();
-    // cb(node);
-    if (shouldTraverse(node)) {
+    pathsList.push(node.parents.concat(node.index));
+    if (
+      shouldTraverseInvisibleNodes ||
+      (nodeHasChildren(node) && isNodeExpanded(node))
+    ) {
       stack = constructBfsTraverseStack(
         node.children,
         //[...node.parents, node.index],
@@ -48,10 +52,14 @@ const traverse = (nodes, shouldTraverse, parents = []) => {
       );
     }
   }
+
+  return pathsList;
 };
 
 onmessage = (e) => {
   console.log("message received", e.data);
-  postMessage("received");
+  const { nodes, shouldTraverseInvisibleNodes, parents } = e.data;
+  const parentsList = traverse(nodes, shouldTraverseInvisibleNodes, parents);
+  postMessage(parentsList);
   close();
 };

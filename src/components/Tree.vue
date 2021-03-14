@@ -268,41 +268,70 @@ export default defineComponent({
           parents: [...node.parents, node.index],
           shouldTraverseInvisibleNodes: true,
         });
-        nodesTraversalWorker.onmessage = (e) => console.log(e);
+        nodesTraversalWorker.onmessage = (e) => {
+          console.log(e);
+          pathsList = [...pathsList, ...e.data];
+          console.log(pathsList);
+
+          /**
+           * this iteration will not only update props tree nodes
+           * but also affect all descendant nodes of the current node in the view
+           * because these descendant nodes are passed by references
+           * also, to improve performance, avoid using forEach
+           * pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
+           */
+          for (let i = 0; i < pathsList.length; i++)
+            updateTreeNode(nodes, pathsList[i], updateFn);
+
+          // onChange.value(nodes);
+          onChange(nodes);
+
+          // udpate flattened Tree nodes
+          const updatedNode = updateFn(node);
+          if (isNodeExpanded(updatedNode)) {
+            collapseNodes(node, index, flattenedTree);
+            expandNodes(updatedNode, index, flattenedTree);
+          }
+
+          flattenedTree[index] = updatedNode;
+
+          // force refresh data in child component to trigger UI update
+          virtualScroller.value.refreshView();
+        };
+      } else {
+        traverse(
+          [...node.children],
+          [...node.parents, node.index],
+          addNodeToPathsList,
+          shouldTraverse
+        );
+        console.log(pathsList);
+
+        /**
+         * this iteration will not only update props tree nodes
+         * but also affect all descendant nodes of the current node in the view
+         * because these descendant nodes are passed by references
+         * also, to improve performance, avoid using forEach
+         * pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
+         */
+        for (let i = 0; i < pathsList.length; i++)
+          updateTreeNode(nodes, pathsList[i], updateFn);
+
+        // onChange.value(nodes);
+        onChange(nodes);
+
+        // udpate flattened Tree nodes
+        const updatedNode = updateFn(node);
+        if (isNodeExpanded(updatedNode)) {
+          collapseNodes(node, index, flattenedTree);
+          expandNodes(updatedNode, index, flattenedTree);
+        }
+
+        flattenedTree[index] = updatedNode;
+
+        // force refresh data in child component to trigger UI update
+        virtualScroller.value.refreshView();
       }
-
-      traverse(
-        [...node.children],
-        [...node.parents, node.index],
-        addNodeToPathsList,
-        shouldTraverse
-      );
-      console.log(pathsList);
-
-      /**
-       * this iteration will not only update props tree nodes
-       * but also affect all descendant nodes of the current node in the view
-       * because these descendant nodes are passed by references
-       * also, to improve performance, avoid using forEach
-       * pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
-       */
-      for (let i = 0; i < pathsList.length; i++)
-        updateTreeNode(nodes, pathsList[i], updateFn);
-
-      // onChange.value(nodes);
-      onChange(nodes);
-
-      // udpate flattened Tree nodes
-      const updatedNode = updateFn(node);
-      if (isNodeExpanded(updatedNode)) {
-        collapseNodes(node, index, flattenedTree);
-        expandNodes(updatedNode, index, flattenedTree);
-      }
-
-      flattenedTree[index] = updatedNode;
-
-      // force refresh data in child component to trigger UI update
-      virtualScroller.value.refreshView();
     };
 
     const initialScrollIndex = ref(0);
