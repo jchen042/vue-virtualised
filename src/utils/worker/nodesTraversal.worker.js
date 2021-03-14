@@ -11,10 +11,12 @@ import {
 const traverse = (nodes, shouldTraverseInvisibleNodes, parents = []) => {
   let stack = constructBfsTraverseStack(nodes, parents);
   let pathsList = [];
+  let nodesList = [];
 
   while (stack.length > 0) {
     const node = stack.shift();
     pathsList.push(node.parents.concat(node.index));
+    nodesList.push(node);
     if (
       shouldTraverseInvisibleNodes ||
       (nodeHasChildren(node) && isNodeExpanded(node))
@@ -28,13 +30,13 @@ const traverse = (nodes, shouldTraverseInvisibleNodes, parents = []) => {
     }
   }
 
-  return pathsList;
+  return { pathsList, nodesList };
 };
 
 onmessage = (e) => {
   console.log("message received", e.data);
   const { nodes, shouldTraverseInvisibleNodes, parents } = e.data;
-  const parentsList = traverse(nodes, shouldTraverseInvisibleNodes, parents);
-  postMessage(parentsList);
+  const data = traverse(nodes, shouldTraverseInvisibleNodes, parents);
+  postMessage(data);
   close();
 };

@@ -256,8 +256,6 @@ export default defineComponent({
 
     const updateNodes = (nodes, node, index, updateFn) => {
       // update tree nodes
-      let pathsList = [[...node.parents, node.index]];
-
       if (window.Worker) {
         const nodesTraversalWorker = new NodesTraversalWorker();
         nodesTraversalWorker.postMessage({
@@ -265,13 +263,15 @@ export default defineComponent({
           parents: [...node.parents, node.index],
           shouldTraverseInvisibleNodes: true,
         });
-        nodesTraversalWorker.onmessage = (e) => {
+        nodesTraversalWorker.onmessage = async (e) => {
           console.log(e);
-          pathsList = [...pathsList, ...e.data];
+          let { pathsList } = e.data;
+          pathsList = [[...node.parents, node.index], ...pathsList];
 
           _updateNodes(nodes, node, pathsList, index, updateFn);
         };
       } else {
+        let pathsList = [[...node.parents, node.index]];
         // avoid creating multiple anonymous functions inside traverse()
         const addNodeToPathsList = (node) =>
           pathsList.push(node.parents.concat(node.index));
