@@ -27,6 +27,7 @@ import {
 } from "vue";
 import VirtualScroller from "./VirtualScroller.vue";
 
+import { sleep } from "../utils/index";
 import {
   nodeHasChildren,
   isNodeExpanded,
@@ -227,10 +228,9 @@ export default defineComponent({
     };
 
     const _updateNodes = async (nodes, node, pathsList, index, updateFn) => {
-      const sleep = (time) => new Promise((rs) => setTimeout(() => rs(), time));
-
       // console.log(pathsList);
       console.log("_updateNodes:before", performance.now());
+      console.log("_for:before", performance.now());
 
       /**
        * this iteration will not only update props tree nodes
@@ -239,20 +239,12 @@ export default defineComponent({
        * also, to improve performance, avoid using forEach
        * pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
        */
-      // for (let i = 0; i < pathsList.length; i++)
-      //   updateTreeNode(nodes, pathsList[i], updateFn);
-      const arraySize = pathsList.length;
-      const chunkSize = 100000;
-      const chunkNumb = Math.ceil(arraySize / chunkSize);
-      console.log("_for:before", performance.now(), arraySize, chunkNumb);
-      for (let c = 0; c < chunkNumb; c++) {
-        for (let i = 0; i < chunkSize; i++) {
-          const index = c * chunkSize + i;
-          if (index > arraySize - 1) break;
-          updateTreeNode(nodes, pathsList[index], updateFn);
+      for (let i = 0; i < pathsList.length; i++) {
+        updateTreeNode(nodes, pathsList[i], updateFn);
+        if (i % 1000 === 0) {
+          console.log("_for:body", performance.now(), i);
+          await sleep(1);
         }
-        console.log("_for:body", performance.now(), c);
-        await sleep(60);
       }
 
       console.log("_for:after", performance.now());
