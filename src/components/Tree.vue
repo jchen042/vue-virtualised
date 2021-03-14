@@ -241,26 +241,20 @@ export default defineComponent({
        */
       // for (let i = 0; i < pathsList.length; i++)
       //   updateTreeNode(nodes, pathsList[i], updateFn);
-      // const arraySize = pathsList.length;
-      // const chunkSize = 100000;
-      // const chunkNumb = Math.floor(arraySize / chunkSize);
-      // console.log("_for:before", performance.now(), arraySize, chunkNumb);
-      // for (let c = 0; c < chunkNumb; c++) {
-      //   for (let i = 0; i < chunkSize; i++) {
-      //     const index = c * chunkSize + i;
-      //     if (!index < arraySize - 1) break;
-      //     updateTreeNode(nodes, pathsList[index], updateFn);
-      //   }
-      //   console.log("_for:body", performance.now(), c);
-      //   await sleep(60);
-      // }
-      const chunkedPathsList = chunk(pathsList, 100000);
-      chunkedPathsList.forEach(async (paths, index) => {
-        for (let i = 0; i < paths.length; i++)
-          updateTreeNode(nodes, paths[i], updateFn);
-        console.log("_for:body", performance.now(), index);
-        await sleep(40);
-      });
+      const arraySize = pathsList.length;
+      const chunkSize = 100000;
+      const chunkNumb = Math.ceil(arraySize / chunkSize);
+      console.log("_for:before", performance.now(), arraySize, chunkNumb);
+      for (let c = 0; c < chunkNumb; c++) {
+        for (let i = 0; i < chunkSize; i++) {
+          const index = c * chunkSize + i;
+          if (index > arraySize - 1) break;
+          updateTreeNode(nodes, pathsList[index], updateFn);
+        }
+        console.log("_for:body", performance.now(), c);
+        await sleep(60);
+      }
+
       console.log("_for:after", performance.now());
 
       // onChange.value(nodes);
