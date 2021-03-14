@@ -27,6 +27,8 @@ import {
 } from "vue";
 import VirtualScroller from "./VirtualScroller.vue";
 
+import { nodeHasChildren, isNodeExpanded } from "../utils/nodesHelper";
+import NodesTraversalWorker from "../utils/worker/nodesTraversal.worker";
 import { chunk } from "lodash";
 
 export default defineComponent({
@@ -69,9 +71,14 @@ export default defineComponent({
     //   cb(obj);
     // };
 
-    const nodeHasChildren = (node) => node.children && node.children.length;
-
-    const isNodeExpanded = (node) => node.state && node.state.expanded;
+    let nodesTraversalWorker = null;
+    // const URL = window.URL || window.webkitURL;
+    // const reader = new FileReader();
+    // console.log(file);
+    // const blob = new Blob([file], { type: "application/javascript" });
+    // const objectURL = URL.createObjectURL(blob);
+    if (window.Worker) nodesTraversalWorker = new NodesTraversalWorker();
+    console.log(nodesTraversalWorker);
 
     /**
      * build a named function for traverse() method to leverage
@@ -150,7 +157,6 @@ export default defineComponent({
      * instead, we force refreshing Virtual Scroller view when updating nodes
      * as it contains limited amount of visible nodes so it's much faster
      */
-    // const flattenedTree = getFlattenedTree(nodes.value);
     const flattenedTree = markRaw(getFlattenedTree(nodes));
     console.log("iteration", flattenedTree);
 
@@ -263,6 +269,14 @@ export default defineComponent({
         pathsList.push(node.parents.concat(node.index));
 
       const shouldTraverse = () => true;
+
+      nodesTraversalWorker
+        ? nodesTraversalWorker.postMessage("test worker")
+        : null;
+
+      nodesTraversalWorker
+        ? (nodesTraversalWorker.onMessage = (e) => console.log(e))
+        : null;
 
       traverse(
         [...node.children],

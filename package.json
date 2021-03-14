@@ -26,7 +26,8 @@
     "eslint-plugin-vue": "^7.0.0-0",
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "worker-loader": "^3.0.8"
   },
   "eslintConfig": {
     "root": true,
