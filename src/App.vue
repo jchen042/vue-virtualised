@@ -1,14 +1,16 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
   <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
-  <tree
-    ref="treeView"
-    :nodes="nodes"
-    :on-change="onChange"
-    :viewport-height="viewportHeight"
-    :initial-scroll-top="initialScrollTop"
-    :cell-renderer="cellRenderer"
-  ></tree>
+  <suspense>
+    <tree
+      ref="treeView"
+      :nodes="nodes"
+      :on-change="onChange"
+      :viewport-height="viewportHeight"
+      :initial-scroll-top="initialScrollTop"
+      :cell-renderer="cellRenderer"
+    ></tree>
+  </suspense>
 </template>
 
 <script>

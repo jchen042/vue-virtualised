@@ -50,6 +50,7 @@ import {
 
 import Cell from "./Cell.vue";
 
+import { sleep } from "../utils/index";
 import invariant from "invariant";
 import { isNil } from "lodash";
 
@@ -269,6 +270,7 @@ export default defineComponent({
       );
 
       await nextTick();
+      await sleep(300);
       virtualScroller.value.scrollTo({ top: scrollTop.value });
     };
 

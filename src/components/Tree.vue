@@ -59,7 +59,7 @@ export default defineComponent({
     },
   },
   emits: [],
-  setup(props, { emit }) {
+  async setup(props, { emit }) {
     // const { nodes, onChange } = toRefs(props);
     // NO REACTIVE
     // eslint-disable-next-line vue/no-setup-props-destructure
@@ -80,8 +80,10 @@ export default defineComponent({
      * use iteration to flatten tree structure to one dimension for virtualised list
      * use recursive method might cause stack overflow exception
      */
-    const traverse = (nodes, parents = [], cb, shouldTraverse) => {
+    const traverse = async (nodes, parents = [], cb, shouldTraverse) => {
       let stack = constructBfsTraverseStack(nodes, parents);
+      let i = 1;
+      console.log("_while:before", performance.now());
 
       while (stack.length > 0) {
         const node = stack.shift();
@@ -94,10 +96,17 @@ export default defineComponent({
             stack
           );
         }
+        i++;
+        if (i % 1000 === 0) {
+          console.log("_while:body", performance.now(), i);
+          await sleep(1);
+        }
       }
+
+      console.log("_while:after", performance.now());
     };
 
-    const getFlattenedTree = (nodes, parents = []) => {
+    const getFlattenedTree = async (nodes, parents = []) => {
       /**
        * reactive object makes the iteration time-consuming
        * to avoid expensive traversal, we have to markRaw object
@@ -111,7 +120,7 @@ export default defineComponent({
       const shouldTraverse = (node) =>
         nodeHasChildren(node) && isNodeExpanded(node);
 
-      traverse(nodes, parents, addNodeToFlattenedTree, shouldTraverse);
+      await traverse(nodes, parents, addNodeToFlattenedTree, shouldTraverse);
 
       return flattenedTree;
     };
@@ -124,7 +133,7 @@ export default defineComponent({
      * instead, we force refreshing Virtual Scroller view when updating nodes
      * as it contains limited amount of visible nodes so it's much faster
      */
-    const flattenedTree = markRaw(getFlattenedTree(nodes));
+    const flattenedTree = markRaw(await getFlattenedTree(nodes));
     console.log("iteration", flattenedTree);
 
     const updateTreeNode = (nodes, path, updateFn) => {
@@ -167,9 +176,9 @@ export default defineComponent({
       return count;
     };
 
-    const expandNodes = (updatedNode, index, flattenedTree) => {
+    const expandNodes = async (updatedNode, index, flattenedTree) => {
       // expand node by inserting node's visible descendants to flattened tree
-      const visibleDescendants = getFlattenedTree(
+      const visibleDescendants = await getFlattenedTree(
         [...updatedNode.children],
         [...updatedNode.parents, updatedNode.index]
       );
@@ -198,7 +207,7 @@ export default defineComponent({
     };
 
     // update single node
-    const updateNode = (nodes, node, index, updateFn) => {
+    const updateNode = async (nodes, node, index, updateFn) => {
       console.log(node, index);
 
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
@@ -214,7 +223,7 @@ export default defineComponent({
 
       if (changeAffectFlattenedTree(node, updatedNode)) {
         if (isNodeExpanded(updatedNode)) {
-          expandNodes(updatedNode, index, flattenedTree);
+          await expandNodes(updatedNode, index, flattenedTree);
         } else {
           collapseNodes(node, index, flattenedTree);
         }
@@ -256,7 +265,7 @@ export default defineComponent({
       const updatedNode = updateFn(node);
       if (isNodeExpanded(updatedNode)) {
         collapseNodes(node, index, flattenedTree);
-        expandNodes(updatedNode, index, flattenedTree);
+        await expandNodes(updatedNode, index, flattenedTree);
       }
 
       flattenedTree[index] = updatedNode;
@@ -266,7 +275,7 @@ export default defineComponent({
       console.log("updateNodes:after", performance.now());
     };
 
-    const updateNodes = (nodes, node, index, updateFn) => {
+    const updateNodes = async (nodes, node, index, updateFn) => {
       console.log("updateNodes:before", performance.now());
       // update tree nodes
       // eslint-disable-next-line no-constant-condition
@@ -295,7 +304,7 @@ export default defineComponent({
 
         const shouldTraverse = () => true;
 
-        traverse(
+        await traverse(
           [...node.children],
           [...node.parents, node.index],
           addNodeToPathsList,
