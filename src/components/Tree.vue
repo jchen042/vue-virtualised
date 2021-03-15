@@ -31,7 +31,8 @@ import { sleep, sliceTask } from "../utils/index";
 import {
   nodeHasChildren,
   isNodeExpanded,
-  constructBfsTraverseStack,
+  traverse,
+  getNumberOfVisibleDescendants,
 } from "../utils/nodesHelper";
 import { chunk } from "lodash";
 
@@ -80,28 +81,6 @@ export default defineComponent({
     //   cb(obj);
     // };
 
-    /**
-     * use iteration to flatten tree structure to one dimension for virtualised list
-     * use recursive method might cause stack overflow exception
-     */
-    const traverse = async (nodes, parents = [], cb, shouldTraverse) => {
-      let stack = constructBfsTraverseStack(nodes, parents);
-      let i = 1;
-
-      while (stack.length > 0) {
-        const node = stack.shift();
-        cb(node);
-        if (shouldTraverse(node)) {
-          stack = constructBfsTraverseStack(
-            node.children,
-            node.parents.concat(node.index),
-            stack
-          );
-        }
-        useTimeSlicing.value && (await sliceTask(i++, 1000, 1));
-      }
-    };
-
     const getFlattenedTree = async (nodes, parents = []) => {
       /**
        * reactive object makes the iteration time-consuming
@@ -116,7 +95,13 @@ export default defineComponent({
       const shouldTraverse = (node) =>
         nodeHasChildren(node) && isNodeExpanded(node);
 
-      await traverse(nodes, parents, addNodeToFlattenedTree, shouldTraverse);
+      await traverse(
+        nodes,
+        parents,
+        addNodeToFlattenedTree,
+        shouldTraverse,
+        useTimeSlicing.value
+      );
 
       return flattenedTree;
     };
@@ -169,35 +154,13 @@ export default defineComponent({
       });
     };
 
-    // count the amount of visible descendants based on the node
-    const getNumberOfVisibleDescendants = async (
-      node,
-      index,
-      flattenedTree
-    ) => {
-      const nodePath = [...node.parents, node.index];
-      let count = 0;
-
-      for (let i = index + 1; i < flattenedTree.length; i++) {
-        const parents = [...flattenedTree[i].parents];
-        if (
-          parents.slice(0, nodePath.length).toString() !== nodePath.toString()
-        )
-          break;
-        else count++;
-
-        useTimeSlicing.value && (await sliceTask(i, 1000, 1));
-      }
-
-      return count;
-    };
-
     const collapseNodes = async (node, index, flattenedTree) => {
       // collapse node by removing current node's descendants from flattened tree
       const numberOfVisibleDescendants = await getNumberOfVisibleDescendants(
         node,
         index,
-        flattenedTree
+        flattenedTree,
+        useTimeSlicing.value
       );
       flattenedTree.splice(index + 1, numberOfVisibleDescendants);
     };
@@ -205,7 +168,7 @@ export default defineComponent({
     // update single node
     const updateNode = async (nodes, node, index, updateFn) => {
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
-      // onChange.value(nodes);
+
       onChange(nodes);
 
       /**
@@ -219,7 +182,7 @@ export default defineComponent({
         if (isNodeExpanded(updatedNode)) {
           await expandNodes(updatedNode, index, flattenedTree);
         } else {
-          collapseNodes(node, index, flattenedTree);
+          await collapseNodes(node, index, flattenedTree);
         }
       }
 
@@ -242,7 +205,8 @@ export default defineComponent({
         [...node.children],
         [...node.parents, node.index],
         addNodeToPathsList,
-        shouldTraverse
+        shouldTraverse,
+        useTimeSlicing.value
       );
 
       /**
