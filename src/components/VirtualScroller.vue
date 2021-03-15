@@ -40,6 +40,7 @@ import {
   toRefs,
   ref,
   triggerRef,
+  markRaw,
   computed,
   onMounted,
   watch,
@@ -50,7 +51,6 @@ import {
 
 import Cell from "./Cell.vue";
 
-import { sleep } from "../utils/index";
 import invariant from "invariant";
 import { isNil } from "lodash";
 

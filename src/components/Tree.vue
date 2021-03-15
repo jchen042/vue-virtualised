@@ -43,6 +43,7 @@ export default defineComponent({
       type: Array,
       default: () => [],
     },
+    useTimeSlicing: { type: Boolean, default: () => true },
     onChange: { type: Function, default: (nodes) => {} },
     viewportHeight: {
       type: Number,
@@ -63,7 +64,7 @@ export default defineComponent({
   },
   emits: [],
   async setup(props, { emit }) {
-    // const { nodes, onChange } = toRefs(props);
+    const { useTimeSlicing } = toRefs(props);
     // NO REACTIVE
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { nodes, onChange } = props;
@@ -97,7 +98,7 @@ export default defineComponent({
             stack
           );
         }
-        window.useTimeSlicing && (await sliceTask(i++, 1000, 1));
+        useTimeSlicing.value && (await sliceTask(i++, 1000, 1));
       }
     };
 
@@ -149,23 +150,6 @@ export default defineComponent({
       return isNodeExpanded(node) !== isNodeExpanded(updatedNode);
     };
 
-    // count the amount of visible descendants based on the node
-    const getNumberOfVisibleDescendants = (node, index, flattenedTree) => {
-      const nodePath = [...node.parents, node.index];
-      let count = 0;
-
-      for (let i = index + 1; i < flattenedTree.length; i++) {
-        const parents = [...flattenedTree[i].parents];
-        if (
-          parents.slice(0, nodePath.length).toString() !== nodePath.toString()
-        )
-          break;
-        else count++;
-      }
-
-      return count;
-    };
-
     const expandNodes = async (updatedNode, index, flattenedTree) => {
       // expand node by inserting node's visible descendants to flattened tree
       const visibleDescendants = await getFlattenedTree(
@@ -185,9 +169,32 @@ export default defineComponent({
       });
     };
 
-    const collapseNodes = (node, index, flattenedTree) => {
+    // count the amount of visible descendants based on the node
+    const getNumberOfVisibleDescendants = async (
+      node,
+      index,
+      flattenedTree
+    ) => {
+      const nodePath = [...node.parents, node.index];
+      let count = 0;
+
+      for (let i = index + 1; i < flattenedTree.length; i++) {
+        const parents = [...flattenedTree[i].parents];
+        if (
+          parents.slice(0, nodePath.length).toString() !== nodePath.toString()
+        )
+          break;
+        else count++;
+
+        useTimeSlicing.value && (await sliceTask(i, 1000, 1));
+      }
+
+      return count;
+    };
+
+    const collapseNodes = async (node, index, flattenedTree) => {
       // collapse node by removing current node's descendants from flattened tree
-      const numberOfVisibleDescendants = getNumberOfVisibleDescendants(
+      const numberOfVisibleDescendants = await getNumberOfVisibleDescendants(
         node,
         index,
         flattenedTree
@@ -202,7 +209,7 @@ export default defineComponent({
       onChange(nodes);
 
       /**
-       * operation is expensive if we call this method to update all flattened tree list:
+       * operation is expensive if we call this method to update the entire flattened tree list:
        * flattenedTree = getFlattenedTree(nodes);
        * instead, we only update affected area in the list
        */
@@ -247,7 +254,7 @@ export default defineComponent({
        */
       for (let i = 0; i < pathsList.length; i++) {
         updateTreeNode(nodes, pathsList[i], updateFn);
-        window.useTimeSlicing && (await sliceTask(i, 1000));
+        useTimeSlicing.value && (await sliceTask(i, 1000, 1));
       }
 
       onChange(nodes);

@@ -5,6 +5,7 @@
     <tree
       ref="treeView"
       :nodes="nodes"
+      :use-time-slicing="true"
       :on-change="onChange"
       :viewport-height="viewportHeight"
       :initial-scroll-top="initialScrollTop"
@@ -140,9 +141,6 @@ export default {
         ]
       ),
     ];
-    // const cellRenderer = (node, index) => (
-    //   <div style={{ height: "100%" }}>{node.name}</div>
-    // );
 
     return { treeView, nodes, onChange, cellRenderer };
   },
