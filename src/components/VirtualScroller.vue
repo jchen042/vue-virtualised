@@ -270,8 +270,10 @@ export default defineComponent({
       );
 
       await nextTick();
-      await sleep(300);
-      virtualScroller.value.scrollTo({ top: scrollTop.value });
+
+      // ensure all values are presented
+      if (scrollTop.value && virtualScroller.value)
+        virtualScroller.value.scrollTo({ top: scrollTop.value });
     };
 
     const handleScroll = () => {
