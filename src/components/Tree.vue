@@ -84,10 +84,8 @@ export default defineComponent({
      * use recursive method might cause stack overflow exception
      */
     const traverse = async (nodes, parents = [], cb, shouldTraverse) => {
-      console.log("traverse:start", performance.now());
       let stack = constructBfsTraverseStack(nodes, parents);
       let i = 1;
-      console.log("_while:start", performance.now());
 
       while (stack.length > 0) {
         const node = stack.shift();
@@ -95,19 +93,12 @@ export default defineComponent({
         if (shouldTraverse(node)) {
           stack = constructBfsTraverseStack(
             node.children,
-            //[...node.parents, node.index],
             node.parents.concat(node.index),
             stack
           );
         }
-
-        i++;
-        await sliceTask(i, 1000, 1, () =>
-          console.log("_while:body", performance.now(), i)
-        );
+        window.useTimeSlicing && (await sliceTask(i++, 1000, 1));
       }
-      console.log("_while:end", performance.now());
-      console.log("traverse:end", performance.now());
     };
 
     const getFlattenedTree = async (nodes, parents = []) => {
@@ -138,7 +129,6 @@ export default defineComponent({
      * as it contains limited amount of visible nodes so it's much faster
      */
     const flattenedTree = markRaw(await getFlattenedTree(nodes));
-    console.log("iteration", flattenedTree);
 
     const updateTreeNode = (nodes, path, updateFn) => {
       // traverse tree by path to get target node to update
@@ -182,7 +172,6 @@ export default defineComponent({
         [...updatedNode.children],
         [...updatedNode.parents, updatedNode.index]
       );
-      console.log(visibleDescendants);
       /**
        * hack: chunk large array into small sub arrays and run splice() method for each
        * to avoid RangeError: Maximum call stack size exceeded exception
@@ -208,8 +197,6 @@ export default defineComponent({
 
     // update single node
     const updateNode = async (nodes, node, index, updateFn) => {
-      console.log(node, index);
-
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
       // onChange.value(nodes);
       onChange(nodes);
@@ -236,7 +223,6 @@ export default defineComponent({
     };
 
     const updateNodes = async (nodes, node, index, updateFn) => {
-      console.log("updateNodes:start", performance.now());
       // update tree nodes
       let pathsList = [[...node.parents, node.index]];
       // give functions names to avoid creating multiple anonymous functions inside traverse()
@@ -251,9 +237,7 @@ export default defineComponent({
         addNodeToPathsList,
         shouldTraverse
       );
-      console.log(pathsList);
 
-      console.log("_for:start", performance.now());
       /**
        * this iteration will not only update props tree nodes
        * but also affect all descendant nodes of the current node in the view
@@ -263,12 +247,8 @@ export default defineComponent({
        */
       for (let i = 0; i < pathsList.length; i++) {
         updateTreeNode(nodes, pathsList[i], updateFn);
-
-        await sliceTask(i, 1000, 1, () =>
-          console.log("_for:body", performance.now(), i)
-        );
+        window.useTimeSlicing && (await sliceTask(i, 1000));
       }
-      console.log("_for:end", performance.now());
 
       onChange(nodes);
 
@@ -283,7 +263,6 @@ export default defineComponent({
 
       // force refresh data in child component to trigger UI update
       virtualScroller.value.refreshView();
-      console.log("updateNodes:end", performance.now());
     };
 
     const initialScrollIndex = ref(0);

@@ -10,12 +10,12 @@ export const sliceTask = async (
   i,
   chunkSize,
   sleepTime,
-  cbBeforeSleep = () => {},
-  cbAfterSleep = () => {}
+  cbBeforeSleep,
+  cbAfterSleep
 ) => {
   if (i % chunkSize === 0) {
-    cbBeforeSleep();
+    cbBeforeSleep && cbBeforeSleep();
     await sleep(sleepTime);
-    cbAfterSleep();
+    cbAfterSleep && cbAfterSleep();
   }
 };

@@ -272,7 +272,7 @@ export default defineComponent({
       await nextTick();
 
       // ensure all values are presented
-      if (scrollTop.value && virtualScroller.value)
+      if (scrollTop.value !== null && virtualScroller.value !== null)
         virtualScroller.value.scrollTo({ top: scrollTop.value });
     };
 
