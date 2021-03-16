@@ -8,6 +8,7 @@
     :tolerance="tolerance"
     :get-node-height="getNodeHeight"
     :cell-renderer="cellRenderer"
+    @onScroll="handleScroll"
   ></virtual-scroller>
 </template>
 
@@ -71,7 +72,7 @@ export default defineComponent({
       default: (node, index) => [h("div", {}, node.name)],
     },
   },
-  emits: [],
+  emits: ["onScroll"],
   async setup(props, { emit }) {
     const { useTimeSlicing } = toRefs(props);
     // NO REACTIVE
@@ -244,12 +245,17 @@ export default defineComponent({
       virtualScroller.value.refreshView();
     };
 
+    const handleScroll = (scrollTop) => {
+      emit("onScroll", scrollTop);
+    };
+
     return {
       // handleScroll,
       virtualScroller,
       flattenedTree,
       updateNode,
       updateNodes,
+      handleScroll,
     };
   },
 });

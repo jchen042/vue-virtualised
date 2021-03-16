@@ -30,7 +30,7 @@ export default {
       default: (node, index) => `${index}_${node.key}`,
     },
   },
-  emits: ["toggleChildNodes"],
+  emits: [],
   setup(props) {
     return () =>
       props.visibleNodes.map((node, index) =>

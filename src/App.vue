@@ -13,6 +13,7 @@
       :tolerance="2"
       :get-node-height="getNodeHeight"
       :cell-renderer="cellRenderer"
+      @onScroll="handleScroll"
     ></tree>
   </suspense>
 </template>
@@ -144,7 +145,11 @@ export default {
       ),
     ];
 
-    return { treeView, nodes, onChange, cellRenderer };
+    const handleScroll = (scrollTop) => {
+      // console.log(scrollTop);
+    };
+
+    return { treeView, nodes, onChange, cellRenderer, handleScroll };
   },
   data() {
     return {
