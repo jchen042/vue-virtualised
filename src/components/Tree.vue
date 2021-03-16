@@ -250,7 +250,6 @@ export default defineComponent({
     };
 
     return {
-      // handleScroll,
       virtualScroller,
       flattenedTree,
       updateNode,
