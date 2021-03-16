@@ -9,6 +9,8 @@
       :on-change="onChange"
       :viewport-height="viewportHeight"
       :initial-scroll-top="initialScrollTop"
+      :initial-scroll-index="initialScrollIndex"
+      :tolerance="2"
       :get-node-height="getNodeHeight"
       :cell-renderer="cellRenderer"
     ></tree>
@@ -152,6 +154,7 @@ export default {
       })),
       viewportHeight: 400,
       initialScrollTop: 300,
+      initialScrollIndex: 0,
       getNodeHeight: (node) => 30 + (node.index % 10),
     };
   },

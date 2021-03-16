@@ -138,7 +138,6 @@ export default defineComponent({
     const getChildPositions = (nodes, getNodeHeight) => {
       let results = [0];
       if (nodes.length > 0) {
-        // TODO: handle the scenario that the getNodeHeight method returns an invalid value
         for (let i = 1; i < nodes.length; i++) {
           invariant(
             !Number.isNaN(getNodeHeight(nodes[i - 1])),
@@ -157,7 +156,8 @@ export default defineComponent({
     );
 
     const scrollTop = ref(
-      initialScrollIndex.value && initialScrollIndex.value < data.value.length
+      !isNil(initialScrollIndex.value) &&
+        initialScrollIndex.value < data.value.length
         ? childPositions.value[Math.max(0, initialScrollIndex.value)]
         : initialScrollTop.value
     );

@@ -5,7 +5,7 @@
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
     :initial-scroll-index="initialScrollIndex"
-    :tolerance="2"
+    :tolerance="tolerance"
     :get-node-height="getNodeHeight"
     :cell-renderer="cellRenderer"
   ></virtual-scroller>
@@ -53,6 +53,14 @@ export default defineComponent({
     initialScrollTop: {
       type: Number,
       default: () => 0,
+    },
+    initialScrollIndex: {
+      type: Number,
+      default: () => null,
+    },
+    tolerance: {
+      type: Number,
+      default: () => 2,
     },
     getNodeHeight: {
       type: Function,
@@ -236,15 +244,12 @@ export default defineComponent({
       virtualScroller.value.refreshView();
     };
 
-    const initialScrollIndex = ref(0);
-
     return {
       // handleScroll,
       virtualScroller,
       flattenedTree,
       updateNode,
       updateNodes,
-      initialScrollIndex,
     };
   },
 });

@@ -53,6 +53,7 @@ export const traverse = async (
         stack
       );
     }
+
     useTimeSlicing && (await sliceTask(i++, 1000, 1));
   }
 };
