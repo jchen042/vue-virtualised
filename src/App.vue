@@ -1,31 +1,27 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
   <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
-  <suspense>
-    <virtualised-base-tree
-      ref="treeView"
-      :nodes="nodes"
-      :use-time-slicing="false"
-      :on-change="onChange"
-      :viewport-height="viewportHeight"
-      :initial-scroll-top="initialScrollTop"
-      :initial-scroll-index="initialScrollIndex"
-      :tolerance="2"
-      :get-node-height="getNodeHeight"
-      :cell-renderer="cellRenderer"
-      @onScroll.passive="handleScroll"
-    ></virtualised-base-tree>
-    <template #fallback>
-      <div>Loading...</div>
-    </template>
-  </suspense>
+  <virtualised-tree
+    ref="treeView"
+    :nodes="nodes"
+    :use-time-slicing="false"
+    :on-change="onChange"
+    :viewport-height="viewportHeight"
+    :initial-scroll-top="initialScrollTop"
+    :initial-scroll-index="initialScrollIndex"
+    :tolerance="2"
+    :get-node-height="getNodeHeight"
+    :cell-renderer="cellRenderer"
+    @onScroll="handleScroll"
+  >
+    <template #fallback><div>Loading tree...</div></template>
+  </virtualised-tree>
 </template>
 
 <script>
 import { ref, h } from "vue";
 import HelloWorld from "./components/HelloWorld.vue";
-import VirtualisedBaseScroller from "./components/VirtualisedBaseScroller.vue";
-import VirtualisedBaseTree from "./components/VirtualisedBaseTree.vue";
+import VirtualisedTree from "./components/VirtualisedTree";
 
 import { constructFixedTree } from "./utils/mock";
 
@@ -33,8 +29,7 @@ export default {
   name: "App",
   components: {
     HelloWorld,
-    VirtualisedBaseScroller,
-    VirtualisedBaseTree,
+    VirtualisedTree,
   },
   setup() {
     const treeView = ref(null);
@@ -92,7 +87,7 @@ export default {
     ];
 
     const handleScroll = (scrollTop) => {
-      // console.log(scrollTop);
+      console.log(scrollTop);
     };
 
     return { treeView, nodes, onChange, cellRenderer, handleScroll };

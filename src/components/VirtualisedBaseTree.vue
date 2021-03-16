@@ -1,6 +1,6 @@
 <template>
   <virtualised-base-scroller
-    ref="virtualScroller"
+    ref="virtualisedBaseScroller"
     :data="flattenedTree"
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
@@ -8,7 +8,7 @@
     :tolerance="tolerance"
     :get-node-height="getNodeHeight"
     :cell-renderer="cellRenderer"
-    @onScroll.passive="handleScroll"
+    @onScroll="handleScroll"
   ></virtualised-base-scroller>
 </template>
 
@@ -67,7 +67,7 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { nodes, onChange } = props;
 
-    const virtualScroller = ref(null);
+    const virtualisedBaseScroller = ref(null);
 
     const getFlattenedTree = async (nodes, parents = []) => {
       /**
@@ -153,16 +153,16 @@ export default defineComponent({
       flattenedTree.splice(index + 1, numberOfVisibleDescendants);
     };
 
-    // Update a single node
+    // Update a single node.
     const updateNode = async (nodes, node, index, updateFn) => {
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
 
       onChange(nodes);
 
       /**
-       * operation is expensive if we call this method to update the entire flattened tree list:
+       * Operation is expensive if we call this method to update the entire flattened tree list:
        * flattenedTree = getFlattenedTree(nodes);
-       * instead, we only update affected area in the list
+       * Instead, we only update affected area in the list.
        */
       const updatedNode = updateFn(node);
 
@@ -177,7 +177,7 @@ export default defineComponent({
       flattenedTree[index] = updatedNode;
 
       // Force refresh data in child component to trigger UI update.
-      virtualScroller.value.refreshView();
+      virtualisedBaseScroller.value.refreshView();
     };
 
     const updateNodes = async (nodes, node, index, updateFn) => {
@@ -221,7 +221,7 @@ export default defineComponent({
       flattenedTree[index] = updatedNode;
 
       // Force refresh data in child component to trigger UI update.
-      virtualScroller.value.refreshView();
+      virtualisedBaseScroller.value.refreshView();
     };
 
     const handleScroll = (scrollTop) => {
@@ -229,7 +229,7 @@ export default defineComponent({
     };
 
     return {
-      virtualScroller,
+      virtualisedBaseScroller,
       flattenedTree,
       updateNode,
       updateNodes,
