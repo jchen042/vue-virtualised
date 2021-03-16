@@ -18,12 +18,18 @@
           transform: `translateY(${offsetY}px)`,
         }"
       >
-        <cell
-          :start-index="startIndex"
-          :visible-nodes="visibleNodes"
-          :get-node-height="getNodeHeight"
-          :cell-renderer="cellRenderer"
-        ></cell>
+        <div
+          v-for="(node, index) in visibleNodes"
+          :key="getNodeKey(node, index)"
+          :style="{ height: `${getNodeHeight(node)}px` }"
+        >
+          <virtualised-base-cell
+            :node="node"
+            :index="index"
+            :start-index="startIndex"
+            :cell-renderer="cellRenderer"
+          ></virtualised-base-cell>
+        </div>
       </div>
     </div>
   </div>
@@ -40,7 +46,6 @@ import {
   toRefs,
   ref,
   triggerRef,
-  markRaw,
   computed,
   onMounted,
   watch,
@@ -49,14 +54,14 @@ import {
   h,
 } from "vue";
 
-import Cell from "./Cell.vue";
+import VirtualisedBaseCell from "./VirtualisedBaseCell.vue";
 
 import invariant from "invariant";
 import { isNil } from "lodash";
 
 export default defineComponent({
-  name: "VirtualScroller",
-  components: { Cell },
+  name: "VirtualisedBaseScroller",
+  components: { VirtualisedBaseCell },
   props: {
     data: {
       type: Array,
@@ -82,9 +87,18 @@ export default defineComponent({
       type: Function,
       default: () => 40,
     },
+    /**
+     * A unique identifier for this list.
+     * If there are multiple VirtualisedBaseScroller at the same level of nesting within another VirtualBaseScroller,
+     * this key is necessary for virtualisation to work properly.
+     */
+    getNodeKey: {
+      type: Function,
+      default: (node, index) => node.key ?? index,
+    },
     cellRenderer: {
       type: Function,
-      default: (node, index) => [h("div", {}, node.name)],
+      default: (node, index) => [h("div", { key: index }, node.name ?? node)],
     },
   },
   emits: ["onScroll"],
@@ -134,7 +148,7 @@ export default defineComponent({
 
     const virtualScroller = ref(null);
 
-    // store an array of child nodes positions
+    // Store an array of child nodes positions from 0.
     const getChildPositions = (nodes, getNodeHeight) => {
       let results = [0];
       if (nodes.length > 0) {
@@ -162,7 +176,7 @@ export default defineComponent({
         : initialScrollTop.value
     );
 
-    // calculte total content height
+    // Calculte total content height.
     const getTotalHeight = (nodes, childPositions, getNodeHeight) => {
       return nodes.length > 0
         ? childPositions[nodes.length - 1] +
@@ -173,14 +187,14 @@ export default defineComponent({
       getTotalHeight(data.value, childPositions.value, getNodeHeight.value)
     );
 
-    // start of rendered node's index
+    // Start of rendered node's index.
     const startIndex = ref(0);
-    // offset start node
+    // Offset start node.
     const offsetY = ref(0);
-    // visible nodes
+    // Visible nodes in the virtualised view.
     const visibleNodes = ref([]);
 
-    // binary search to find the first visible node's index in viewport
+    // Binary search to find the first visible node's index in viewport.
     const getFirstVisibleIndex = (
       scrollTop,
       viewportHeight,
@@ -188,7 +202,7 @@ export default defineComponent({
       childPositions,
       itemCount
     ) => {
-      // in the case we don't have enough elements to scroll, return index
+      // In the case we don't have enough elements to scroll, so return index 0
       if (totalHeight < scrollTop || totalHeight < viewportHeight) return 0;
       let startRange = 0;
       let endRange = itemCount - 1 < 0 ? 0 : itemCount - 1;
@@ -208,7 +222,7 @@ export default defineComponent({
       return itemCount;
     };
 
-    // find the last node's index in the viewport
+    // Find the last node's index in the viewport.
     const getLastVisibleIndex = (
       childPositions,
       firstVisibleIndex,
@@ -232,8 +246,8 @@ export default defineComponent({
     };
 
     /**
-     * calculate nodes to be rendered to the view
-     * and offset to be set to the rendered nodes
+     * Calculate nodes to be rendered to the view,
+     * and offset to be set to the rendered nodes.
      */
     const setScrollState = async () => {
       // first visible node's index
@@ -244,10 +258,10 @@ export default defineComponent({
         childPositions.value,
         data.value.length
       );
-      // set start of rendered node's index
+      // Set start of rendered node's index.
       startIndex.value = Math.max(0, firstVisibleIndex - tolerance.value);
 
-      // last visible node's index
+      // Last visible node's index.
       const lastVisibleIndex = getLastVisibleIndex(
         childPositions.value,
         firstVisibleIndex,
@@ -259,11 +273,11 @@ export default defineComponent({
         lastVisibleIndex + tolerance.value
       );
 
-      // amount of nodes needs to be rendered
+      // Amount of nodes needs to be rendered.
       const visibleNodeCount = endIndex - startIndex.value + 1;
-      // set offset based on the index of start node
+      // Set offset based on the index of start node.
       offsetY.value = childPositions.value[startIndex.value];
-      // set visible nodes
+      // Set visible nodes.
       visibleNodes.value = data.value.slice(
         startIndex.value,
         startIndex.value + visibleNodeCount
@@ -271,7 +285,7 @@ export default defineComponent({
 
       await nextTick();
 
-      // ensure all values are presented
+      // Ensure all values are presented.
       if (scrollTop.value !== null && virtualScroller.value !== null)
         virtualScroller.value.scrollTo({ top: scrollTop.value });
     };

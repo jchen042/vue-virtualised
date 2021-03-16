@@ -1,6 +1,6 @@
 <template>
-  <virtual-scroller
-    ref="virtualScroller"
+  <virtualised-base-scroller
+    ref="virtualisedBaseScroller"
     :data="flattenedTree"
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
@@ -9,26 +9,14 @@
     :get-node-height="getNodeHeight"
     :cell-renderer="cellRenderer"
     @onScroll="handleScroll"
-  ></virtual-scroller>
+  ></virtualised-base-scroller>
 </template>
 
 <script>
-import {
-  defineComponent,
-  toRefs,
-  ref,
-  unref,
-  isProxy,
-  isReactive,
-  markRaw,
-  onMounted,
-  computed,
-  watch,
-  h,
-} from "vue";
-import VirtualScroller from "./VirtualScroller.vue";
+import { defineComponent, toRefs, ref, markRaw, h } from "vue";
+import VirtualisedBaseScroller from "./VirtualisedBaseScroller.vue";
 
-import { sleep, sliceTask } from "../utils/index";
+import { sliceTask } from "../utils/index";
 import {
   nodeHasChildren,
   isNodeExpanded,
@@ -38,15 +26,15 @@ import {
 import { chunk } from "lodash";
 
 export default defineComponent({
-  name: "Tree",
-  components: { VirtualScroller },
+  name: "VirtualisedBaseTree",
+  components: { VirtualisedBaseScroller },
   props: {
     nodes: {
       type: Array,
       default: () => [],
     },
     useTimeSlicing: { type: Boolean, default: () => true },
-    onChange: { type: Function, default: (nodes) => {} },
+    onChange: { type: Function, default: () => {} },
     viewportHeight: {
       type: Number,
       default: () => 400,
@@ -69,7 +57,7 @@ export default defineComponent({
     },
     cellRenderer: {
       type: Function,
-      default: (node, index) => [h("div", {}, node.name)],
+      default: (node, index) => [h("div", { key: index }, node.name ?? node)],
     },
   },
   emits: ["onScroll"],
@@ -79,25 +67,16 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { nodes, onChange } = props;
 
-    const virtualScroller = ref(null);
-
-    // const traverse = (obj, cb) => {
-    //   for (let k in obj) {
-    //     if (obj[k] && Array.isArray(obj[k])) {
-    //       obj[k].forEach((el) => traverse(el, cb));
-    //     }
-    //   }
-    //   cb(obj);
-    // };
+    const virtualisedBaseScroller = ref(null);
 
     const getFlattenedTree = async (nodes, parents = []) => {
       /**
-       * reactive object makes the iteration time-consuming
-       * to avoid expensive traversal, we have to markRaw object
+       * Reactive object makes the iteration time-consuming.
+       * To avoid expensive traversal, we have to markRaw object.
        */
       const flattenedTree = markRaw([]);
 
-      // make sure node pushed to the flattened tree is not reactive
+      // Make sure node pushed to the flattened tree is not reactive.
       const addNodeToFlattenedTree = (node) =>
         flattenedTree.push(markRaw(node));
 
@@ -116,24 +95,24 @@ export default defineComponent({
     };
 
     /**
-     * avoid to use reactive() to make flattenedTree reactive
+     * Avoid to use reactive() to make flattenedTree reactive
      * because it will cause performance issue
      * as it triggered multiple get() and set() when Vue detecting data changes
-     * so it's expensive to apply reactive attribute for large array
-     * instead, we force refreshing Virtual Scroller view when updating nodes
-     * as it contains limited amount of visible nodes so it's much faster
+     * so it's expensive to apply reactive attribute for large array.
+     * Instead, we force refreshing VirtualisedBaseScroller view when updating nodes
+     * as it contains limited amount of visible nodes so it's much faster.
      */
     const flattenedTree = markRaw(await getFlattenedTree(nodes));
 
     const updateTreeNode = (nodes, path, updateFn) => {
-      // traverse tree by path to get target node to update
+      // Traverse props tree by path to get target node to update.
       let parentNodes = nodes;
       const size = path.length - 1;
       for (let i = 0; i < size; i++)
         parentNodes = parentNodes[path[i]].children;
 
       /**
-       * the node referred from the tree will be updated
+       * The node referred from the tree will be updated.
        */
       parentNodes[path[path.length - 1]] = updateFn(
         parentNodes[path[path.length - 1]]
@@ -145,15 +124,15 @@ export default defineComponent({
     };
 
     const expandNodes = async (updatedNode, index, flattenedTree) => {
-      // expand node by inserting node's visible descendants to flattened tree
+      // Expand node by inserting node's visible descendants to flattened tree.
       const visibleDescendants = await getFlattenedTree(
         [...updatedNode.children],
         [...updatedNode.parents, updatedNode.index]
       );
       /**
-       * hack: chunk large array into small sub arrays and run splice() method for each
-       * to avoid RangeError: Maximum call stack size exceeded exception
-       * this exception is due to the limitation of JS engine
+       * Hack: chunk large array into small sub arrays and run splice() method for each
+       * to avoid "RangeError: Maximum call stack size exceeded exception".
+       * This exception is due to the arguments limitation of JS engine.
        */
       const chunkedVisibleDescendants = chunk(visibleDescendants, 50000);
       let i = index + 1;
@@ -164,7 +143,7 @@ export default defineComponent({
     };
 
     const collapseNodes = async (node, index, flattenedTree) => {
-      // collapse node by removing current node's descendants from flattened tree
+      // Collapse node by removing current node's descendants from flattened tree.
       const numberOfVisibleDescendants = await getNumberOfVisibleDescendants(
         node,
         index,
@@ -174,16 +153,16 @@ export default defineComponent({
       flattenedTree.splice(index + 1, numberOfVisibleDescendants);
     };
 
-    // update single node
+    // Update a single node.
     const updateNode = async (nodes, node, index, updateFn) => {
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
 
       onChange(nodes);
 
       /**
-       * operation is expensive if we call this method to update the entire flattened tree list:
+       * Operation is expensive if we call this method to update the entire flattened tree list:
        * flattenedTree = getFlattenedTree(nodes);
-       * instead, we only update affected area in the list
+       * Instead, we only update affected area in the list.
        */
       const updatedNode = updateFn(node);
 
@@ -197,14 +176,14 @@ export default defineComponent({
 
       flattenedTree[index] = updatedNode;
 
-      // force refresh data in child component to trigger UI update
-      virtualScroller.value.refreshView();
+      // Force refresh data in child component to trigger UI update.
+      virtualisedBaseScroller.value.refreshView();
     };
 
     const updateNodes = async (nodes, node, index, updateFn) => {
-      // update tree nodes
+      // Update props tree nodes.
       let pathsList = [[...node.parents, node.index]];
-      // give functions names to avoid creating multiple anonymous functions inside traverse()
+      // Give functions names to avoid creating multiple anonymous functions inside traverse().
       const addNodeToPathsList = (node) =>
         pathsList.push(node.parents.concat(node.index));
 
@@ -219,10 +198,10 @@ export default defineComponent({
       );
 
       /**
-       * this iteration will not only update props tree nodes
-       * but also affect all descendant nodes of the current node in the view
-       * because these descendant nodes are passed by references
-       * also, to improve performance, avoid using forEach
+       * This iteration will not only update props tree nodes,
+       * but also affect all descendant nodes of the current node in the view.
+       * Because these descendant nodes are passed by references.
+       * Also, to improve performance, avoid using forEach, like this
        * pathsList.forEach((path) => updateTreeNode(nodes, path, updateFn));
        */
       for (let i = 0; i < pathsList.length; i++) {
@@ -232,7 +211,7 @@ export default defineComponent({
 
       onChange(nodes);
 
-      // udpate flattened Tree nodes
+      // Udpate flattened Tree nodes.
       const updatedNode = updateFn(node);
       if (isNodeExpanded(updatedNode)) {
         collapseNodes(node, index, flattenedTree);
@@ -241,8 +220,8 @@ export default defineComponent({
 
       flattenedTree[index] = updatedNode;
 
-      // force refresh data in child component to trigger UI update
-      virtualScroller.value.refreshView();
+      // Force refresh data in child component to trigger UI update.
+      virtualisedBaseScroller.value.refreshView();
     };
 
     const handleScroll = (scrollTop) => {
@@ -250,8 +229,7 @@ export default defineComponent({
     };
 
     return {
-      // handleScroll,
-      virtualScroller,
+      virtualisedBaseScroller,
       flattenedTree,
       updateNode,
       updateNodes,

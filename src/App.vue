@@ -1,102 +1,57 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
   <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
-  <suspense>
-    <tree
-      ref="treeView"
-      :nodes="nodes"
-      :use-time-slicing="true"
-      :on-change="onChange"
-      :viewport-height="viewportHeight"
-      :initial-scroll-top="initialScrollTop"
-      :initial-scroll-index="initialScrollIndex"
-      :tolerance="2"
-      :get-node-height="getNodeHeight"
-      :cell-renderer="cellRenderer"
-      @onScroll="handleScroll"
-    ></tree>
-  </suspense>
+  <div :style="{ display: 'flex', flexDirection: 'row' }">
+    <div :style="{ width: '50%' }">
+      VirtualisedTree
+      <virtualised-tree
+        ref="treeView"
+        :nodes="nodes"
+        :use-time-slicing="false"
+        :on-change="onChange"
+        :viewport-height="viewportHeight"
+        :initial-scroll-top="initialScrollTop"
+        :initial-scroll-index="initialScrollIndex"
+        :tolerance="2"
+        :get-node-height="getNodeHeight"
+        :cell-renderer="cellRenderer"
+        @onScroll="handleScroll"
+      >
+        <template #fallback><div>Loading tree...</div></template>
+      </virtualised-tree>
+    </div>
+    <div :style="{ width: '50%' }">
+      VirtualisedList
+      <virtualised-list
+        :nodes="data"
+        :viewport-height="viewportHeight"
+        :initial-scroll-top="initialScrollTop"
+        :initial-scroll-index="initialScrollIndex"
+        :tolerance="2"
+        :get-node-height="getNodeHeight"
+        :cell-renderer="listCellRenderer"
+        @onScroll="handleScroll"
+      ></virtualised-list>
+    </div>
+  </div>
 </template>
 
 <script>
-import { ref, reactive, h, onMounted } from "vue";
+import { ref, h } from "vue";
 import HelloWorld from "./components/HelloWorld.vue";
-import VirtualScroller from "./components/VirtualScroller.vue";
-import Tree from "./components/Tree.vue";
+import VirtualisedList from "./components/VirtualisedList";
+import VirtualisedTree from "./components/VirtualisedTree";
+
+import { constructFixedTree } from "./utils/mock";
 
 export default {
   name: "App",
   components: {
     HelloWorld,
-    VirtualScroller,
-    Tree,
+    VirtualisedTree,
+    VirtualisedList,
   },
   setup() {
-    const constructRandomTree = (
-      maxDeepness,
-      maxNumberOfChildren,
-      minNumOfNodes,
-      deepness = 1
-    ) => {
-      return new Array(minNumOfNodes).fill(deepness).map((value, i) => {
-        const id = i;
-        const numberOfChildren =
-          deepness === maxDeepness
-            ? 0
-            : Math.round(Math.random() * maxNumberOfChildren);
-
-        return {
-          id,
-          name: `Leaf ${i}`,
-          children: numberOfChildren
-            ? constructRandomTree(
-                maxDeepness,
-                maxNumberOfChildren,
-                numberOfChildren,
-                deepness + 1
-              )
-            : [],
-          state: {
-            expanded: numberOfChildren
-              ? Boolean(Math.round(Math.random()))
-              : false,
-            // favorite: Boolean(Math.round(Math.random())),
-            // deletable: Boolean(Math.round(Math.random())),
-          },
-        };
-      });
-    };
-
-    const constructFixedTree = (
-      maxDeepness,
-      numberOfChildren,
-      numOfNodes,
-      deepness = 1
-    ) => {
-      return new Array(numOfNodes).fill(deepness).map((value, i) => {
-        const id = i;
-
-        return {
-          id,
-          name: `Leaf ${i}`,
-          children:
-            deepness !== maxDeepness
-              ? constructFixedTree(
-                  maxDeepness,
-                  numberOfChildren,
-                  numberOfChildren,
-                  deepness + 1
-                )
-              : [],
-          state: {
-            expanded: deepness !== maxDeepness ? Boolean(i % 3) : false,
-            // favorite: Boolean(Math.round(Math.random())),
-            // deletable: Boolean(Math.round(Math.random())),
-          },
-        };
-      });
-    };
-
     const treeView = ref(null);
 
     const nodes = constructFixedTree(6, 15, 5);
@@ -120,8 +75,8 @@ export default {
             {
               style: { width: "20px" },
               disabled: node.state.isLeaf,
-              onClick: () =>
-                treeView.value.updateNode(nodes, node, index, (node) => ({
+              onClick: async () =>
+                await treeView.value.updateNode(nodes, node, index, (node) => ({
                   ...node,
                   state: { ...node.state, expanded: !node.state.expanded },
                 })),
@@ -133,23 +88,43 @@ export default {
             "button",
             {
               style: { width: "20px" },
-              onClick: () =>
-                treeView.value.updateNodes(nodes, node, index, (node) => ({
-                  ...node,
-                  name: "test",
-                })),
+              onClick: async () =>
+                await treeView.value.updateNodes(
+                  nodes,
+                  node,
+                  index,
+                  (node) => ({
+                    ...node,
+                    name: "test",
+                  })
+                ),
             },
             "C"
           ),
         ]
       ),
+      h("div", {
+        style: {
+          borderBottom: "1px solid black",
+          marginLeft: `${node.parents.length * 30}px`,
+        },
+      }),
     ];
 
+    const listCellRenderer = (node, index) => [h("div", {}, node.label)];
+
     const handleScroll = (scrollTop) => {
-      // console.log(scrollTop);
+      console.log(scrollTop);
     };
 
-    return { treeView, nodes, onChange, cellRenderer, handleScroll };
+    return {
+      treeView,
+      nodes,
+      onChange,
+      cellRenderer,
+      listCellRenderer,
+      handleScroll,
+    };
   },
   data() {
     return {
