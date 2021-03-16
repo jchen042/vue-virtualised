@@ -2,7 +2,7 @@
 import { h } from "vue";
 
 export default {
-  name: "Cell",
+  name: "VirtualisedBaseCell",
   props: {
     startIndex: { type: Number, default: () => 0 },
     visibleNodes: { type: Array, default: () => [] },
@@ -11,23 +11,21 @@ export default {
       default: () => 40,
     },
     /**
-     * Takes an item from data and renders it into the list
+     * Takes an item from data and renders it into the list.
      */
     cellRenderer: {
       type: Function,
-      default: (node, index) => [
-        h("div", {}, `${index} - ${node.name ?? node}`),
-      ],
+      default: (node, index) => [h("div", { key: index }, node.name ?? node)],
       required: true,
     },
     /**
      * A unique identifier for this list.
-     * If there are multiple VirtualScroller at the same level of nesting within another VirtualScroller,
+     * If there are multiple VirtualisedBaseScroller at the same level of nesting within another VirtualBaseScroller,
      * this key is necessary for virtualisation to work properly.
      */
     getNodeKey: {
       type: Function,
-      default: (node, index) => `${index}_${node.key}`,
+      default: (node, index) => node.key ?? index,
     },
   },
   emits: [],

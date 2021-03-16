@@ -2,10 +2,10 @@
   <img alt="Vue logo" src="./assets/logo.png" />
   <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
   <suspense>
-    <tree
+    <virtualised-base-tree
       ref="treeView"
       :nodes="nodes"
-      :use-time-slicing="true"
+      :use-time-slicing="false"
       :on-change="onChange"
       :viewport-height="viewportHeight"
       :initial-scroll-top="initialScrollTop"
@@ -13,16 +13,19 @@
       :tolerance="2"
       :get-node-height="getNodeHeight"
       :cell-renderer="cellRenderer"
-      @onScroll="handleScroll"
-    ></tree>
+      @onScroll.passive="handleScroll"
+    ></virtualised-base-tree>
+    <template #fallback>
+      <div>Loading...</div>
+    </template>
   </suspense>
 </template>
 
 <script>
-import { ref, reactive, h, onMounted } from "vue";
+import { ref, h } from "vue";
 import HelloWorld from "./components/HelloWorld.vue";
-import VirtualScroller from "./components/VirtualScroller.vue";
-import Tree from "./components/Tree.vue";
+import VirtualisedBaseScroller from "./components/VirtualisedBaseScroller.vue";
+import VirtualisedBaseTree from "./components/VirtualisedBaseTree.vue";
 
 import { constructFixedTree } from "./utils/mock";
 
@@ -30,8 +33,8 @@ export default {
   name: "App",
   components: {
     HelloWorld,
-    VirtualScroller,
-    Tree,
+    VirtualisedBaseScroller,
+    VirtualisedBaseTree,
   },
   setup() {
     const treeView = ref(null);
@@ -57,8 +60,8 @@ export default {
             {
               style: { width: "20px" },
               disabled: node.state.isLeaf,
-              onClick: () =>
-                treeView.value.updateNode(nodes, node, index, (node) => ({
+              onClick: async () =>
+                await treeView.value.updateNode(nodes, node, index, (node) => ({
                   ...node,
                   state: { ...node.state, expanded: !node.state.expanded },
                 })),
@@ -70,16 +73,22 @@ export default {
             "button",
             {
               style: { width: "20px" },
-              onClick: () =>
-                treeView.value.updateNodes(nodes, node, index, (node) => ({
-                  ...node,
-                  name: "test",
-                })),
+              onClick: async () =>
+                await treeView.value.updateNodes(
+                  nodes,
+                  node,
+                  index,
+                  (node) => ({
+                    ...node,
+                    name: "test",
+                  })
+                ),
             },
             "C"
           ),
         ]
       ),
+      h("div", { style: { borderBottom: "1px solid black" } }),
     ];
 
     const handleScroll = (scrollTop) => {
