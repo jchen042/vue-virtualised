@@ -13,8 +13,12 @@
       :cell-renderer="cellRenderer"
       @onScroll="handleScroll"
     >
-      <template #default="slotProps">
-        <slot :node="slotProps.node" :index="slotProps.index"></slot>
+      <template #cell="slotProps">
+        <slot
+          name="cell"
+          :node="slotProps.node"
+          :index="slotProps.index"
+        ></slot>
       </template>
     </virtualised-base-tree>
     <template #fallback>
@@ -31,7 +35,7 @@ export default defineComponent({
   name: "VirtualisedTree",
   components: {
     VirtualisedBaseTree: defineAsyncComponent(() =>
-      import("./VirtualisedBaseTree.vue")
+      import("./Base/VirtualisedBaseTree.vue")
     ),
   },
   props: {

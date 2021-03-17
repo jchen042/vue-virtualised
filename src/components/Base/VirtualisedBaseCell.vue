@@ -24,7 +24,7 @@ export default {
           style: { height: "100%" },
         },
         props.cellRenderer(props.node, props.index + props.startIndex) ?? [
-          slots.default({
+          slots.cell({
             node: props.node,
             index: props.index + props.startIndex,
           }),
