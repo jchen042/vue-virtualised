@@ -28,7 +28,11 @@
             :index="index"
             :start-index="startIndex"
             :cell-renderer="cellRenderer"
-          ></virtualised-base-cell>
+          >
+            <template #default="slotProps">
+              <slot :node="slotProps.node" :index="slotProps.index"></slot>
+            </template>
+          </virtualised-base-cell>
         </div>
       </div>
     </div>

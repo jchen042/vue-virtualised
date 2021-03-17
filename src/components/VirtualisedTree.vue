@@ -12,7 +12,11 @@
       :get-node-height="getNodeHeight"
       :cell-renderer="cellRenderer"
       @onScroll="handleScroll"
-    ></virtualised-base-tree>
+    >
+      <template #default="slotProps">
+        <slot :node="slotProps.node" :index="slotProps.index"></slot>
+      </template>
+    </virtualised-base-tree>
     <template #fallback>
       <!-- <div>Loading...</div> -->
       <slot name="fallback"></slot>
