@@ -1,26 +1,45 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
   <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
-  <virtualised-tree
-    ref="treeView"
-    :nodes="nodes"
-    :use-time-slicing="false"
-    :on-change="onChange"
-    :viewport-height="viewportHeight"
-    :initial-scroll-top="initialScrollTop"
-    :initial-scroll-index="initialScrollIndex"
-    :tolerance="2"
-    :get-node-height="getNodeHeight"
-    :cell-renderer="cellRenderer"
-    @onScroll="handleScroll"
-  >
-    <template #fallback><div>Loading tree...</div></template>
-  </virtualised-tree>
+  <div :style="{ display: 'flex', flexDirection: 'row' }">
+    <div :style="{ width: '50%' }">
+      VirtualisedTree
+      <virtualised-tree
+        ref="treeView"
+        :nodes="nodes"
+        :use-time-slicing="false"
+        :on-change="onChange"
+        :viewport-height="viewportHeight"
+        :initial-scroll-top="initialScrollTop"
+        :initial-scroll-index="initialScrollIndex"
+        :tolerance="2"
+        :get-node-height="getNodeHeight"
+        :cell-renderer="cellRenderer"
+        @onScroll="handleScroll"
+      >
+        <template #fallback><div>Loading tree...</div></template>
+      </virtualised-tree>
+    </div>
+    <div :style="{ width: '50%' }">
+      VirtualisedList
+      <virtualised-list
+        :nodes="data"
+        :viewport-height="viewportHeight"
+        :initial-scroll-top="initialScrollTop"
+        :initial-scroll-index="initialScrollIndex"
+        :tolerance="2"
+        :get-node-height="getNodeHeight"
+        :cell-renderer="listCellRenderer"
+        @onScroll="handleScroll"
+      ></virtualised-list>
+    </div>
+  </div>
 </template>
 
 <script>
 import { ref, h } from "vue";
 import HelloWorld from "./components/HelloWorld.vue";
+import VirtualisedList from "./components/VirtualisedList";
 import VirtualisedTree from "./components/VirtualisedTree";
 
 import { constructFixedTree } from "./utils/mock";
@@ -30,6 +49,7 @@ export default {
   components: {
     HelloWorld,
     VirtualisedTree,
+    VirtualisedList,
   },
   setup() {
     const treeView = ref(null);
@@ -83,14 +103,28 @@ export default {
           ),
         ]
       ),
-      h("div", { style: { borderBottom: "1px solid black" } }),
+      h("div", {
+        style: {
+          borderBottom: "1px solid black",
+          marginLeft: `${node.parents.length * 30}px`,
+        },
+      }),
     ];
+
+    const listCellRenderer = (node, index) => [h("div", {}, node.label)];
 
     const handleScroll = (scrollTop) => {
       console.log(scrollTop);
     };
 
-    return { treeView, nodes, onChange, cellRenderer, handleScroll };
+    return {
+      treeView,
+      nodes,
+      onChange,
+      cellRenderer,
+      listCellRenderer,
+      handleScroll,
+    };
   },
   data() {
     return {

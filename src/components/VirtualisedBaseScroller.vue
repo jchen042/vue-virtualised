@@ -18,12 +18,18 @@
           transform: `translateY(${offsetY}px)`,
         }"
       >
-        <virtualised-base-cell
-          :start-index="startIndex"
-          :visible-nodes="visibleNodes"
-          :get-node-height="getNodeHeight"
-          :cell-renderer="cellRenderer"
-        ></virtualised-base-cell>
+        <div
+          v-for="(node, index) in visibleNodes"
+          :key="getNodeKey(node, index)"
+          :style="{ height: `${getNodeHeight(node)}px` }"
+        >
+          <virtualised-base-cell
+            :node="node"
+            :index="index"
+            :start-index="startIndex"
+            :cell-renderer="cellRenderer"
+          ></virtualised-base-cell>
+        </div>
       </div>
     </div>
   </div>
@@ -80,6 +86,15 @@ export default defineComponent({
     getNodeHeight: {
       type: Function,
       default: () => 40,
+    },
+    /**
+     * A unique identifier for this list.
+     * If there are multiple VirtualisedBaseScroller at the same level of nesting within another VirtualBaseScroller,
+     * this key is necessary for virtualisation to work properly.
+     */
+    getNodeKey: {
+      type: Function,
+      default: (node, index) => node.key ?? index,
     },
     cellRenderer: {
       type: Function,
