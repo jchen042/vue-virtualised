@@ -9,7 +9,11 @@
     :get-node-height="getNodeHeight"
     :cell-renderer="cellRenderer"
     @onScroll="handleScroll"
-  ></virtualised-base-scroller>
+  >
+    <template #default="slotProps">
+      <slot :node="slotProps.node" :index="slotProps.index"></slot>
+    </template>
+  </virtualised-base-scroller>
 </template>
 
 <script>

@@ -13,18 +13,24 @@ export default {
     cellRenderer: {
       type: Function,
       default: (node, index) => [h("div", { key: index }, node.name ?? node)],
-      required: true,
     },
   },
   emits: [],
-  setup(props) {
+  setup(props, { slots }) {
     return () =>
       h(
         "div",
         {
           style: { height: "100%" },
         },
-        props.cellRenderer(props.node, props.index + props.startIndex)
+        props.cellRenderer
+          ? props.cellRenderer(props.node, props.index + props.startIndex)
+          : [
+              slots.default({
+                node: props.node,
+                index: props.index + props.startIndex,
+              }),
+            ]
       );
   },
 };

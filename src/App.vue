@@ -17,6 +17,7 @@
         :cell-renderer="cellRenderer"
         @onScroll="handleScroll"
       >
+        <template #default="slotProps">{{ slotProps.node.name }}</template>
         <template #fallback><div>Loading tree...</div></template>
       </virtualised-tree>
     </div>
@@ -31,7 +32,9 @@
         :get-node-height="getNodeHeight"
         :cell-renderer="listCellRenderer"
         @onScroll="handleScroll"
-      ></virtualised-list>
+      >
+        <template #default="slotProps">{{ slotProps.node }}</template>
+      </virtualised-list>
     </div>
   </div>
 </template>
