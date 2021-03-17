@@ -12,7 +12,7 @@ export default {
      */
     cellRenderer: {
       type: Function,
-      default: (node, index) => [h("div", { key: index }, node.name ?? node)],
+      default: () => null,
     },
   },
   emits: [],
@@ -23,14 +23,12 @@ export default {
         {
           style: { height: "100%" },
         },
-        props.cellRenderer
-          ? props.cellRenderer(props.node, props.index + props.startIndex)
-          : [
-              slots.default({
-                node: props.node,
-                index: props.index + props.startIndex,
-              }),
-            ]
+        props.cellRenderer(props.node, props.index + props.startIndex) ?? [
+          slots.default({
+            node: props.node,
+            index: props.index + props.startIndex,
+          }),
+        ]
       );
   },
 };

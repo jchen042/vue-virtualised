@@ -102,7 +102,7 @@ export default defineComponent({
     },
     cellRenderer: {
       type: Function,
-      default: (node, index) => [h("div", { key: index }, node.name ?? node)],
+      default: () => null,
     },
   },
   emits: ["onScroll"],

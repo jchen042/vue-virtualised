@@ -18,7 +18,7 @@
 
 <script>
 import { defineComponent, toRefs, ref, markRaw, h } from "vue";
-import VirtualisedBaseScroller from "./VirtualisedBaseScroller.vue";
+import VirtualisedBaseScroller from "./Base/VirtualisedBaseScroller";
 
 import { sliceTask } from "../utils/index";
 import {
@@ -61,7 +61,7 @@ export default defineComponent({
     },
     cellRenderer: {
       type: Function,
-      default: (node, index) => [h("div", { key: index }, node.name ?? node)],
+      default: () => null,
     },
   },
   emits: ["onScroll"],
