@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { defineComponent, defineAsyncComponent, h, ref, watch } from "vue";
+import { defineComponent, defineAsyncComponent, ref, watch } from "vue";
 
 export default defineComponent({
   name: "VirtualisedTree",
@@ -75,6 +75,8 @@ export default defineComponent({
     const virtualisedBaseTree = ref(null);
     const updateNode = ref(null);
     const updateNodes = ref(null);
+    const scrollToStart = ref(null);
+    const scrollToEnd = ref(null);
 
     const handleScroll = (scrollTop) => {
       emit("onScroll", scrollTop);
@@ -85,10 +87,21 @@ export default defineComponent({
       () => {
         updateNode.value = virtualisedBaseTree.value.updateNode;
         updateNodes.value = virtualisedBaseTree.value.updateNodes;
+        scrollToStart.value = virtualisedBaseTree.value.scrollToStart;
+        window.scrollTreeToStart = scrollToStart.value;
+        scrollToEnd.value = virtualisedBaseTree.value.scrollToEnd;
+        window.scrollTreeToEnd = scrollToEnd.value;
       }
     );
 
-    return { virtualisedBaseTree, updateNode, updateNodes, handleScroll };
+    return {
+      virtualisedBaseTree,
+      updateNode,
+      updateNodes,
+      scrollToStart,
+      scrollToEnd,
+      handleScroll,
+    };
   },
 });
 </script>
