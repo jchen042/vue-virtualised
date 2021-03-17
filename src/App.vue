@@ -17,7 +17,7 @@
         :cell-renderer="cellRenderer"
         @onScroll="handleScroll"
       >
-        <template #default="slotProps">{{ slotProps.node.name }}</template>
+        <template #cell="slotProps">{{ slotProps.node.name }}</template>
         <template #fallback><div>Loading tree...</div></template>
       </virtualised-tree>
     </div>
@@ -33,7 +33,7 @@
         :cell-renderer="listCellRenderer"
         @onScroll="handleScroll"
       >
-        <template #default="slotProps">{{ slotProps.node }}</template>
+        <template #cell="slotProps">{{ slotProps.node }}</template>
       </virtualised-list>
     </div>
   </div>

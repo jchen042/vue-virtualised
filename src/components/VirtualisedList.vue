@@ -10,15 +10,15 @@
     :cell-renderer="cellRenderer"
     @onScroll="handleScroll"
   >
-    <template #default="slotProps">
-      <slot :node="slotProps.node" :index="slotProps.index"></slot>
+    <template #cell="slotProps">
+      <slot name="cell" :node="slotProps.node" :index="slotProps.index"></slot>
     </template>
   </virtualised-base-scroller>
 </template>
 
 <script>
 import { h } from "vue";
-import VirtualisedBaseScroller from "./VirtualisedBaseScroller";
+import VirtualisedBaseScroller from "./Base/VirtualisedBaseScroller";
 
 export default {
   name: "VirtualisedList",
@@ -50,7 +50,7 @@ export default {
     },
     cellRenderer: {
       type: Function,
-      default: (node, index) => [h("div", { key: index }, node.name ?? node)],
+      default: () => null,
     },
   },
   emits: ["onScroll"],
