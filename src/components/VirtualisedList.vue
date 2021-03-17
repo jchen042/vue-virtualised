@@ -1,6 +1,6 @@
 <template>
   <virtualised-base-scroller
-    ref="virtualisedBaseScroller"
+    ref="scroller"
     :data="nodes"
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { h } from "vue";
+import { ref, onMounted } from "vue";
 import VirtualisedBaseScroller from "./Base/VirtualisedBaseScroller";
 
 export default {
@@ -55,11 +55,22 @@ export default {
   },
   emits: ["onScroll"],
   setup(props, { emit }) {
+    const scroller = ref(null);
+    const scrollToStart = ref(null);
+    const scrollToEnd = ref(null);
+
     const handleScroll = (scrollTop) => {
       emit("onScroll", scrollTop);
     };
 
-    return { handleScroll };
+    onMounted(() => {
+      scrollToStart.value = scroller.value.scrollToStart;
+      window.scrollListToStart = scrollToStart.value;
+      scrollToEnd.value = scroller.value.scrollToEnd;
+      window.scrollListToEnd = scrollToEnd.value;
+    });
+
+    return { scroller, scrollToStart, scrollToEnd, handleScroll };
   },
 };
 </script>

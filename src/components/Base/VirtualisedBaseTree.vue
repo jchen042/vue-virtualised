@@ -1,6 +1,6 @@
 <template>
   <virtualised-base-scroller
-    ref="virtualisedBaseScroller"
+    ref="scroller"
     :data="flattenedTree"
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { defineComponent, toRefs, ref, markRaw } from "vue";
+import { defineComponent, toRefs, ref, markRaw, onMounted } from "vue";
 import VirtualisedBaseScroller from "./VirtualisedBaseScroller";
 
 import { sliceTask } from "../../utils/index";
@@ -71,7 +71,14 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { nodes, onChange } = props;
 
-    const virtualisedBaseScroller = ref(null);
+    const scroller = ref(null);
+    const scrollToStart = ref(null);
+    const scrollToEnd = ref(null);
+
+    onMounted(() => {
+      scrollToStart.value = scroller.value.scrollToStart;
+      scrollToEnd.value = scroller.value.scrollToEnd;
+    });
 
     const getFlattenedTree = async (nodes, parents = []) => {
       /**
@@ -181,7 +188,7 @@ export default defineComponent({
       flattenedTree[index] = updatedNode;
 
       // Force refresh data in child component to trigger UI update.
-      virtualisedBaseScroller.value.refreshView();
+      scroller.value.refreshView();
     };
 
     const updateNodes = async (nodes, node, index, updateFn) => {
@@ -225,7 +232,7 @@ export default defineComponent({
       flattenedTree[index] = updatedNode;
 
       // Force refresh data in child component to trigger UI update.
-      virtualisedBaseScroller.value.refreshView();
+      scroller.value.refreshView();
     };
 
     const handleScroll = (scrollTop) => {
@@ -233,10 +240,12 @@ export default defineComponent({
     };
 
     return {
-      virtualisedBaseScroller,
+      scroller,
       flattenedTree,
       updateNode,
       updateNodes,
+      scrollToStart,
+      scrollToEnd,
       handleScroll,
     };
   },

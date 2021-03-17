@@ -305,6 +305,17 @@ export default defineComponent({
       });
     };
 
+    const scrollToStart = () => {
+      virtualScroller.value.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const scrollToEnd = () => {
+      virtualScroller.value.scrollTo({
+        top: totalHeight.value,
+        behavior: "smooth",
+      });
+    };
+
     onMounted(async () => {
       await setScrollState();
     });
@@ -339,6 +350,8 @@ export default defineComponent({
       offsetY,
       visibleNodes,
       handleScroll,
+      scrollToStart,
+      scrollToEnd,
       refreshView,
     };
   },
