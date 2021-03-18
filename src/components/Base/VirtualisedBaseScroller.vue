@@ -59,7 +59,6 @@ import {
   watch,
   watchEffect,
   nextTick,
-  h,
 } from "vue";
 
 import VirtualisedBaseCell from "./VirtualisedBaseCell.vue";
@@ -87,6 +86,7 @@ export default defineComponent({
       type: Number,
       default: () => null,
     },
+    scrollBehaviour: { type: String, default: () => "smooth" },
     tolerance: {
       type: Number,
       default: () => 2,
@@ -115,6 +115,7 @@ export default defineComponent({
     const {
       initialScrollTop,
       initialScrollIndex,
+      scrollBehaviour,
       viewportHeight,
       tolerance,
       getNodeHeight,
@@ -180,7 +181,7 @@ export default defineComponent({
     const scrollTop = ref(
       !isNil(initialScrollIndex.value) &&
         initialScrollIndex.value < data.value.length
-        ? childPositions.value[Math.max(0, initialScrollIndex.value)]
+        ? childPositions.value[initialScrollIndex.value]
         : initialScrollTop.value
     );
 
@@ -295,7 +296,10 @@ export default defineComponent({
 
       // Ensure all values are presented.
       if (scrollTop.value !== null && virtualScroller.value !== null)
-        virtualScroller.value.scrollTo({ top: scrollTop.value });
+        virtualScroller.value.scrollTo({
+          top: scrollTop.value,
+          behavior: scrollBehaviour.value,
+        });
     };
 
     const handleScroll = () => {
@@ -306,14 +310,31 @@ export default defineComponent({
     };
 
     const scrollToStart = () => {
-      virtualScroller.value.scrollTo({ top: 0, behavior: "smooth" });
+      virtualScroller.value.scrollTo({
+        top: 0,
+        behavior: scrollBehaviour.value,
+      });
     };
 
     const scrollToEnd = () => {
       virtualScroller.value.scrollTo({
         top: totalHeight.value,
-        behavior: "smooth",
+        behavior: scrollBehaviour.value,
       });
+    };
+
+    const scrollToIndex = (index) => {
+      invariant(
+        index >= 0,
+        `index value out of range: requested index ${index} but minimum is 0`
+      );
+      invariant(
+        index < data.value.length,
+        `index value out of range: requested index ${index} is out of 0 to ${
+          data.value.length - 1
+        }`
+      );
+      scrollTop.value = childPositions.value[index];
     };
 
     onMounted(async () => {
@@ -352,6 +373,7 @@ export default defineComponent({
       handleScroll,
       scrollToStart,
       scrollToEnd,
+      scrollToIndex,
       refreshView,
     };
   },

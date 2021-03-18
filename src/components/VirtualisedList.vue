@@ -58,6 +58,7 @@ export default {
     const scroller = ref(null);
     const scrollToStart = ref(null);
     const scrollToEnd = ref(null);
+    const scrollToIndex = ref(null);
 
     const handleScroll = (scrollTop) => {
       emit("onScroll", scrollTop);
@@ -68,6 +69,8 @@ export default {
       window.scrollListToStart = scrollToStart.value;
       scrollToEnd.value = scroller.value.scrollToEnd;
       window.scrollListToEnd = scrollToEnd.value;
+      scrollToIndex.value = scroller.value.scrollToIndex;
+      window.scrollListToIndex = scrollToIndex.value;
     });
 
     return { scroller, scrollToStart, scrollToEnd, handleScroll };
