@@ -109,7 +109,7 @@ export default defineComponent({
       default: () => null,
     },
   },
-  emits: ["onScroll"],
+  emits: ["onScroll", "onStartReached", "onEndReached"],
   setup(props, { emit }) {
     // TODO: dynamic data attributes
     const {
@@ -306,6 +306,18 @@ export default defineComponent({
       requestAnimationFrame(() => {
         scrollTop.value = virtualScroller.value.scrollTop;
         emit("onScroll", virtualScroller.value.scrollTop);
+
+        if (scrollTop.value === 0)
+          emit("onStartReached", virtualScroller.value.scrollTop);
+
+        // Hack: we might have 1px tolerance when scrolling to the end
+        if (scrollTop.value >= totalHeight.value - viewportHeight.value - 1)
+          emit("onEndReached", virtualScroller.value.scrollTop);
+        // console.log(
+        //   "end reached",
+        //   virtualScroller.value.scrollTop,
+        //   totalHeight.value
+        // );
       });
     };
 

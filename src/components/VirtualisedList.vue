@@ -9,6 +9,8 @@
     :get-node-height="getNodeHeight"
     :cell-renderer="cellRenderer"
     @onScroll="handleScroll"
+    @onStartReached="handleStartReached"
+    @onEndReached="handleEndReached"
   >
     <template #cell="slotProps">
       <slot name="cell" :node="slotProps.node" :index="slotProps.index"></slot>
@@ -53,7 +55,7 @@ export default {
       default: () => null,
     },
   },
-  emits: ["onScroll"],
+  emits: ["onScroll", "onStartReached", "onEndReached"],
   setup(props, { emit }) {
     const scroller = ref(null);
     const scrollToStart = ref(null);
@@ -63,6 +65,14 @@ export default {
 
     const handleScroll = (scrollTop) => {
       emit("onScroll", scrollTop);
+    };
+
+    const handleStartReached = (scrollTop) => {
+      emit("onStartReached", scrollTop);
+    };
+
+    const handleEndReached = (scrollTop) => {
+      emit("onEndReached", scrollTop);
     };
 
     onMounted(() => {
@@ -80,6 +90,8 @@ export default {
       scrollToIndex,
       scrollToNode,
       handleScroll,
+      handleStartReached,
+      handleEndReached,
     };
   },
 };

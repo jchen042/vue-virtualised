@@ -12,6 +12,8 @@
       :get-node-height="getNodeHeight"
       :cell-renderer="cellRenderer"
       @onScroll="handleScroll"
+      @onStartReached="handleStartReached"
+      @onEndReached="handleEndReached"
     >
       <template #cell="slotProps">
         <slot
@@ -69,7 +71,7 @@ export default defineComponent({
       default: () => null,
     },
   },
-  emits: ["onScroll"],
+  emits: ["onScroll", "onStartReached", "onEndReached"],
   setup(props, { emit }) {
     const virtualisedBaseTree = ref(null);
     const updateNode = ref(null);
@@ -81,6 +83,14 @@ export default defineComponent({
 
     const handleScroll = (scrollTop) => {
       emit("onScroll", scrollTop);
+    };
+
+    const handleStartReached = (scrollTop) => {
+      emit("onStartReached", scrollTop);
+    };
+
+    const handleEndReached = (scrollTop) => {
+      emit("onEndReached", scrollTop);
     };
 
     watch(
@@ -104,7 +114,10 @@ export default defineComponent({
       scrollToStart,
       scrollToEnd,
       scrollToIndex,
+      scrollToNode,
       handleScroll,
+      handleStartReached,
+      handleEndReached,
     };
   },
 });
