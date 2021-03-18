@@ -9,6 +9,8 @@
     :get-node-height="getNodeHeight"
     :cell-renderer="cellRenderer"
     @onScroll="handleScroll"
+    @onStartReached="handleStartReached"
+    @onEndReached="handleEndReached"
   >
     <template #cell="slotProps">
       <slot name="cell" :node="slotProps.node" :index="slotProps.index"></slot>
@@ -64,7 +66,7 @@ export default defineComponent({
       default: () => null,
     },
   },
-  emits: ["onScroll"],
+  emits: ["onScroll", "onStartReached", "onEndReached"],
   async setup(props, { emit }) {
     const { useTimeSlicing } = toRefs(props);
     // NO REACTIVE
@@ -243,6 +245,14 @@ export default defineComponent({
       emit("onScroll", scrollTop);
     };
 
+    const handleStartReached = (scrollTop) => {
+      emit("onStartReached", scrollTop);
+    };
+
+    const handleEndReached = (scrollTop) => {
+      emit("onEndReached", scrollTop);
+    };
+
     return {
       scroller,
       flattenedTree,
@@ -253,6 +263,8 @@ export default defineComponent({
       scrollToIndex,
       scrollToNode,
       handleScroll,
+      handleStartReached,
+      handleEndReached,
     };
   },
 });

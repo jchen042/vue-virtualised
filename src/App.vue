@@ -16,6 +16,8 @@
         :get-node-height="getNodeHeight"
         :cell-renderer="cellRenderer"
         @onScroll="handleScroll"
+        @onStartReached="handleStartReached"
+        @onEndReached="handleEndReached"
       >
         <template #cell="slotProps">{{ slotProps.node.name }}</template>
         <template #fallback><div>Loading tree...</div></template>
@@ -32,6 +34,8 @@
         :get-node-height="getNodeHeight"
         :cell-renderer="listCellRenderer"
         @onScroll="handleScroll"
+        @onStartReached="handleStartReached"
+        @onEndReached="handleEndReached"
       >
         <template #cell="slotProps">{{ slotProps.node }}</template>
       </virtualised-list>
@@ -120,6 +124,13 @@ export default {
       console.log(scrollTop);
     };
 
+    const handleStartReached = (scrollTop) =>
+      console.log("start reached", scrollTop);
+
+    const handleEndReached = (scrollTop) => {
+      console.log("end reached", scrollTop);
+    };
+
     return {
       treeView,
       nodes,
@@ -127,6 +138,8 @@ export default {
       cellRenderer,
       listCellRenderer,
       handleScroll,
+      handleStartReached,
+      handleEndReached,
     };
   },
   data() {
