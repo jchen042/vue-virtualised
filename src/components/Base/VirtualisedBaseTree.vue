@@ -74,10 +74,14 @@ export default defineComponent({
     const scroller = ref(null);
     const scrollToStart = ref(null);
     const scrollToEnd = ref(null);
+    const scrollToIndex = ref(null);
+    const scrollToNode = ref(null);
 
     onMounted(() => {
       scrollToStart.value = scroller.value.scrollToStart;
       scrollToEnd.value = scroller.value.scrollToEnd;
+      scrollToIndex.value = scroller.value.scrollToIndex;
+      scrollToNode.value = scroller.value.scrollToNode;
     });
 
     const getFlattenedTree = async (nodes, parents = []) => {
@@ -246,6 +250,8 @@ export default defineComponent({
       updateNodes,
       scrollToStart,
       scrollToEnd,
+      scrollToIndex,
+      scrollToNode,
       handleScroll,
     };
   },

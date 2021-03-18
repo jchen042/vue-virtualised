@@ -22,7 +22,6 @@
       </template>
     </virtualised-base-tree>
     <template #fallback>
-      <!-- <div>Loading...</div> -->
       <slot name="fallback"></slot>
     </template>
   </suspense>
@@ -77,6 +76,8 @@ export default defineComponent({
     const updateNodes = ref(null);
     const scrollToStart = ref(null);
     const scrollToEnd = ref(null);
+    const scrollToIndex = ref(null);
+    const scrollToNode = ref(null);
 
     const handleScroll = (scrollTop) => {
       emit("onScroll", scrollTop);
@@ -88,9 +89,11 @@ export default defineComponent({
         updateNode.value = virtualisedBaseTree.value.updateNode;
         updateNodes.value = virtualisedBaseTree.value.updateNodes;
         scrollToStart.value = virtualisedBaseTree.value.scrollToStart;
-        window.scrollTreeToStart = scrollToStart.value;
         scrollToEnd.value = virtualisedBaseTree.value.scrollToEnd;
-        window.scrollTreeToEnd = scrollToEnd.value;
+        scrollToIndex.value = virtualisedBaseTree.value.scrollToIndex;
+        window.scrollTreeToIndex = scrollToIndex.value;
+        scrollToNode.value = virtualisedBaseTree.value.scrollToNode;
+        window.scrollTreeToNode = scrollToNode.value;
       }
     );
 
@@ -100,6 +103,7 @@ export default defineComponent({
       updateNodes,
       scrollToStart,
       scrollToEnd,
+      scrollToIndex,
       handleScroll,
     };
   },

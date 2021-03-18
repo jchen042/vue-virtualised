@@ -337,6 +337,15 @@ export default defineComponent({
       scrollTop.value = childPositions.value[index];
     };
 
+    const scrollToNode = (conditionCallback) => {
+      invariant(
+        conditionCallback && typeof conditionCallback === "function",
+        `input parameter ${conditionCallback} is not a function`
+      );
+      const index = data.value.findIndex((node) => conditionCallback(node));
+      if (index !== -1) scrollToIndex(index);
+    };
+
     onMounted(async () => {
       await setScrollState();
     });
@@ -374,6 +383,7 @@ export default defineComponent({
       scrollToStart,
       scrollToEnd,
       scrollToIndex,
+      scrollToNode,
       refreshView,
     };
   },

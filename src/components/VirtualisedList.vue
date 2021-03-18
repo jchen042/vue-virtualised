@@ -59,6 +59,7 @@ export default {
     const scrollToStart = ref(null);
     const scrollToEnd = ref(null);
     const scrollToIndex = ref(null);
+    const scrollToNode = ref(null);
 
     const handleScroll = (scrollTop) => {
       emit("onScroll", scrollTop);
@@ -66,14 +67,20 @@ export default {
 
     onMounted(() => {
       scrollToStart.value = scroller.value.scrollToStart;
-      window.scrollListToStart = scrollToStart.value;
       scrollToEnd.value = scroller.value.scrollToEnd;
-      window.scrollListToEnd = scrollToEnd.value;
       scrollToIndex.value = scroller.value.scrollToIndex;
-      window.scrollListToIndex = scrollToIndex.value;
+      scrollToNode.value = scroller.value.scrollToNode;
+      window.scrollListToNode = scrollToNode.value;
     });
 
-    return { scroller, scrollToStart, scrollToEnd, handleScroll };
+    return {
+      scroller,
+      scrollToStart,
+      scrollToEnd,
+      scrollToIndex,
+      scrollToNode,
+      handleScroll,
+    };
   },
 };
 </script>
