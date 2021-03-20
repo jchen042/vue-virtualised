@@ -1,12 +1,14 @@
 <script>
 import { h } from "vue";
 
+import invariant from "fbjs/lib/invariant";
+
 export default {
   name: "VirtualisedBaseCell",
   props: {
-    node: { type: Object, default: () => null },
-    index: { type: Number, default: () => 0 },
-    startIndex: { type: Number, default: () => 0 },
+    node: { type: Object, required: true },
+    index: { type: Number, required: true },
+    startIndex: { type: Number, default: () => 0, required: true },
     /**
      * Takes an item from data and renders it into the list.
      */
@@ -17,6 +19,11 @@ export default {
   },
   emits: [],
   setup(props, { slots }) {
+    invariant(
+      typeof props.cellRenderer === "function",
+      `cellRenderer is not a function`
+    );
+
     return () =>
       h(
         "div",
