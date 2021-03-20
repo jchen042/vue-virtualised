@@ -126,7 +126,7 @@ export default defineComponent({
     });
 
     // TODO: test invalid cases
-    invariant(Array.isArray(data.value), "data type is not Array");
+    invariant(Array.isArray(data.value), "data is not an Array");
     invariant(
       !isNaN(Number(viewportHeight.value)),
       `viewportHeight value ${viewportHeight.value} is not Number`
@@ -162,6 +162,10 @@ export default defineComponent({
       !isNaN(Number(tolerance.value)),
       `tolerance value ${tolerance.value} is not Number`
     );
+    invariant(
+      typeof getNodeHeight.value === "function",
+      `getNodeHeight is not a function`
+    );
 
     const virtualScroller = ref(null);
 
@@ -171,7 +175,7 @@ export default defineComponent({
       if (nodes.length > 0) {
         for (let i = 1; i < nodes.length; i++) {
           invariant(
-            !Number.isNaN(getNodeHeight(nodes[i - 1])),
+            !isNaN(Number(getNodeHeight(nodes[i - 1]))),
             `getNodeHeight(node) method returns an invalid value ${getNodeHeight(
               nodes[i - 1]
             )} at index ${i - 1}`

@@ -8,8 +8,10 @@
       :viewport-height="viewportHeight"
       :initial-scroll-top="initialScrollTop"
       :initial-scroll-index="initialScrollIndex"
+      :scroll-behaviour="scrollBehaviour"
       :tolerance="tolerance"
       :get-node-height="getNodeHeight"
+      :get-node-key="getNodeKey"
       :cell-renderer="cellRenderer"
       @onScroll="handleScroll"
       @onStartReached="handleStartReached"
@@ -42,7 +44,7 @@ export default defineComponent({
   props: {
     nodes: {
       type: Array,
-      default: () => [],
+      required: true,
     },
     useTimeSlicing: { type: Boolean, default: () => true },
     onChange: { type: Function, default: () => {} },
@@ -58,6 +60,7 @@ export default defineComponent({
       type: Number,
       default: () => null,
     },
+    scrollBehaviour: { type: String, default: () => "auto" },
     tolerance: {
       type: Number,
       default: () => 2,
@@ -65,6 +68,10 @@ export default defineComponent({
     getNodeHeight: {
       type: Function,
       default: () => 40,
+    },
+    getNodeKey: {
+      type: Function,
+      default: (node, index) => node.key ?? index,
     },
     cellRenderer: {
       type: Function,
