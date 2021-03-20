@@ -63,8 +63,8 @@ import {
 
 import VirtualisedBaseCell from "./VirtualisedBaseCell.vue";
 
-import invariant from "invariant";
-import { isNil } from "lodash";
+import invariant from "fbjs/lib/invariant";
+import { isNil, isNaN } from "lodash";
 
 export default defineComponent({
   name: "VirtualisedBaseScroller",
@@ -72,7 +72,7 @@ export default defineComponent({
   props: {
     data: {
       type: Array,
-      default: () => [],
+      required: true,
     },
     viewportHeight: {
       type: Number,
@@ -86,7 +86,7 @@ export default defineComponent({
       type: Number,
       default: () => null,
     },
-    scrollBehaviour: { type: String, default: () => "smooth" },
+    scrollBehaviour: { type: String, default: () => "auto" },
     tolerance: {
       type: Number,
       default: () => 2,
@@ -113,10 +113,10 @@ export default defineComponent({
   setup(props, { emit }) {
     // TODO: dynamic data attributes
     const {
+      viewportHeight,
       initialScrollTop,
       initialScrollIndex,
       scrollBehaviour,
-      viewportHeight,
       tolerance,
       getNodeHeight,
     } = toRefs(props);
@@ -126,14 +126,26 @@ export default defineComponent({
     });
 
     // TODO: test invalid cases
-    invariant(Array.isArray(data.value), "data is not Array");
+    invariant(Array.isArray(data.value), "data type is not Array");
     invariant(
-      !Number.isNaN(initialScrollTop.value),
+      !isNaN(Number(viewportHeight.value)),
+      `viewportHeight value ${viewportHeight.value} is not Number`
+    );
+    invariant(
+      viewportHeight.value >= 0,
+      `viewportHeight value out of range: requested viewportHeight ${viewportHeight.value} but minimum is 0`
+    );
+    invariant(
+      !isNaN(Number(initialScrollTop.value)),
       `initialScrollTop value ${initialScrollTop.value} is not Number`
     );
     invariant(
+      initialScrollTop.value >= 0,
+      `initialScrollTop value out of range: requested initialScrollTop ${initialScrollTop.value} but minimn is 0`
+    );
+    invariant(
       isNil(initialScrollIndex.value) ||
-        !Number.isNaN(initialScrollIndex.value),
+        !isNaN(Number(initialScrollIndex.value)),
       `initialScrollIndex value ${initialScrollIndex.value} is not Number`
     );
     invariant(
@@ -147,11 +159,7 @@ export default defineComponent({
       } is out of 0 to ${data.value.length - 1}`
     );
     invariant(
-      !Number.isNaN(viewportHeight.value),
-      `viewportHeight value ${viewportHeight.value} is not Number`
-    );
-    invariant(
-      !Number.isNaN(tolerance.value),
+      !isNaN(Number(tolerance.value)),
       `tolerance value ${tolerance.value} is not Number`
     );
 
@@ -179,8 +187,7 @@ export default defineComponent({
     );
 
     const scrollTop = ref(
-      !isNil(initialScrollIndex.value) &&
-        initialScrollIndex.value < data.value.length
+      !isNil(initialScrollIndex.value)
         ? childPositions.value[initialScrollIndex.value]
         : initialScrollTop.value
     );
@@ -277,6 +284,7 @@ export default defineComponent({
         data.value.length,
         viewportHeight.value
       );
+      // Set end of rendered node's index.
       const endIndex = Math.min(
         data.value.length,
         lastVisibleIndex + tolerance.value
@@ -313,11 +321,6 @@ export default defineComponent({
         // Hack: we might have 1px tolerance when scrolling to the end
         if (scrollTop.value >= totalHeight.value - viewportHeight.value - 1)
           emit("onEndReached", virtualScroller.value.scrollTop);
-        // console.log(
-        //   "end reached",
-        //   virtualScroller.value.scrollTop,
-        //   totalHeight.value
-        // );
       });
     };
 

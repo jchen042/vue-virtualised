@@ -5,6 +5,7 @@
     :viewport-height="viewportHeight"
     :initial-scroll-top="initialScrollTop"
     :initial-scroll-index="initialScrollIndex"
+    :scroll-behaviour="scrollBehaviour"
     :tolerance="tolerance"
     :get-node-height="getNodeHeight"
     :cell-renderer="cellRenderer"
@@ -28,7 +29,7 @@ export default {
   props: {
     nodes: {
       type: Array,
-      default: () => [],
+      required: true,
     },
     viewportHeight: {
       type: Number,
@@ -42,6 +43,7 @@ export default {
       type: Number,
       default: () => null,
     },
+    scrollBehaviour: { type: String, default: () => "smooth" },
     tolerance: {
       type: Number,
       default: () => 2,

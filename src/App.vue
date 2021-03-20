@@ -30,7 +30,8 @@
         :viewport-height="viewportHeight"
         :initial-scroll-top="initialScrollTop"
         :initial-scroll-index="initialScrollIndex"
-        :tolerance="2"
+        :scroll-behaviour="'auto'"
+        :tolerance="-2"
         :get-node-height="getNodeHeight"
         :cell-renderer="listCellRenderer"
         @onScroll="handleScroll"
@@ -146,11 +147,11 @@ export default {
     return {
       data: Array.from({ length: 100000 }, (_, i) => ({
         index: i,
-        label: i + 1,
+        label: i,
       })),
       viewportHeight: 400,
       initialScrollTop: 300,
-      initialScrollIndex: 0,
+      initialScrollIndex: 50000,
       getNodeHeight: (node) => 30 + (node.index % 10),
     };
   },
