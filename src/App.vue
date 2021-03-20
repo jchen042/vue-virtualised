@@ -7,13 +7,15 @@
       <virtualised-tree
         ref="treeView"
         :nodes="nodes"
-        :use-time-slicing="false"
+        :use-time-slicing="true"
         :on-change="onChange"
         :viewport-height="viewportHeight"
         :initial-scroll-top="initialScrollTop"
         :initial-scroll-index="initialScrollIndex"
+        :scroll-behaviour="'smooth'"
         :tolerance="2"
         :get-node-height="getNodeHeight"
+        :get-node-key="(node, index) => node.key"
         :cell-renderer="cellRenderer"
         @onScroll="handleScroll"
         @onStartReached="handleStartReached"
@@ -30,8 +32,10 @@
         :viewport-height="viewportHeight"
         :initial-scroll-top="initialScrollTop"
         :initial-scroll-index="initialScrollIndex"
+        :scroll-behaviour="'auto'"
         :tolerance="2"
         :get-node-height="getNodeHeight"
+        :get-node-key="(node, index) => index"
         :cell-renderer="listCellRenderer"
         @onScroll="handleScroll"
         @onStartReached="handleStartReached"
@@ -146,11 +150,11 @@ export default {
     return {
       data: Array.from({ length: 100000 }, (_, i) => ({
         index: i,
-        label: i + 1,
+        label: i,
       })),
       viewportHeight: 400,
       initialScrollTop: 300,
-      initialScrollIndex: 0,
+      initialScrollIndex: 50000,
       getNodeHeight: (node) => 30 + (node.index % 10),
     };
   },
