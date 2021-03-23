@@ -69,6 +69,7 @@ export default {
     const scrollToEnd = ref(null);
     const scrollToIndex = ref(null);
     const scrollToNode = ref(null);
+    const refreshView = ref(null);
 
     const handleScroll = (scrollTop) => {
       emit("onScroll", scrollTop);
@@ -87,7 +88,7 @@ export default {
       scrollToEnd.value = scroller.value.scrollToEnd;
       scrollToIndex.value = scroller.value.scrollToIndex;
       scrollToNode.value = scroller.value.scrollToNode;
-      window.scrollListToNode = scrollToNode.value;
+      refreshView.value = scroller.value.refreshView;
     });
 
     return {
@@ -99,6 +100,7 @@ export default {
       handleScroll,
       handleStartReached,
       handleEndReached,
+      refreshView,
     };
   },
 };
