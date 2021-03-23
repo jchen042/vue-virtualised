@@ -21,7 +21,7 @@ export default {
   setup(props, { slots }) {
     invariant(
       typeof props.cellRenderer === "function",
-      `cellRenderer is not a function`
+      `cellRenderer ${props.cellRenderer} is not a function`
     );
 
     return () =>
