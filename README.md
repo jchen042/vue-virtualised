@@ -51,7 +51,13 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 
 |Prop|Type|Required?|Default|Description|
 |---|---|:---:|---|---|
-|nodes|`Array<any>`|✓||List data for rendering and can be any types.|
+|nodes|`Array<any>`|✓||List data for rendering and can be any types inside of the array.|
+
+### `VirtualisedTree` Props
+
+|Prop|Type|Required?|Default|Description|
+|---|---|:---:|---|---|
+|nodes|`Array<Node>`|✓||Tree data with the following keys: <ul><li>`name` is the primary label for the node.</li><li>`state` stores states of each node.<ul><li>`expanded` shows children of the node if true, or hides them if false. Defaults to false.</li></ul></li><li>`children` is an array of child nodes belonging to the node.</li></ul><div>e.g. `[{name: "Node 1", children: [{name: "Leaf 1"}]}, {name: "Node 2"}]`</div>|
 
 ## Events
 
