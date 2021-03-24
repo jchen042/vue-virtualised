@@ -33,7 +33,7 @@ TBC...
 
 ### Mutual props
 
-Here are props that are identical between both `VirtualisedList` and `VirtualisedTree` components.
+Here are props that are identical in both `VirtualisedList` and `VirtualisedTree` components.
 
 <!-- markdownlint-disable MD033 -->
 |Prop|Type|Required?|Default|Description|
@@ -47,11 +47,35 @@ Here are props that are identical between both `VirtualisedList` and `Virtualise
 |getNodeKey|`Function`|||A function that takes the current node and the index of the node in the virtual scroller as parameters, and returns the key of the node. Key is a unique identifier for the virtualised scroller. <div>e.g. `(node, index) => node.key`</div>|
 |cellRenderer|`Function`|||A function that takes the current node and its current index in the virtualised scroller as parameters, and returns an array of Children VNodes, built using [`h()`](https://v3.vuejs.org/guide/render-function.html#h-arguments), or using strings to get "text VNodes" or an object with slots. If this prop is specified, the `cell` slot in the template will be override.|
 
-### Virtualised List
+### `VirtualisedList` Props
 
 |Prop|Type|Required?|Default|Description|
 |---|---|:---:|---|---|
-|nodes|`Array<any>`|✓||List data for rendering.|
+|nodes|`Array<any>`|✓||List data for rendering and can be any types.|
+
+## Events
+
+### Mutual events
+
+Here are events that are identical in both `VirtualisedList` and `VirtualisedTree` components.
+
+|Event|Description|
+|---|---|
+|onScroll|Triggered when the user is scrolling the rendered content.|
+|onStartReached|Triggered once when the scroll position gets the bottom of the rendered content.|
+|onEndReached|Triggered once when the scroll position gets the top of the rendered content.|
+
+## Methods
+
+### `VirtualisedList` Methods
+
+`refreshView()`
+
+```ts
+refreshView(): void
+```
+
+Force refresh rendered content.
 
 ## Project setup
 
