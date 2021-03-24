@@ -45,7 +45,7 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 |tolerance|`Number`||`2`|Padding of nodes outside of the viewport to allow for smooth scrolling.|
 |getNodeHeight|`Function`|||A function that takes the current node as a parameter, and returns the height of the node. <div>e.g. `(node) => 30 + (node.index % 10)`</div>|
 |getNodeKey|`Function`|||A function that takes the current node and the index of the node in the virtual scroller as parameters, and returns the key of the node. Key is a unique identifier for the virtualised scroller. <div>e.g. `(node, index) => node.key`</div>|
-|cellRenderer|`Function`|||A function that takes the current node and its current index in the virtualised scroller as parameters, and returns an array of Children VNodes, built using [`h()`](https://v3.vuejs.org/guide/render-function.html#h-arguments), or using strings to get "text VNodes" or an object with slots. If this prop is specified, the `cell` slot in the template will be override.|
+|cellRenderer|`Function`|||A function that takes the current node and its current index in the virtualised scroller as parameters, and returns an array of Children VNodes, built using [`h()`](https://v3.vuejs.org/guide/render-function.html#h-arguments), or using strings to get "text VNodes" or an object with slots. If this prop is specified, the `cell` slot in the template will be override. <div>e.g. `(node, index) => [h("div", {style: {height: "100%"}}, node.name)]`</div>|
 
 ### `VirtualisedList` Props
 
@@ -57,7 +57,9 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 
 |Prop|Type|Required?|Default|Description|
 |---|---|:---:|---|---|
-|nodes|`Array<Node>`|✓||Tree data with the following keys: <ul><li>`name` is the primary label for the node.</li><li>`state` stores states of each node.<ul><li>`expanded` shows children of the node if true, or hides them if false. Defaults to false.</li></ul></li><li>`children` is an array of child nodes belonging to the node.</li></ul><div>e.g. `[{name: "Node 1", children: [{name: "Leaf 1"}]}, {name: "Node 2"}]`</div>|
+|nodes|`Array<Node>`|✓||Tree data with implementing the following keys: <ul><li>`name`: The primary label for the node.</li><li>`state?`: An object stores states of each node.<ul><li>`expanded?`: shows children of the node if true, or hides them if false. Defaults to false.</li></ul></li><li>`children`: An array of child nodes belonging to the node.</li></ul><div>e.g. `[{name: "Node 1", children: [{name: "Leaf 1"}]}, {name: "Node 2"}]`</div>|
+|useTimeSlicing|`boolean`||`false`|Time slicing is a technique allows for switching between micro tasks (i.e. DOM redrawing) and micro tasks (i.e. node updating) when traversing and manipulating enormous amount of nodes. If it's set to `true`, we can avoid blocking the whole web application. However, the total amount of traversal time will be longer.|
+|onChange|`Function`|||A function that takes `nodes` prop as a parameter. This function will be called when executing `updateNode()` and `updateNodes()` methods.|
 
 ## Events
 
@@ -67,13 +69,63 @@ Here are events that are identical in both `VirtualisedList` and `VirtualisedTre
 
 |Event|Description|
 |---|---|
-|onScroll|Triggered when the user is scrolling the rendered content.|
-|onStartReached|Triggered once when the scroll position gets the bottom of the rendered content.|
-|onEndReached|Triggered once when the scroll position gets the top of the rendered content.|
+|onScroll|Triggered when the user is scrolling the rendered content. This event emits the current scroll position of the rendered content.|
+|onStartReached|Triggered once when the scroll position gets the bottom of the rendered content. This event emits the current scroll position of the rendered content.|
+|onEndReached|Triggered once when the scroll position gets the top of the rendered content. This event emits the current scroll position of the rendered content.|
+
+## Slots
+
+### Mutual slots
+
+Slots are provided for rendering content dynamically. Here are slots that are identical in both `VirtualisedList` and `VirtualisedTree` components.
+
+|Slot|Props|Description|
+|---|---|---|
+|cell|<ul><li>`node`: The current node for rendering.</li><li>`index`: The current node's index in the rendered content.</li></ul>|The slot for rendering a single node in the content. If `cellRenderer` props is specified, this slot won't have effect.|
+
+### `VirtualisedTree` slots
+
+|Slot|Props|Description|
+|---|---|---|
+|fallback||There are cases when it's useful to specify fallback (i.e. default) content for a slot, to be rendered only when no content is provided.|
 
 ## Methods
 
-### `VirtualisedList` Methods
+### Mutual methods
+
+`scrollToStart()`
+
+```ts
+scrollToStart(): void
+```
+
+`scrollToEnd()`
+
+```ts
+scrollToEnd(): void
+```
+
+`scrollToIndex()`
+
+```ts
+scrollToIndex(index: number): void
+```
+
+Valid `index` should be in the range from `0` to `nodes.length - 1`.
+
+`scrollToNode()`
+
+```ts
+scrollToNode(conditionCallback: Function): void
+```
+
+Valid `conditionCallback` should be a function that takes a node as a parameter and returns a `boolean`:
+
+```ts
+conditionCallback(node: Node): boolean
+```
+
+### `VirtualisedList` methods
 
 `refreshView()`
 
@@ -81,7 +133,43 @@ Here are events that are identical in both `VirtualisedList` and `VirtualisedTre
 refreshView(): void
 ```
 
-Force refresh rendered content.
+Forces refresh rendered content.
+
+### `VirtualisedTree` methods
+
+`updateNode`
+
+```ts
+updateNode(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
+```
+
+This method updates a single node in both original data and the view. Valid parameters are:
+
+- `nodes`: `nodes` prop.
+- `node`: The current node that needs to be updated.
+- `index`: The index of the node that needs to be updated.
+- `updateFn`: The function that manipulates the current node and returns an updated node:
+
+```ts
+updateFn(node: Node): Node
+```
+
+`updateNodes`
+
+```ts
+updateNodes(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
+```
+
+This method updates a single node including all its descendants in both original data and the view. Valid parameters are:
+
+- `nodes`: `nodes` prop.
+- `node`: The current node that needs to be updated.
+- `index`: The index of the node that needs to be updated.
+- `updateFn`: The function that manipulates the current node and returns an updated node:
+
+```ts
+updateFn(node: Node): Node
+```
 
 ## Project setup
 
@@ -103,6 +191,3 @@ yarn build
 ```
 yarn lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
