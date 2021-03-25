@@ -47,13 +47,13 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 |getNodeKey|`Function`|||A function that takes the current node and the index of the node in the virtual scroller as parameters, and returns the key of the node. Key is a unique identifier for the virtualised scroller. <div>e.g. `(node, index) => node.key`</div>|
 |cellRenderer|`Function`|||A function that takes the current node and its current index in the virtualised scroller as parameters, and returns an array of Children VNodes, built using [`h()`](https://v3.vuejs.org/guide/render-function.html#h-arguments), or using strings to get "text VNodes" or an object with slots. If this prop is specified, the `cell` slot in the template will be override. <div>e.g. `(node, index) => [h("div", {style: {height: "100%"}}, node.name)]`</div>|
 
-### `VirtualisedList` Props
+### `VirtualisedList` props
 
 |Prop|Type|Required?|Default|Description|
 |---|---|:---:|---|---|
 |nodes|`Array<any>`|✓||List data for rendering and can be any types inside of the array.|
 
-### `VirtualisedTree` Props
+### `VirtualisedTree` props
 
 |Prop|Type|Required?|Default|Description|
 |---|---|:---:|---|---|
@@ -93,19 +93,19 @@ Slots are provided for rendering content dynamically. Here are slots that are id
 
 ### Mutual methods
 
-`scrollToStart()`
+#### `scrollToStart()`
 
 ```ts
 scrollToStart(): void
 ```
 
-`scrollToEnd()`
+#### `scrollToEnd()`
 
 ```ts
 scrollToEnd(): void
 ```
 
-`scrollToIndex()`
+#### `scrollToIndex()`
 
 ```ts
 scrollToIndex(index: number): void
@@ -113,7 +113,7 @@ scrollToIndex(index: number): void
 
 Valid `index` should be in the range from `0` to `nodes.length - 1`.
 
-`scrollToNode()`
+#### `scrollToNode()`
 
 ```ts
 scrollToNode(conditionCallback: Function): void
@@ -127,7 +127,7 @@ conditionCallback(node: Node): boolean
 
 ### `VirtualisedList` methods
 
-`refreshView()`
+#### `refreshView()`
 
 ```ts
 refreshView(): void
@@ -137,7 +137,7 @@ Forces refresh rendered content.
 
 ### `VirtualisedTree` methods
 
-`updateNode`
+#### `updateNode`
 
 ```ts
 updateNode(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
@@ -154,7 +154,7 @@ This method updates a single node in both original data and the view. Valid para
 updateFn(node: Node): Node
 ```
 
-`updateNodes`
+#### `updateNodes`
 
 ```ts
 updateNodes(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
@@ -171,23 +171,32 @@ This method updates a single node including all its descendants in both original
 updateFn(node: Node): Node
 ```
 
-## Project setup
+## Contributing
 
-```
+Pull requests are welcome!
+
+### Project setup
+
+```shell
 yarn install
 ```
 
-### Compiles and hot-reloads for development
-```
+#### Compiles and hot-reloads for development
+
+```shell
 yarn serve
 ```
 
-### Compiles and minifies for production
-```
+#### Compiles and minifies for production
+
+```shell
 yarn build
 ```
 
-### Lints and fixes files
-```
+#### Lints and fixes files
+
+```shell
 yarn lint
 ```
+
+## License
