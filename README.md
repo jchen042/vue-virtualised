@@ -18,7 +18,7 @@ ES6 and CommonJS builds are available with each distribution.
 For example:
 
 ```js
-// You can import any component you want as a named export from 'vue3-virtualised'. e.g.
+// You can import any component you want as a named export from 'vue-virtualised'. e.g.
 import { VirtualisedList, VirtualisedTree } from 'vue-virtualised';
 
 // Or you can import the component as a named export. e.g.

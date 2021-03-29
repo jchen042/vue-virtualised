@@ -73,18 +73,23 @@ export default {
             display: "flex",
             flexDirection: "row",
             height: "100%",
+            transform: "translateX(10px)",
             textAlign: "left",
-            borderLeft: "1px solid black",
-            marginLeft: `${node.parents.length * 30}px`,
           },
         },
         [
+          ...node.parents.map(() =>
+            h("div", {
+              style: { width: "20px", borderLeft: "1px solid black" },
+            })
+          ),
           h(
             "div",
             {
               style: {
                 display: node.state.isLeaf ? "none" : "block",
                 width: "20px",
+                marginLeft: "-10px",
                 textAlign: "center",
               },
               onClick: async () =>
@@ -95,11 +100,16 @@ export default {
             },
             node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),
-          node.name,
+          h("div", {}, node.name),
           h(
             "div",
             {
-              style: { position: "absolute", right: 0, fontSize: "small" },
+              style: {
+                position: "absolute",
+                right: "20px",
+                fontSize: "small",
+                cursor: "pointer",
+              },
               onClick: async () =>
                 await treeView.value.updateNodes(
                   nodes,
@@ -107,7 +117,7 @@ export default {
                   index,
                   (node) => ({
                     ...node,
-                    name: `${node.name} updated`,
+                    name: "current node and all descendants updated",
                   })
                 ),
             },
