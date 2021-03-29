@@ -1,32 +1,7 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <!-- <HelloWorld msg="Welcome to Your Vue.js App" /> -->
-  <div :style="{ display: 'flex', flexDirection: 'row' }">
-    <div :style="{ width: '50%' }">
-      VirtualisedTree
-      <virtualised-tree
-        ref="treeView"
-        :nodes="nodes"
-        :use-time-slicing="true"
-        :on-change="onChange"
-        :viewport-height="viewportHeight"
-        :initial-scroll-top="initialScrollTop"
-        :initial-scroll-index="initialScrollIndex"
-        :scroll-behaviour="'smooth'"
-        :tolerance="2"
-        :get-node-height="getNodeHeight"
-        :get-node-key="(node, index) => node.key"
-        :cell-renderer="cellRenderer"
-        @onScroll="handleScroll"
-        @onStartReached="handleStartReached"
-        @onEndReached="handleEndReached"
-      >
-        <template #cell="slotProps">{{ slotProps.node.name }}</template>
-        <template #fallback><div>Loading tree...</div></template>
-      </virtualised-tree>
-    </div>
-    <div :style="{ width: '50%' }">
-      VirtualisedList
+  <div class="app-container">
+    <div class="list-container">
+      <div class="title">VirtualisedList</div>
       <virtualised-list
         :nodes="data"
         :viewport-height="viewportHeight"
@@ -41,15 +16,35 @@
         @onStartReached="handleStartReached"
         @onEndReached="handleEndReached"
       >
-        <template #cell="slotProps">{{ slotProps.node }}</template>
       </virtualised-list>
+    </div>
+    <div class="tree-container">
+      <div class="title">VirtualisedTree</div>
+      <virtualised-tree
+        ref="treeView"
+        :nodes="nodes"
+        :use-time-slicing="false"
+        :on-change="onChange"
+        :viewport-height="viewportHeight"
+        :initial-scroll-top="initialScrollTop"
+        :initial-scroll-index="initialScrollIndex"
+        :scroll-behaviour="'smooth'"
+        :tolerance="2"
+        :get-node-height="getNodeHeight"
+        :get-node-key="(node, index) => node.key"
+        :cell-renderer="treeCellRenderer"
+        @onScroll="handleScroll"
+        @onStartReached="handleStartReached"
+        @onEndReached="handleEndReached"
+      >
+        <template #fallback><div>Loading tree...</div></template>
+      </virtualised-tree>
     </div>
   </div>
 </template>
 
 <script>
 import { ref, h } from "vue";
-import HelloWorld from "./components/HelloWorld.vue";
 import VirtualisedList from "./components/VirtualisedList";
 import VirtualisedTree from "./components/VirtualisedTree";
 
@@ -58,7 +53,6 @@ import { constructFixedTree } from "./utils/mock";
 export default {
   name: "App",
   components: {
-    HelloWorld,
     VirtualisedTree,
     VirtualisedList,
   },
@@ -69,23 +63,35 @@ export default {
 
     const onChange = (nodes) => console.log("on change", nodes);
 
-    const cellRenderer = (node, index) => [
+    const listCellRenderer = (node) => [h("div", {}, node.label)];
+
+    const treeCellRenderer = (node, index) => [
       h(
         "div",
         {
           style: {
+            display: "flex",
+            flexDirection: "row",
             height: "100%",
+            transform: "translateX(10px)",
             textAlign: "left",
-            borderLeft: "1px solid black",
-            marginLeft: `${node.parents.length * 30}px`,
           },
         },
         [
+          ...node.parents.map(() =>
+            h("div", {
+              style: { width: "20px", borderLeft: "1px solid black" },
+            })
+          ),
           h(
-            "button",
+            "div",
             {
-              style: { width: "20px" },
-              disabled: node.state.isLeaf,
+              style: {
+                display: node.state.isLeaf ? "none" : "block",
+                width: "20px",
+                marginLeft: "-10px",
+                textAlign: "center",
+              },
               onClick: async () =>
                 await treeView.value.updateNode(nodes, node, index, (node) => ({
                   ...node,
@@ -94,11 +100,16 @@ export default {
             },
             node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),
-          node.name,
+          h("div", {}, node.name),
           h(
-            "button",
+            "div",
             {
-              style: { width: "20px" },
+              style: {
+                position: "absolute",
+                right: "20px",
+                fontSize: "small",
+                cursor: "pointer",
+              },
               onClick: async () =>
                 await treeView.value.updateNodes(
                   nodes,
@@ -106,23 +117,15 @@ export default {
                   index,
                   (node) => ({
                     ...node,
-                    name: "test",
+                    name: "current node and all descendants updated",
                   })
                 ),
             },
-            "C"
+            "Bulk update nodes"
           ),
         ]
       ),
-      h("div", {
-        style: {
-          borderBottom: "1px solid black",
-          marginLeft: `${node.parents.length * 30}px`,
-        },
-      }),
     ];
-
-    const listCellRenderer = (node, index) => [h("div", {}, node.label)];
 
     const handleScroll = (scrollTop) => {
       console.log(scrollTop);
@@ -139,8 +142,8 @@ export default {
       treeView,
       nodes,
       onChange,
-      cellRenderer,
       listCellRenderer,
+      treeCellRenderer,
       handleScroll,
       handleStartReached,
       handleEndReached,
@@ -152,7 +155,7 @@ export default {
         index: i,
         label: i,
       })),
-      viewportHeight: 400,
+      viewportHeight: 500,
       initialScrollTop: 300,
       initialScrollIndex: 50000,
       getNodeHeight: (node) => 30 + (node.index % 10),
@@ -169,5 +172,25 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.list-container {
+  width: 35%;
+}
+
+.tree-container {
+  width: 60%;
+}
+
+.title {
+  margin: 20px;
+  font-size: larger;
+  font-weight: bold;
 }
 </style>
