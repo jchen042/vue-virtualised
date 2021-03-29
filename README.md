@@ -1,17 +1,17 @@
-# Vue3 Virtualised
+# Vue Virtualised
 
 > Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data.
 
 ## Getting started
 
-Install `vue3-virtualised` using npm.
+Install `vue-virtualised` using npm.
 
 ```sh
 # npm
-npm install vue3-virtualised --save
+npm install vue-virtualised --save
 
 # yarn
-yarn add vue3-virtualised
+yarn add vue-virtualised
 ```
 
 ES6 and CommonJS builds are available with each distribution.
@@ -19,10 +19,10 @@ For example:
 
 ```js
 // You can import any component you want as a named export from 'vue3-virtualised'. e.g.
-import { VirtualisedList, VirtualisedTree } from 'vue3-virtualised';
+import { VirtualisedList, VirtualisedTree } from 'vue-virtualised';
 
 // Or you can import the component as a named export. e.g.
-import { VirtualisedTree as Tree } from 'vue3-virtualised';
+import { VirtualisedTree as Tree } from 'vue-virtualised';
 ```
 
 ## Usage
@@ -57,7 +57,7 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 
 |Prop|Type|Required?|Default|Description|
 |---|---|:---:|---|---|
-|nodes|`Array<Node>`|✓||Tree data with implementing the following keys: <ul><li>`name`: The primary label for the node.</li><li>`state?`: An object stores states of each node.<ul><li>`expanded?`: shows children of the node if true, or hides them if false. Defaults to false.</li></ul></li><li>`children`: An array of child nodes belonging to the node.</li></ul><div>e.g. `[{name: "Node 1", children: [{name: "Leaf 1"}]}, {name: "Node 2"}]`</div>|
+|nodes|`Array<Node>`|✓||Tree data with implementing the following keys: <ul><li>`name`: The primary label for the node.</li><li>`state?`: An object stores states of each node.<ul><li>`expanded?`: shows children of the node if `true`, or hides them if `false`. Defaults to `false`.</li></ul></li><li>`children`: An array of child nodes belonging to the node.</li></ul><div>e.g. `[{name: "Node 1", children: [{name: "Leaf 1"}]}, {name: "Node 2"}]`</div>|
 |useTimeSlicing|`boolean`||`false`|Time slicing is a technique allows for switching between micro tasks (i.e. DOM redrawing) and micro tasks (i.e. node updating) when traversing and manipulating enormous amount of nodes. If it's set to `true`, we can avoid blocking the whole web application. However, the total amount of traversal time will be longer.|
 |onChange|`Function`|||A function that takes `nodes` prop as a parameter. This function will be called when executing `updateNode()` and `updateNodes()` methods.|
 
@@ -137,7 +137,7 @@ Forces refresh rendered content.
 
 ### `VirtualisedTree` methods
 
-#### `updateNode`
+#### `updateNode()`
 
 ```ts
 updateNode(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
@@ -154,7 +154,7 @@ This method updates a single node in both original data and the view. Valid para
 updateFn(node: Node): Node
 ```
 
-#### `updateNodes`
+#### `updateNodes()`
 
 ```ts
 updateNodes(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
