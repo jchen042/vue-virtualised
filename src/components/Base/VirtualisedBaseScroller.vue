@@ -197,6 +197,7 @@ export default defineComponent({
     );
 
     // Calculte total content height.
+    // TODO: Fix the content height limitation of 33554400px.
     const getTotalHeight = (nodes, childPositions, getNodeHeight) => {
       return nodes.length > 0
         ? childPositions[nodes.length - 1] +

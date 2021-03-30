@@ -63,24 +63,20 @@ export default {
 
     const onChange = (nodes) => console.log("on change", nodes);
 
-    const listCellRenderer = (node) => [h("div", {}, node.label)];
+    const listCellRenderer = (node) => [
+      h("div", { class: "cell-container list-cell-container" }, node.label),
+    ];
 
     const treeCellRenderer = (node, index) => [
       h(
         "div",
         {
-          style: {
-            display: "flex",
-            flexDirection: "row",
-            height: "100%",
-            transform: "translateX(10px)",
-            textAlign: "left",
-          },
+          class: "cell-container tree-cell-container",
         },
         [
           ...node.parents.map(() =>
             h("div", {
-              style: { width: "20px", borderLeft: "1px solid black" },
+              class: "vertical-divider",
             })
           ),
           h(
@@ -88,10 +84,8 @@ export default {
             {
               style: {
                 display: node.state.isLeaf ? "none" : "block",
-                width: "20px",
-                marginLeft: "-10px",
-                textAlign: "center",
               },
+              class: "expansion-button",
               onClick: async () =>
                 await treeView.value.updateNode(nodes, node, index, (node) => ({
                   ...node,
@@ -104,12 +98,7 @@ export default {
           h(
             "div",
             {
-              style: {
-                position: "absolute",
-                right: "20px",
-                fontSize: "small",
-                cursor: "pointer",
-              },
+              class: "update-button",
               onClick: async () =>
                 await treeView.value.updateNodes(
                   nodes,
@@ -157,8 +146,8 @@ export default {
       })),
       viewportHeight: 500,
       initialScrollTop: 300,
-      initialScrollIndex: 50000,
-      getNodeHeight: (node) => 30 + (node.index % 10),
+      initialScrollIndex: 0,
+      getNodeHeight: (node) => 40 + (node.index % 10),
     };
   },
 };
@@ -192,5 +181,55 @@ export default {
   margin: 20px;
   font-size: larger;
   font-weight: bold;
+}
+
+.cell-container {
+  height: 100%;
+  align-items: center;
+}
+
+.list-cell-container {
+  text-align: center;
+}
+
+.tree-cell-container {
+  display: flex;
+  flex-direction: row;
+  transform: translateX(10px);
+  text-align: left;
+}
+
+.vertical-divider {
+  width: 20px;
+  height: 100%;
+  border-left: 1px solid #eaecef;
+}
+
+.expansion-button {
+  width: 20px;
+  margin-left: -10px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.update-button {
+  position: absolute;
+  right: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: #2ea44f;
+  color: hsla(0, 0%, 100%, 0.8);
+  padding: 5px 16px;
+  visibility: hidden;
+}
+
+.cell-container:hover {
+  background-color: #f6f8fa;
+}
+
+.cell-container:hover .update-button {
+  visibility: visible;
 }
 </style>
