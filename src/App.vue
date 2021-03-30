@@ -69,18 +69,12 @@ export default {
       h(
         "div",
         {
-          style: {
-            display: "flex",
-            flexDirection: "row",
-            height: "100%",
-            transform: "translateX(10px)",
-            textAlign: "left",
-          },
+          class: "cell-container",
         },
         [
           ...node.parents.map(() =>
             h("div", {
-              style: { width: "20px", borderLeft: "1px solid black" },
+              class: "vertical-divider",
             })
           ),
           h(
@@ -88,10 +82,8 @@ export default {
             {
               style: {
                 display: node.state.isLeaf ? "none" : "block",
-                width: "20px",
-                marginLeft: "-10px",
-                textAlign: "center",
               },
+              class: "expansion-button",
               onClick: async () =>
                 await treeView.value.updateNode(nodes, node, index, (node) => ({
                   ...node,
@@ -104,12 +96,7 @@ export default {
           h(
             "div",
             {
-              style: {
-                position: "absolute",
-                right: "20px",
-                fontSize: "small",
-                cursor: "pointer",
-              },
+              class: "update-button",
               onClick: async () =>
                 await treeView.value.updateNodes(
                   nodes,
@@ -192,5 +179,46 @@ export default {
   margin: 20px;
   font-size: larger;
   font-weight: bold;
+}
+
+.cell-container {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  transform: translateX(10px);
+  align-items: center;
+  text-align: left;
+}
+
+.vertical-divider {
+  width: 20px;
+  height: 100%;
+  border-left: 1px solid #2c3e50;
+}
+
+.expansion-button {
+  width: 20px;
+  margin-left: -10px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.update-button {
+  position: absolute;
+  right: 20px;
+  font-size: smaller;
+  cursor: pointer;
+  border: 1px solid #2c3e50;
+  border-radius: 5px;
+  padding: 2px;
+  visibility: hidden;
+}
+
+.cell-container:hover {
+  background-color: cadetblue;
+}
+
+.cell-container:hover .update-button {
+  visibility: visible;
 }
 </style>
