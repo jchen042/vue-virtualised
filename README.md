@@ -1,6 +1,6 @@
 # Vue Virtualised
 
-> Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data.
+> Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data. `vue-virtualised` is able to render and update 1 million nodes within a few seconds in front-end.
 
 ![Demo](/src/assets/demo-20200331-60fps.gif)
 
@@ -29,7 +29,42 @@ import { VirtualisedTree as Tree } from 'vue-virtualised';
 
 ## Usage
 
-TBC...
+### `VirtualisedList` usage
+
+```vue
+<virtualised-list :nodes="[1, 2, 3, 4, 5]">
+  <template #cell="slotProps">
+    {{ slotProps.node }}
+  </template>
+</virtualised-list>
+```
+
+### `VirtualisedTree` usage
+
+```vue
+<virtualised-tree
+  :nodes="[
+    {
+      name: 'Node 1',
+      children: [{ name: 'Leaf 1' }],
+      state: { expanded: true },
+    },
+    { name: 'Node 2' },
+  ]"
+>
+  <template #cell="slotProps">
+    <!-- node.parents is an array that contains all parent nodes' index -->
+    <div
+      :style="{
+        textAlign: 'left',
+        marginLeft: `${slotProps.node.parents.length * 30}px`,
+      }"
+    >
+      {{ slotProps.node.name }}
+    </div>
+  </template>
+</virtualised-tree>
+```
 
 ## Props
 
