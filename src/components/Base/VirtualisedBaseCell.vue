@@ -6,7 +6,7 @@ import invariant from "fbjs/lib/invariant";
 export default {
   name: "VirtualisedBaseCell",
   props: {
-    node: { type: Object, required: true },
+    node: { type: [Object, String, Number], required: true },
     index: { type: Number, required: true },
     startIndex: { type: Number, default: () => 0, required: true },
     /**
@@ -23,6 +23,7 @@ export default {
       typeof props.cellRenderer === "function",
       `cellRenderer ${props.cellRenderer} is not a function`
     );
+    console.log("node", props.node);
 
     return () =>
       h(

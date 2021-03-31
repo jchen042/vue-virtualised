@@ -17,6 +17,11 @@
         @onEndReached="handleEndReached"
       >
       </virtualised-list>
+      <!-- <virtualised-list :nodes="[1, 2, 3, 4, 5]">
+        <template #cell="slotProps">
+          {{ slotProps.node }}
+        </template>
+      </virtualised-list> -->
     </div>
     <div class="tree-container">
       <div class="title">VirtualisedTree</div>
@@ -39,6 +44,28 @@
       >
         <template #fallback><div>Loading tree...</div></template>
       </virtualised-tree>
+      <!-- <virtualised-tree
+        :nodes="[
+          {
+            name: 'Node 1',
+            children: [{ name: 'Leaf 1' }],
+            state: { expanded: true },
+          },
+          { name: 'Node 2' },
+        ]"
+      >
+        <template #cell="slotProps">
+          node.parents is an array that contains all parent nodes' index
+          <div
+            :style="{
+              textAlign: 'left',
+              marginLeft: `${slotProps.node.parents.length * 30}px`,
+            }"
+          >
+            {{ slotProps.node.name }}
+          </div>
+        </template>
+      </virtualised-tree> -->
     </div>
   </div>
 </template>
