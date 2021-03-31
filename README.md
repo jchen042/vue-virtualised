@@ -2,6 +2,8 @@
 
 > Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data.
 
+![Demo](/src/assets/demo-20200331-60fps.gif)
+
 ## Getting started
 
 Install `vue-virtualised` using npm.

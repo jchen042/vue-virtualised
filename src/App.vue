@@ -63,13 +63,15 @@ export default {
 
     const onChange = (nodes) => console.log("on change", nodes);
 
-    const listCellRenderer = (node) => [h("div", {}, node.label)];
+    const listCellRenderer = (node) => [
+      h("div", { class: "cell-container list-cell-container" }, node.label),
+    ];
 
     const treeCellRenderer = (node, index) => [
       h(
         "div",
         {
-          class: "cell-container",
+          class: "cell-container tree-cell-container",
         },
         [
           ...node.parents.map(() =>
@@ -144,8 +146,8 @@ export default {
       })),
       viewportHeight: 500,
       initialScrollTop: 300,
-      initialScrollIndex: 50000,
-      getNodeHeight: (node) => 30 + (node.index % 10),
+      initialScrollIndex: 0,
+      getNodeHeight: (node) => 40 + (node.index % 10),
     };
   },
 };
@@ -182,18 +184,25 @@ export default {
 }
 
 .cell-container {
+  height: 100%;
+  align-items: center;
+}
+
+.list-cell-container {
+  text-align: center;
+}
+
+.tree-cell-container {
   display: flex;
   flex-direction: row;
-  height: 100%;
   transform: translateX(10px);
-  align-items: center;
   text-align: left;
 }
 
 .vertical-divider {
   width: 20px;
   height: 100%;
-  border-left: 1px solid #2c3e50;
+  border-left: 1px solid #eaecef;
 }
 
 .expansion-button {
@@ -206,16 +215,18 @@ export default {
 .update-button {
   position: absolute;
   right: 20px;
-  font-size: smaller;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  border: 1px solid #2c3e50;
   border-radius: 5px;
-  padding: 2px;
+  background-color: #2ea44f;
+  color: hsla(0, 0%, 100%, 0.8);
+  padding: 5px 16px;
   visibility: hidden;
 }
 
 .cell-container:hover {
-  background-color: cadetblue;
+  background-color: #f6f8fa;
 }
 
 .cell-container:hover .update-button {
