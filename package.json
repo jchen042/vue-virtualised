@@ -1,17 +1,36 @@
 {
   "name": "vue-virtualised",
   "version": "0.0.0",
+  "description": "Vue components developed by Vue.js 3.0 for efficiently rendering large scrollable lists and hierarchical data. vue-virtualised is able to render and update 1 million nodes within a few seconds in front-end.",
+  "keywords": [
+    "vue",
+    "vuejs",
+    "components",
+    "front-end",
+    "virtual-scroller"
+  ],
+  "author": {
+    "name": "Junxiang Chen",
+    "email": "chenfrey920417@outlook.com",
+    "url": "https://github.com/FallingCeilingS"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FallingCeilingS/vue-virtualised"
+  },
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
+  "peerDependencies": {},
   "dependencies": {
     "core-js": "^3.6.5",
     "fbjs": "^0.9.0-alpha.2",
     "lodash": "^4.17.21",
-    "vue": "^3.0.6"
+    "vue": "^3.0.10"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.12.17",

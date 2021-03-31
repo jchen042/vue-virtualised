@@ -23,7 +23,6 @@ export default {
       typeof props.cellRenderer === "function",
       `cellRenderer ${props.cellRenderer} is not a function`
     );
-    console.log("node", props.node);
 
     return () =>
       h(
