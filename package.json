@@ -28,7 +28,7 @@
   "peerDependencies": {},
   "dependencies": {
     "core-js": "^3.6.5",
-    "fbjs": "^0.9.0-alpha.2",
+    "fbjs": "3.0.0",
     "lodash": "^4.17.21",
     "vue": "^3.0.10"
   },
@@ -38,14 +38,14 @@
     "@vue/cli-plugin-babel": "~5.0.0-alpha.7",
     "@vue/cli-plugin-eslint": "~5.0.0-alpha.7",
     "@vue/cli-service": "~5.0.0-alpha.7",
-    "@vue/compiler-sfc": "^3.0.0",
+    "@vue/compiler-sfc": "^3.0.10",
     "@vue/eslint-config-prettier": "^6.0.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.20.0",
     "eslint-plugin-json": "^2.1.2",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-vue": "^7.0.0-0",
-    "fbjs-scripts": "^0.6.0-alpha.3",
+    "fbjs-scripts": "3.0.0",
     "prettier": "^2.2.1"
   },
   "eslintConfig": {
