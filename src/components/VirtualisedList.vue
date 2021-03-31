@@ -22,7 +22,7 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import VirtualisedBaseScroller from "./Base/VirtualisedBaseScroller";
+import VirtualisedBaseScroller from "./Base/VirtualisedBaseScroller.vue";
 
 export default {
   name: "VirtualisedList",

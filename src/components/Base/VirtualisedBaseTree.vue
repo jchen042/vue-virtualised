@@ -22,7 +22,7 @@
 
 <script>
 import { defineComponent, toRefs, ref, markRaw, onMounted } from "vue";
-import VirtualisedBaseScroller from "./VirtualisedBaseScroller";
+import VirtualisedBaseScroller from "./VirtualisedBaseScroller.vue";
 
 import { sliceTask } from "../../utils/index";
 import {
