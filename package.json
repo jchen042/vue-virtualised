@@ -25,10 +25,13 @@
   "homepage": "https://github.com/FallingCeilingS/vue-virtualised#readme",
   "private": true,
   "main": "dist/vue-virtualised.umd.js",
+  "module": "dist/vue-virtualised.esm.js",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "npm run build:umd",
+    "build": "npm run build:umd && npm run build:es",
     "build:umd": "rollup --config build/rollup.config.umd.js",
+    "build:es": "rollup --config build/rollup.config.es.js",
+    "lib": "vue-cli-service build --target lib --name vue-virtualised --dest lib ./src/index.js",
     "lint": "vue-cli-service lint"
   },
   "peerDependencies": {

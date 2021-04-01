@@ -27,4 +27,4 @@ if (GlobalVue) {
 }
 
 // To allow use as module (npm/webpack/etc.) export component
-export default { VirtualisedList, VirtualisedTree };
+export { VirtualisedList, VirtualisedTree };
