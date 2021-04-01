@@ -130,7 +130,7 @@ Slots are provided for rendering content dynamically. Here are slots that are id
 
 |Slot|Props|Description|
 |---|---|---|
-|fallback||There are cases when it's useful to specify fallback (i.e. default) content for a slot, to be rendered only when no content is provided.|
+|fallback||There are cases when it's useful to specify fallback (i.e. default) content for a slot, to be rendered only when no content is provided. This slot is only available when `useTimeSlicing` prop sets to `true` because it takes longer to load the content.|
 
 ## Methods
 
