@@ -21,10 +21,16 @@ For example:
 
 ```js
 // You can import any component you want as a named export from 'vue-virtualised'. e.g.
-import { VirtualisedList, VirtualisedTree } from 'vue-virtualised';
+import { VirtualisedList, VirtualisedTree } from "vue-virtualised";
 
 // Or you can import the component as a named export. e.g.
-import { VirtualisedTree as Tree } from 'vue-virtualised';
+import { VirtualisedTree as Tree } from "vue-virtualised";
+```
+
+⚠️ The line below should be included when importing the package:
+
+```js
+import "vue-virtualised/dist/vue-virtualised.css";
 ```
 
 ## Usage
