@@ -1,6 +1,6 @@
 {
   "name": "vue-virtualised",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Vue components developed by Vue.js 3.0 for efficiently rendering large scrollable lists and hierarchical data. vue-virtualised is able to render and update 1 million nodes within a few seconds in front-end.",
   "keywords": [
     "vue",
@@ -31,7 +31,7 @@
     "url": "https://github.com/FallingCeilingS/vue-virtualised/issues"
   },
   "homepage": "https://github.com/FallingCeilingS/vue-virtualised#readme",
-  "private": true,
+  "private": false,
   "main": "dist/vue-virtualised.umd.js",
   "module": "dist/vue-virtualised.esm.js",
   "unpkg": "dist/vue-virtualised.min.js",
