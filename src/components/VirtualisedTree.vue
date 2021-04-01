@@ -33,14 +33,11 @@
 
 <script>
 import { defineComponent, defineAsyncComponent, ref, watch } from "vue";
+import VirtualisedBaseTree from "./Base/VirtualisedBaseTree.vue";
 
 export default defineComponent({
   name: "VirtualisedTree",
-  components: {
-    VirtualisedBaseTree: defineAsyncComponent(() =>
-      import("./Base/VirtualisedBaseTree.vue")
-    ),
-  },
+  components: { VirtualisedBaseTree },
   props: {
     nodes: {
       type: Array,
