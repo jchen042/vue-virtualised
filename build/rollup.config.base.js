@@ -36,5 +36,6 @@ export default {
     buble(),
   ],
   watch: { include: "src/**" },
+  // https://rollupjs.org/guide/en/#peer-dependencies
   external: ["vue", "css"],
 };
