@@ -118,7 +118,7 @@ Slots are provided for rendering content dynamically. Here are slots that are id
 
 |Slot|Props|Description|
 |---|---|---|
-|cell|<ul><li>`node`: The current node for rendering.</li><li>`index`: The current node's index in the rendered content.</li></ul>|The slot for rendering a single node in the content. If `cellRenderer` props is specified, this slot won't have effect.|
+|cell|<ul><li>`node`: The current node for rendering.<ul><li>`index`: The current index of the node in `children` of its parent node.</li><li>`parents`: An array of indices of all parent nodes ordered from the root node.</li><li>`key`: A unique identifier of the node.</li><li>`name`: The name of the node.</li><li>`state`: An object stores states of each node.<ul><li>`expanded`: shows children of the node if `true`, or hides them if `false`.</li><li>`isLeaf`: A boolean that indicates if the current node is the leaf node.</li></ul></li><li>`children`: An array of child nodes belonging to the node.</li></ul></li><li>`index`: The current node's index in the rendered content.</li></ul>|The slot for rendering a single node in the content. If `cellRenderer` props is specified, this slot won't have effect.|
 
 ### `VirtualisedTree` slots
 
