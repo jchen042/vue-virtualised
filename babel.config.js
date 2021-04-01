@@ -1,3 +1,8 @@
 module.exports = {
-  presets: ["@vue/cli-plugin-babel/preset"],
+  // https://rollupjs.org/guide/en/#peer-dependencies
+  plugins: ["lodash"],
+  presets: [
+    "@vue/cli-plugin-babel/preset",
+    ["@babel/env", { targets: { node: 6 } }],
+  ],
 };

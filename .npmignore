@@ -1,0 +1,6 @@
+.vscode
+public
+.editorconfig
+babel.config.js
+*.gif
+*.log

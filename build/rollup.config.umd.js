@@ -9,6 +9,7 @@ const config = Object.assign({}, base, {
     sourceMap: true,
     // https://github.com/lukeed/navaid/issues/5
     inlineDynamicImports: true,
+    treeshake: true,
   },
 });
 
