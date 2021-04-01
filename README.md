@@ -21,10 +21,16 @@ For example:
 
 ```js
 // You can import any component you want as a named export from 'vue-virtualised'. e.g.
-import { VirtualisedList, VirtualisedTree } from 'vue-virtualised';
+import { VirtualisedList, VirtualisedTree } from "vue-virtualised";
 
 // Or you can import the component as a named export. e.g.
-import { VirtualisedTree as Tree } from 'vue-virtualised';
+import { VirtualisedTree as Tree } from "vue-virtualised";
+```
+
+⚠️ The line below should be included when importing the package:
+
+```js
+import "vue-virtualised/dist/vue-virtualised.css";
 ```
 
 ## Usage
@@ -124,7 +130,7 @@ Slots are provided for rendering content dynamically. Here are slots that are id
 
 |Slot|Props|Description|
 |---|---|---|
-|fallback||There are cases when it's useful to specify fallback (i.e. default) content for a slot, to be rendered only when no content is provided.|
+|fallback||There are cases when it's useful to specify fallback (i.e. default) content for a slot, to be rendered only when no content is provided. This slot is only available when `useTimeSlicing` prop sets to `true` because it takes longer to load the content.|
 
 ## Methods
 
