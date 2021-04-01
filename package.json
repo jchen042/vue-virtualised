@@ -25,7 +25,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/FallingCeilingS/vue-virtualised"
+    "url": "git+https://github.com/FallingCeilingS/vue-virtualised"
   },
   "bugs": {
     "url": "https://github.com/FallingCeilingS/vue-virtualised/issues"
@@ -42,7 +42,8 @@
     "build:es": "rollup --config build/rollup.config.es.js",
     "build:browser": "rollup --config build/rollup.config.browser.js",
     "lib": "vue-cli-service build --target lib --name vue-virtualised --dest lib ./src/index.js",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "prepublishOnly": "npm run lint && npm run build"
   },
   "peerDependencies": {
     "vue": "^3.0.10"
