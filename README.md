@@ -1,5 +1,7 @@
 # Vue Virtualised
 
+[![npm](https://img.shields.io/npm/v/vue-virtualised.svg)](https://www.npmjs.com/package/vue-virtualised)
+
 > Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data. `vue-virtualised` is able to render and update 1 million nodes within a few seconds in front-end.
 
 ![Demo](/src/assets/demo-20200331-60fps.gif)
@@ -81,12 +83,12 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 <!-- markdownlint-disable MD033 -->
 |Prop|Type|Required?|Default|Description|
 |---|---|:---:|---|---|
-|viewportHeight|`Number`||`400`|The height of the scrollable container for rendering elements.|
-|initialScrollTop|`Number`||`0`|The initial scroll position.|
+|viewportHeight|`Number`||`400`|The height (px) of the scrollable container for rendering elements.|
+|initialScrollTop|`Number`||`0`|The initial scroll position (px).|
 |initialScrollIndex|`Number`||`0`|The initial scroll index. If this prop is specified, it will override `initialScrollTop` prop.|
 |scrollBehaviour|`String`||`auto`|Inherited from [`ScrollToOptions.behavior`](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior) that specifies whether the scrolling should animate smoothly, or happen instantly in a single jump. Value is an enum, which can be one of the following: <ul><li>`smooth`: The scrolling animates smoothly.</li><li>`auto`: The scrolling happens in a single jump. </li></ul>|
 |tolerance|`Number`||`2`|Padding of nodes outside of the viewport to allow for smooth scrolling.|
-|getNodeHeight|`Function`|||A function that takes the current node as a parameter, and returns the height of the node. <div>e.g. `(node) => 30 + (node.index % 10)`</div>|
+|getNodeHeight|`Function`||`40`|A function that takes the current node as a parameter, and returns the height (px) of the node. <div>e.g. `(node) => 30 + (node.index % 10)`</div>|
 |getNodeKey|`Function`|||A function that takes the current node and the index of the node in the virtual scroller as parameters, and returns the key of the node. Key is a unique identifier for the virtualised scroller. <div>e.g. `(node, index) => node.key`</div>|
 |cellRenderer|`Function`|||A function that takes the current node and its current index in the virtualised scroller as parameters, and returns an array of Children VNodes, built using [`h()`](https://v3.vuejs.org/guide/render-function.html#h-arguments), or using strings to get "text VNodes" or an object with slots. If this prop is specified, the `cell` slot in the template will be override. <div>e.g. `(node, index) => [h("div", {style: {height: "100%"}}, node.name)]`</div>|
 
