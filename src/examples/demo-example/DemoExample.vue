@@ -45,13 +45,13 @@
 
 <script>
 import { ref, h } from "vue";
-import VirtualisedList from "./components/VirtualisedList";
-import VirtualisedTree from "./components/VirtualisedTree";
+import VirtualisedList from "../../components/VirtualisedList";
+import VirtualisedTree from "../../components/VirtualisedTree";
 
-import { constructFixedTree } from "./utils/mock";
+import { constructFixedTree } from "../../utils/mock";
 
 export default {
-  name: "App",
+  name: "DemoExample",
   components: {
     VirtualisedTree,
     VirtualisedList,
