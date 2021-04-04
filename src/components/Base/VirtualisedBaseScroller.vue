@@ -1,15 +1,15 @@
 <template>
   <div
     ref="virtualScroller"
-    class="virtual-scroller-container"
-    :style="{ height: `${viewportHeight}px` }"
+    :style="{ height: `${viewportHeight}px`, overflow: 'auto' }"
     @scroll.passive="handleScroll"
   >
     <div
-      class="virtual-scroller-content"
       :style="{
         height: `${totalHeight}px`,
         willChange: 'transform',
+        position: 'relative',
+        overflow: 'hidden',
       }"
     >
       <div
@@ -410,12 +410,4 @@ export default defineComponent({
 });
 </script>
 
-<style>
-.virtual-scroller-container {
-  overflow: auto;
-}
-.virtual-scroller-content {
-  overflow: hidden;
-  position: relative;
-}
-</style>
+<style></style>
