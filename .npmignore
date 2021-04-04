@@ -1,6 +1,8 @@
 .vscode
 public
+examples
 .editorconfig
 babel.config.js
+.eslintrc.js
 *.gif
 *.log
