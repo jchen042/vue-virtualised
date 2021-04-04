@@ -11,8 +11,8 @@ module.exports = {
     "@vue/prettier",
   ],
   parserOptions: {
-    parser: "@babel/eslint-parser",
-    plugins: ["@babel"],
+    parser: "@typescript-eslint/parser",
+    plugins: ["@typescript-eslint/eslint-plugin"],
     ecmaFeatures: {
       legacyDecorators: true,
     },
