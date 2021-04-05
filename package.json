@@ -23,7 +23,7 @@
   "unpkg": "dist/vue-virtualised.min.js",
   "dependencies": {
     "core-js": "^3.6.5",
-    "fbjs": "3.0.0",
+    "fbjs": "^3.0.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
@@ -35,6 +35,8 @@
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-node-resolve": "^11.2.1",
     "@rollup/plugin-replace": "^2.4.2",
+    "@types/fbjs": "^3.0.0",
+    "@types/lodash": "^4.14.168",
     "@typescript-eslint/eslint-plugin": "^4.15.1",
     "@typescript-eslint/parser": "^4.15.1",
     "@vue/cli-plugin-babel": "~5.0.0-alpha.7",

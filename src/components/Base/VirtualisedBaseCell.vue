@@ -1,9 +1,9 @@
 <script>
-import { h } from "vue";
+import { defineComponent, h } from "vue";
 
 import invariant from "fbjs/lib/invariant";
 
-export default {
+export default defineComponent({
   name: "VirtualisedBaseCell",
   props: {
     node: { type: [Object, String, Number], required: true },
@@ -31,12 +31,12 @@ export default {
           style: { height: "100%" },
         },
         props.cellRenderer(props.node, props.index + props.startIndex) ?? [
-          slots.cell({
+          slots?.cell({
             node: props.node,
             index: props.index + props.startIndex,
           }),
         ]
       );
   },
-};
+});
 </script>

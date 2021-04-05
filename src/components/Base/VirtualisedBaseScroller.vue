@@ -43,7 +43,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 /**
  * inspired by Adam Klein
  * https://dev.to/adamklein/build-your-own-virtual-scroll-part-i-11ib
@@ -51,6 +51,7 @@
  */
 import {
   defineComponent,
+  PropType,
   toRefs,
   ref,
   triggerRef,
@@ -66,12 +67,14 @@ import VirtualisedBaseCell from "./VirtualisedBaseCell.vue";
 import invariant from "fbjs/lib/invariant";
 import { isNil, isNaN } from "lodash";
 
+import { GetNodeHeight, GetNodeKey, CellRenderer } from "../../types/types";
+
 export default defineComponent({
   name: "VirtualisedBaseScroller",
   components: { VirtualisedBaseCell },
   props: {
     data: {
-      type: Array,
+      type: Array as PropType<Array<any>>,
       required: true,
     },
     viewportHeight: {
@@ -86,13 +89,18 @@ export default defineComponent({
       type: Number,
       default: () => null,
     },
-    scrollBehaviour: { type: String, default: () => "auto" },
+    scrollBehaviour: {
+      // TODO: handle type change for parent components
+      // eslint-disable-next-line no-undef
+      type: Object as PropType<ScrollBehavior>,
+      default: () => "auto",
+    },
     tolerance: {
       type: Number,
       default: () => 2,
     },
     getNodeHeight: {
-      type: Function,
+      type: Function as PropType<GetNodeHeight>,
       default: () => 40,
     },
     /**
@@ -101,11 +109,11 @@ export default defineComponent({
      * this key is necessary for virtualisation to work properly.
      */
     getNodeKey: {
-      type: Function,
-      default: (node, index) => node.key ?? index,
+      type: Function as PropType<GetNodeKey>,
+      default: (node: any, index: number) => node.key ?? index,
     },
     cellRenderer: {
-      type: Function,
+      type: Function as PropType<CellRenderer>,
       default: () => null,
     },
   },
@@ -123,6 +131,9 @@ export default defineComponent({
 
     const data = computed({
       get: () => props.data,
+      set: (val) => {
+        data.value = val;
+      },
     });
 
     // TODO: test invalid cases
@@ -167,10 +178,13 @@ export default defineComponent({
       `getNodeHeight is not a function`
     );
 
-    const virtualScroller = ref(null);
+    const virtualScroller = ref<HTMLElement | null>(null);
 
     // Store an array of child nodes positions from 0.
-    const getChildPositions = (nodes, getNodeHeight) => {
+    const getChildPositions = (
+      nodes: Array<any>,
+      getNodeHeight: GetNodeHeight
+    ) => {
       let results = [0];
       if (nodes.length > 0) {
         for (let i = 1; i < nodes.length; i++) {
@@ -198,7 +212,11 @@ export default defineComponent({
 
     // Calculte total content height.
     // TODO: Fix the content height limitation of 33554400px.
-    const getTotalHeight = (nodes, childPositions, getNodeHeight) => {
+    const getTotalHeight = (
+      nodes: Array<any>,
+      childPositions: Array<number>,
+      getNodeHeight: GetNodeHeight
+    ) => {
       return nodes.length > 0
         ? childPositions[nodes.length - 1] +
             getNodeHeight(nodes[nodes.length - 1])
@@ -213,15 +231,15 @@ export default defineComponent({
     // Offset start node.
     const offsetY = ref(0);
     // Visible nodes in the virtualised view.
-    const visibleNodes = ref([]);
+    const visibleNodes = ref<Array<number>>([]);
 
     // Binary search to find the first visible node's index in viewport.
     const getFirstVisibleIndex = (
-      scrollTop,
-      viewportHeight,
-      totalHeight,
-      childPositions,
-      itemCount
+      scrollTop: number,
+      viewportHeight: number,
+      totalHeight: number,
+      childPositions: Array<number>,
+      itemCount: number
     ) => {
       // In the case we don't have enough elements to scroll, so return index 0
       if (totalHeight < scrollTop || totalHeight < viewportHeight) return 0;
@@ -245,10 +263,10 @@ export default defineComponent({
 
     // Find the last node's index in the viewport.
     const getLastVisibleIndex = (
-      childPositions,
-      firstVisibleIndex,
-      itemCount,
-      viewportHeight
+      childPositions: Array<number>,
+      firstVisibleIndex: number,
+      itemCount: number,
+      viewportHeight: number
     ) => {
       let lastVisibleIndex;
       for (
@@ -317,33 +335,33 @@ export default defineComponent({
 
     const handleScroll = () => {
       requestAnimationFrame(() => {
-        scrollTop.value = virtualScroller.value.scrollTop;
-        emit("onScroll", virtualScroller.value.scrollTop);
+        scrollTop.value = virtualScroller.value?.scrollTop ?? 0;
+        emit("onScroll", virtualScroller.value?.scrollTop);
 
         if (scrollTop.value === 0)
-          emit("onStartReached", virtualScroller.value.scrollTop);
+          emit("onStartReached", virtualScroller.value?.scrollTop);
 
         // Hack: we might have 1px tolerance when scrolling to the end
         if (scrollTop.value >= totalHeight.value - viewportHeight.value - 1)
-          emit("onEndReached", virtualScroller.value.scrollTop);
+          emit("onEndReached", virtualScroller.value?.scrollTop);
       });
     };
 
     const scrollToStart = () => {
-      virtualScroller.value.scrollTo({
+      virtualScroller.value?.scrollTo({
         top: 0,
         behavior: scrollBehaviour.value,
       });
     };
 
     const scrollToEnd = () => {
-      virtualScroller.value.scrollTo({
+      virtualScroller.value?.scrollTo({
         top: totalHeight.value,
         behavior: scrollBehaviour.value,
       });
     };
 
-    const scrollToIndex = (index) => {
+    const scrollToIndex = (index: number) => {
       invariant(
         index >= 0,
         `index value out of range: requested index ${index} but minimum is 0`
@@ -357,7 +375,7 @@ export default defineComponent({
       scrollTop.value = childPositions.value[index];
     };
 
-    const scrollToNode = (conditionCallback) => {
+    const scrollToNode = (conditionCallback: Function) => {
       invariant(
         conditionCallback && typeof conditionCallback === "function",
         `input parameter ${conditionCallback} is not a function`
