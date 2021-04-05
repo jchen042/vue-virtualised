@@ -10,7 +10,7 @@ import cjs from "@rollup/plugin-commonjs";
 import buble from "@rollup/plugin-buble";
 import replace from "@rollup/plugin-replace";
 
-const config = require("../package.json");
+import config from "../package.json";
 
 export default {
   input: "src/index.js",
@@ -33,7 +33,7 @@ export default {
       },
     }),
     cjs(),
-    buble(),
+    // buble(),
   ],
   watch: { include: "src/**" },
   // https://rollupjs.org/guide/en/#peer-dependencies

@@ -42,7 +42,7 @@ export default defineComponent({
       required: true,
     },
     useTimeSlicing: { type: Boolean, default: () => true },
-    onChange: { type: Function, default: () => {} },
+    onChange: { type: Function, default: () => null },
     viewportHeight: {
       type: Number,
       default: () => 400,

@@ -44,6 +44,8 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * inspired by Adam Klein
  * https://dev.to/adamklein/build-your-own-virtual-scroll-part-i-11ib
@@ -67,7 +69,12 @@ import VirtualisedBaseCell from "./VirtualisedBaseCell.vue";
 import invariant from "fbjs/lib/invariant";
 import { isNil, isNaN } from "lodash";
 
-import { GetNodeHeight, GetNodeKey, CellRenderer } from "../../types/types";
+import {
+  GetNodeHeight,
+  GetNodeKey,
+  CellRenderer,
+  ConditionCallback,
+} from "../../types/types";
 
 export default defineComponent({
   name: "VirtualisedBaseScroller",
@@ -375,7 +382,7 @@ export default defineComponent({
       scrollTop.value = childPositions.value[index];
     };
 
-    const scrollToNode = (conditionCallback: Function) => {
+    const scrollToNode = (conditionCallback: ConditionCallback) => {
       invariant(
         conditionCallback && typeof conditionCallback === "function",
         `input parameter ${conditionCallback} is not a function`
