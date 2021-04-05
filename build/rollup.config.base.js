@@ -19,8 +19,8 @@ export default {
   input: "src/index.js",
   plugins: [
     resolve({
-      mainFields: ["module", "jsnext", "main", "browser"],
-      extensions: ["js, ts, vue"],
+      mainFields: ["module", "jsnext:main", "main", "browser"],
+      extensions: ["js", "ts", "vue"],
     }),
     eslint({ include: ["src/**/*.{js,ts,vue}", "src/**/**/*.{js,ts,vue}"] }),
     vue({

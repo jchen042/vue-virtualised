@@ -3,8 +3,17 @@
 
 import { VNode, VNodeArrayChildren } from "@vue/runtime-core";
 
+type NodeState = {
+  expanded?: boolean;
+  isLeaf?: boolean;
+};
+
 export type Node = {
   key?: string | number;
+  name: string | number;
+  index?: number;
+  parents?: Array<number>;
+  state?: NodeState;
   children?: Array<Node>;
 };
 

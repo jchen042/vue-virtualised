@@ -18,6 +18,7 @@ const constructBfsTraverseStack = (nodes, parents = [], stack = []) => {
     node.key = node.key ? node.key : parents.concat(index).toString();
     node.parents = parents;
     node.index = index;
+    node.children = node.children ?? [];
 
     node.state = node.state ? node.state : {};
     node.state.expanded = !!isNodeExpanded(node);

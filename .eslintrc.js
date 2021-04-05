@@ -24,5 +24,7 @@ module.exports = {
     "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
     "vue/no-unused-components": "warn",
     "no-unused-vars": "warn",
+    // https://stackoverflow.com/questions/64529114/eslint-vue-plugin-showing-false-positives-for-vue-comment-directive
+    "vue/comment-directive": 0,
   },
 };
