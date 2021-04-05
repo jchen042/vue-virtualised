@@ -27,3 +27,5 @@ export type CellRenderer = (
 ) => string | number | boolean | VNode | VNodeArrayChildren;
 
 export type ConditionCallback = (node: any) => boolean;
+
+export type OnChangeCallback = (nodes: Array<Node>) => void;

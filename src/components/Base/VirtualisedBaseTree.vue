@@ -38,13 +38,15 @@ import {
   traverse,
   getNumberOfVisibleDescendants,
 } from "../../utils/nodesHelper";
-import { chunk } from "lodash";
+import chunk from "lodash/chunk";
 
 import {
   Node,
+  OnChangeCallback,
   GetNodeHeight,
   GetNodeKey,
   CellRenderer,
+  ConditionCallback,
 } from "../../types/types";
 
 import { NodeModel, UpdateNodeCallback } from "../../types/interfaces";
@@ -58,7 +60,10 @@ export default defineComponent({
       required: true,
     },
     useTimeSlicing: { type: Boolean, default: () => true },
-    onChange: { type: Function, default: () => null },
+    onChange: {
+      type: Function as PropType<OnChangeCallback>,
+      default: () => null,
+    },
     viewportHeight: {
       type: Number,
       default: () => 400,
@@ -102,10 +107,14 @@ export default defineComponent({
     const { nodes, onChange } = props;
 
     const scroller = ref<typeof VirtualisedBaseScroller | null>(null);
-    const scrollToStart = ref(null);
-    const scrollToEnd = ref(null);
-    const scrollToIndex = ref(null);
-    const scrollToNode = ref(null);
+    const scrollToStart = ref<(() => void) | null>(null);
+    const scrollToEnd = ref<(() => void) | null>(null);
+    // eslint-disable-next-line no-unused-vars
+    const scrollToIndex = ref<((index: number) => void) | null>(null);
+    const scrollToNode = ref<
+      // eslint-disable-next-line no-unused-vars
+      ((conditionCallback: ConditionCallback) => void) | null
+    >(null);
 
     onMounted(() => {
       scrollToStart.value = scroller.value?.scrollToStart;
@@ -128,7 +137,7 @@ export default defineComponent({
       const addNodeToFlattenedTree = (node: NodeModel) =>
         flattenedTree.push(markRaw<NodeModel>(node));
 
-      const shouldTraverse = (node: NodeModel) =>
+      const shouldTraverse = (node: NodeModel): boolean =>
         nodeHasChildren(node) && isNodeExpanded(node);
 
       await traverse(
@@ -150,13 +159,15 @@ export default defineComponent({
      * Instead, we force refreshing VirtualisedBaseScroller view when updating nodes
      * as it contains limited amount of visible nodes so it's much faster.
      */
-    const flattenedTree = markRaw(await getFlattenedTree(nodes));
+    const flattenedTree = markRaw<Array<NodeModel>>(
+      await getFlattenedTree(nodes)
+    );
 
     const updateTreeNode = (
       nodes: Array<Node>,
       path: Array<number>,
       updateFn: UpdateNodeCallback
-    ) => {
+    ): void => {
       // Traverse props tree by path to get target node to update.
       let parentNodes = nodes;
       const size = path.length - 1;
@@ -174,7 +185,7 @@ export default defineComponent({
     const changeAffectFlattenedTree = (
       node: NodeModel,
       updatedNode: NodeModel
-    ) => {
+    ): boolean => {
       return isNodeExpanded(node) !== isNodeExpanded(updatedNode);
     };
 
@@ -182,7 +193,7 @@ export default defineComponent({
       updatedNode: NodeModel,
       index: number,
       flattenedTree: Array<NodeModel>
-    ) => {
+    ): Promise<void> => {
       // Expand node by inserting node's visible descendants to flattened tree.
       const visibleDescendants = await getFlattenedTree(
         [...updatedNode.children],
@@ -205,7 +216,7 @@ export default defineComponent({
       node: NodeModel,
       index: number,
       flattenedTree: Array<NodeModel>
-    ) => {
+    ): Promise<void> => {
       // Collapse node by removing current node's descendants from flattened tree.
       const numberOfVisibleDescendants = await getNumberOfVisibleDescendants(
         node,
@@ -222,7 +233,7 @@ export default defineComponent({
       node: NodeModel,
       index: number,
       updateFn: UpdateNodeCallback
-    ) => {
+    ): Promise<void> => {
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
 
       onChange(nodes);
@@ -253,14 +264,14 @@ export default defineComponent({
       node: NodeModel,
       index: number,
       updateFn: UpdateNodeCallback
-    ) => {
+    ): Promise<void> => {
       // Update props tree nodes.
       const pathsList = [[...node.parents, node.index]];
       // Give functions names to avoid creating multiple anonymous functions inside traverse().
       const addNodeToPathsList = (node: NodeModel) =>
         pathsList.push(node.parents.concat(node.index));
 
-      const shouldTraverse = () => true;
+      const shouldTraverse = (): boolean => true;
 
       await traverse(
         [...node.children],
@@ -297,15 +308,15 @@ export default defineComponent({
       scroller.value?.refreshView();
     };
 
-    const handleScroll = (scrollTop: number) => {
+    const handleScroll = (scrollTop: number): void => {
       emit("onScroll", scrollTop);
     };
 
-    const handleStartReached = (scrollTop: number) => {
+    const handleStartReached = (scrollTop: number): void => {
       emit("onStartReached", scrollTop);
     };
 
-    const handleEndReached = (scrollTop: number) => {
+    const handleEndReached = (scrollTop: number): void => {
       emit("onEndReached", scrollTop);
     };
 
