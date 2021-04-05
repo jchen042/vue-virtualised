@@ -19,3 +19,12 @@ export interface NodeModel {
 export interface UpdateNodeCallback {
   (node: Node | NodeModel): NodeModel;
 }
+
+export interface UpdateFunction {
+  (
+    nodes: Array<Node>,
+    node: NodeModel,
+    index: number,
+    updateFn: UpdateNodeCallback
+  ): Promise<void>;
+}

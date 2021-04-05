@@ -49,7 +49,11 @@ import {
   ConditionCallback,
 } from "../../types/types";
 
-import { NodeModel, UpdateNodeCallback } from "../../types/interfaces";
+import {
+  NodeModel,
+  UpdateNodeCallback,
+  UpdateFunction,
+} from "../../types/interfaces";
 
 export default defineComponent({
   name: "VirtualisedBaseTree",
@@ -91,7 +95,7 @@ export default defineComponent({
     },
     getNodeKey: {
       type: Function as PropType<GetNodeKey>,
-      default: (node: Node, index: number) => node.key ?? index,
+      default: (node: NodeModel, index: number) => node.key ?? index,
     },
     cellRenderer: {
       type: Function as PropType<CellRenderer>,
@@ -227,12 +231,7 @@ export default defineComponent({
     };
 
     // Update a single node.
-    const updateNode = async (
-      nodes: Array<Node>,
-      node: NodeModel,
-      index: number,
-      updateFn: UpdateNodeCallback
-    ): Promise<void> => {
+    const updateNode: UpdateFunction = async (nodes, node, index, updateFn) => {
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
 
       onChange(nodes);
@@ -258,12 +257,12 @@ export default defineComponent({
       scroller.value?.refreshView();
     };
 
-    const updateNodes = async (
-      nodes: Array<Node>,
-      node: NodeModel,
-      index: number,
-      updateFn: UpdateNodeCallback
-    ): Promise<void> => {
+    const updateNodes: UpdateFunction = async (
+      nodes,
+      node,
+      index,
+      updateFn
+    ) => {
       // Update props tree nodes.
       const pathsList = [[...node.parents, node.index]];
       // Give functions names to avoid creating multiple anonymous functions inside traverse().

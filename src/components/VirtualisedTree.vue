@@ -31,20 +31,39 @@
   </suspense>
 </template>
 
-<script>
-import { defineComponent, defineAsyncComponent, ref, watch } from "vue";
+<script lang="ts">
+import {
+  defineComponent,
+  defineAsyncComponent,
+  PropType,
+  ref,
+  watch,
+} from "vue";
 import VirtualisedBaseTree from "./Base/VirtualisedBaseTree.vue";
+
+import {
+  Node,
+  OnChangeCallback,
+  GetNodeHeight,
+  GetNodeKey,
+  CellRenderer,
+  ConditionCallback,
+} from "../types/types";
+import { NodeModel, UpdateFunction } from "../types/interfaces";
 
 export default defineComponent({
   name: "VirtualisedTree",
   components: { VirtualisedBaseTree },
   props: {
     nodes: {
-      type: Array,
+      type: Array as PropType<Array<Node>>,
       required: true,
     },
     useTimeSlicing: { type: Boolean, default: () => true },
-    onChange: { type: Function, default: () => null },
+    onChange: {
+      type: Function as PropType<OnChangeCallback>,
+      default: () => null,
+    },
     viewportHeight: {
       type: Number,
       default: () => 400,
@@ -57,57 +76,63 @@ export default defineComponent({
       type: Number,
       default: () => null,
     },
-    scrollBehaviour: { type: String, default: () => "auto" },
+    scrollBehaviour: {
+      // eslint-disable-next-line no-undef
+      type: String as PropType<ScrollBehavior>,
+      default: () => "auto",
+    },
     tolerance: {
       type: Number,
       default: () => 2,
     },
     getNodeHeight: {
-      type: Function,
+      type: Function as PropType<GetNodeHeight>,
       default: () => 40,
     },
     getNodeKey: {
-      type: Function,
-      default: (node, index) => node.key ?? index,
+      type: Function as PropType<GetNodeKey>,
+      default: (node: NodeModel, index: number) => node.key ?? index,
     },
     cellRenderer: {
-      type: Function,
+      type: Function as PropType<CellRenderer>,
       default: () => null,
     },
   },
   emits: ["onScroll", "onStartReached", "onEndReached"],
   setup(props, { emit }) {
-    const virtualisedBaseTree = ref(null);
-    const updateNode = ref(null);
-    const updateNodes = ref(null);
-    const scrollToStart = ref(null);
-    const scrollToEnd = ref(null);
-    const scrollToIndex = ref(null);
-    const scrollToNode = ref(null);
+    const virtualisedBaseTree = ref<typeof VirtualisedBaseTree | null>(null);
+    const updateNode = ref<UpdateFunction | null>(null);
+    const updateNodes = ref<UpdateFunction | null>(null);
+    const scrollToStart = ref<(() => void) | null>(null);
+    const scrollToEnd = ref<(() => void) | null>(null);
+    // eslint-disable-next-line no-unused-vars
+    const scrollToIndex = ref<((index: number) => void) | null>(null);
+    const scrollToNode = ref<
+      // eslint-disable-next-line no-unused-vars
+      ((conditionCallback: ConditionCallback) => void) | null
+    >(null);
 
-    const handleScroll = (scrollTop) => {
+    const handleScroll = (scrollTop: number): void => {
       emit("onScroll", scrollTop);
     };
 
-    const handleStartReached = (scrollTop) => {
+    const handleStartReached = (scrollTop: number): void => {
       emit("onStartReached", scrollTop);
     };
 
-    const handleEndReached = (scrollTop) => {
+    const handleEndReached = (scrollTop: number): void => {
       emit("onEndReached", scrollTop);
     };
 
     watch(
       () => virtualisedBaseTree.value,
       () => {
-        updateNode.value = virtualisedBaseTree.value.updateNode;
-        updateNodes.value = virtualisedBaseTree.value.updateNodes;
-        scrollToStart.value = virtualisedBaseTree.value.scrollToStart;
-        scrollToEnd.value = virtualisedBaseTree.value.scrollToEnd;
-        scrollToIndex.value = virtualisedBaseTree.value.scrollToIndex;
-        window.scrollTreeToIndex = scrollToIndex.value;
-        scrollToNode.value = virtualisedBaseTree.value.scrollToNode;
-        window.scrollTreeToNode = scrollToNode.value;
+        updateNode.value = virtualisedBaseTree.value?.updateNode;
+        updateNodes.value = virtualisedBaseTree.value?.updateNodes;
+        scrollToStart.value = virtualisedBaseTree.value?.scrollToStart;
+        scrollToEnd.value = virtualisedBaseTree.value?.scrollToEnd;
+        scrollToIndex.value = virtualisedBaseTree.value?.scrollToIndex;
+        scrollToNode.value = virtualisedBaseTree.value?.scrollToNode;
       }
     );
 
