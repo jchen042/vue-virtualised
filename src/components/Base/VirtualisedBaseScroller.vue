@@ -67,7 +67,13 @@ import {
 import VirtualisedBaseCell from "./VirtualisedBaseCell.vue";
 
 import invariant from "fbjs/lib/invariant";
-import { isNil, isNaN } from "lodash";
+/**
+ * This import below will bring all of lodash in bundle after introducing TypeScript.
+ * import { isNil, isNaN } from "lodash";
+ * Only portions of lodash should be imported.
+ */
+import isNil from "lodash/isNil";
+import isNaN from "lodash/isNaN";
 
 import {
   GetNodeHeight,
@@ -192,7 +198,7 @@ export default defineComponent({
       nodes: Array<any>,
       getNodeHeight: GetNodeHeight
     ) => {
-      let results = [0];
+      const results = [0];
       if (nodes.length > 0) {
         for (let i = 1; i < nodes.length; i++) {
           invariant(
