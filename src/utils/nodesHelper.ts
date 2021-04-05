@@ -20,7 +20,7 @@ const constructBfsTraverseStack = (
   nodes: Array<Node | NodeModel>,
   parents: Array<number> = [],
   stack: Array<Node | NodeModel> = []
-) => {
+): Array<Node | NodeModel> => {
   const _nodes = stack;
 
   for (let index = nodes.length - 1; index >= 0; index--) {

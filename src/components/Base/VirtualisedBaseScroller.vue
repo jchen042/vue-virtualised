@@ -103,9 +103,8 @@ export default defineComponent({
       default: () => null,
     },
     scrollBehaviour: {
-      // TODO: handle type change for parent components
       // eslint-disable-next-line no-undef
-      type: Object as PropType<ScrollBehavior>,
+      type: String as PropType<ScrollBehavior>,
       default: () => "auto",
     },
     tolerance: {
