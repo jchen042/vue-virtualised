@@ -243,7 +243,7 @@ export default defineComponent({
     // Offset start node.
     const offsetY = ref<number>(0);
     // Visible nodes in the virtualised view.
-    const visibleNodes = ref<Array<number>>([]);
+    const visibleNodes = ref<Array<any>>([]);
 
     // Binary search to find the first visible node's index in viewport.
     const getFirstVisibleIndex = (

@@ -10,7 +10,7 @@ import { CellRenderer } from "../../types/types";
 export default defineComponent({
   name: "VirtualisedBaseCell",
   props: {
-    node: { type: Object as PropType<any>, required: true },
+    node: { type: [Object, Number, String] as PropType<any>, required: true },
     index: { type: Number, required: true },
     startIndex: { type: Number, default: () => 0, required: true },
     /**
@@ -35,12 +35,11 @@ export default defineComponent({
           style: { height: "100%" },
         },
         props.cellRenderer(props.node, props.index + props.startIndex) ?? [
-          slots.cell ??
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            slots.cell!({
-              node: props.node,
-              index: props.index + props.startIndex,
-            }),
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          slots.cell!({
+            node: props.node,
+            index: props.index + props.startIndex,
+          }),
         ]
       );
   },
