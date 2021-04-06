@@ -1,5 +1,5 @@
-export const sleep = (time) =>
-  new Promise((resolve) => setTimeout(() => resolve(), time));
+const sleep = (time: number): Promise<null> =>
+  new Promise((resolve) => setTimeout(() => resolve(null), time));
 
 /**
  * slice a whole iteration task into multiple micro tasks
@@ -7,12 +7,12 @@ export const sleep = (time) =>
  * so the user doesn't feel blocking
  */
 export const sliceTask = async (
-  i,
-  chunkSize,
-  sleepTime,
-  cbBeforeSleep,
-  cbAfterSleep
-) => {
+  i: number,
+  chunkSize: number,
+  sleepTime: number,
+  cbBeforeSleep?: () => void,
+  cbAfterSleep?: () => void
+): Promise<void> => {
   if (i % chunkSize === 0) {
     cbBeforeSleep && cbBeforeSleep();
     await sleep(sleepTime);

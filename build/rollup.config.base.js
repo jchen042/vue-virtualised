@@ -1,29 +1,40 @@
-import resolve from "@rollup/plugin-node-resolve";
-import { eslint } from "rollup-plugin-eslint";
-import vue from "rollup-plugin-vue";
-import autoprefixer from "autoprefixer";
-import babel from "rollup-plugin-babel";
-import css from "rollup-plugin-css-only";
 import fs from "fs";
+import path from "path";
+
+import resolve from "@rollup/plugin-node-resolve";
+import eslint from "@rollup/plugin-eslint";
+import babel from "rollup-plugin-babel";
+import vue from "rollup-plugin-vue";
+import typescript from "rollup-plugin-typescript2";
+import commonjs from "@rollup/plugin-commonjs";
+import autoprefixer from "autoprefixer";
+import css from "rollup-plugin-css-only";
 import CleanCSS from "clean-css";
-import cjs from "@rollup/plugin-commonjs";
 import buble from "@rollup/plugin-buble";
 import replace from "@rollup/plugin-replace";
 
-const config = require("../package.json");
+import config from "../package.json";
 
 export default {
   input: "src/index.js",
   plugins: [
     resolve({
-      mainFields: ["module", "jsnext", "main", "browser"],
-      extensions: ["js, vue"],
+      mainFields: ["module", "jsnext:main", "main", "browser"],
+      extensions: ["js", "ts", "vue"],
     }),
-    eslint({ include: ["src/**/*.{js,vue}", "src/**/**/*.{js,vue}"] }),
+    eslint({ include: ["src/**/*.{js,ts,vue}", "src/**/**/*.{js,ts,vue}"] }),
     vue({
       postcssPlugins: [autoprefixer],
     }),
-    babel({ exclude: "node_modules/**", runtimeHelpers: true }),
+    babel({
+      exclude: "node_modules/**",
+      presets: ["@babel/preset-env", "@babel/preset-typescript"],
+      runtimeHelpers: true,
+    }),
+    typescript({
+      tsconfig: path.resolve(__dirname, "../tsconfig.json"),
+    }),
+    commonjs(),
     css({
       output: (styles) => {
         fs.writeFileSync(
@@ -32,8 +43,7 @@ export default {
         );
       },
     }),
-    cjs(),
-    buble(),
+    // buble(),
   ],
   watch: { include: "src/**" },
   // https://rollupjs.org/guide/en/#peer-dependencies

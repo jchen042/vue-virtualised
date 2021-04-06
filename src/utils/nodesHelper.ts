@@ -1,16 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { sliceTask } from "./index";
 
-export const nodeHasChildren = (node) => node.children && node.children.length;
+import { Node } from "../types/types";
+import { NodeModel } from "../types/interfaces";
 
-export const isNodeExpanded = (node) => node.state && node.state.expanded;
+export const nodeHasChildren = (node: Node | NodeModel): boolean =>
+  !!(node.children && node.children.length);
+
+export const isNodeExpanded = (node: Node | NodeModel): boolean =>
+  !!(node.state && node.state.expanded);
 
 /**
  * build a named function for traverse() method to leverage
  * to avoid creating multiple anonymous functions
  * which is expensive
  */
-const constructBfsTraverseStack = (nodes, parents = [], stack = []) => {
-  let _nodes = stack;
+const constructBfsTraverseStack = (
+  nodes: Array<Node | NodeModel>,
+  parents: Array<number> = [],
+  stack: Array<Node | NodeModel> = []
+): Array<Node | NodeModel> => {
+  const _nodes = stack;
 
   for (let index = nodes.length - 1; index >= 0; index--) {
     const node = nodes[index];
@@ -18,6 +29,7 @@ const constructBfsTraverseStack = (nodes, parents = [], stack = []) => {
     node.key = node.key ? node.key : parents.concat(index).toString();
     node.parents = parents;
     node.index = index;
+    node.children = node.children ?? [];
 
     node.state = node.state ? node.state : {};
     node.state.expanded = !!isNodeExpanded(node);
@@ -34,22 +46,24 @@ const constructBfsTraverseStack = (nodes, parents = [], stack = []) => {
  * use recursive method might cause stack overflow exception
  */
 export const traverse = async (
-  nodes,
-  parents = [],
-  cb,
-  shouldTraverse,
+  nodes: Array<Node | NodeModel>,
+  parents: Array<number> = [],
+  // eslint-disable-next-line no-unused-vars
+  cb: (node: NodeModel) => any,
+  // eslint-disable-next-line no-unused-vars
+  shouldTraverse: (node: NodeModel) => boolean,
   useTimeSlicing = true
-) => {
+): Promise<void> => {
   let stack = constructBfsTraverseStack(nodes, parents);
   let i = 1;
 
   while (stack.length > 0) {
     const node = stack.shift();
-    cb(node);
-    if (shouldTraverse(node)) {
+    cb(<NodeModel>node);
+    if (shouldTraverse(<NodeModel>node)) {
       stack = constructBfsTraverseStack(
-        node.children,
-        node.parents.concat(node.index),
+        (<NodeModel>node).children ?? [],
+        (<NodeModel>node).parents.concat((<NodeModel>node).index),
         stack
       );
     }
@@ -60,11 +74,11 @@ export const traverse = async (
 
 // count the amount of visible descendants based on the node
 export const getNumberOfVisibleDescendants = async (
-  node,
-  index,
-  flattenedTree,
-  useTimeSlicing
-) => {
+  node: NodeModel,
+  index: number,
+  flattenedTree: Array<NodeModel>,
+  useTimeSlicing: boolean
+): Promise<number> => {
   const nodePath = [...node.parents, node.index];
   let count = 0;
 

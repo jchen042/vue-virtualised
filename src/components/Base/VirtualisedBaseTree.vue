@@ -20,8 +20,15 @@
   </virtualised-base-scroller>
 </template>
 
-<script>
-import { defineComponent, toRefs, ref, markRaw, onMounted } from "vue";
+<script lang="ts">
+import {
+  defineComponent,
+  PropType,
+  toRefs,
+  ref,
+  markRaw,
+  onMounted,
+} from "vue";
 import VirtualisedBaseScroller from "./VirtualisedBaseScroller.vue";
 
 import { sliceTask } from "../../utils/index";
@@ -31,18 +38,36 @@ import {
   traverse,
   getNumberOfVisibleDescendants,
 } from "../../utils/nodesHelper";
-import { chunk } from "lodash";
+import chunk from "lodash/chunk";
+
+import {
+  Node,
+  OnChangeCallback,
+  GetNodeHeight,
+  GetNodeKey,
+  CellRenderer,
+  ConditionCallback,
+} from "../../types/types";
+
+import {
+  NodeModel,
+  UpdateNodeCallback,
+  UpdateFunction,
+} from "../../types/interfaces";
 
 export default defineComponent({
   name: "VirtualisedBaseTree",
   components: { VirtualisedBaseScroller },
   props: {
     nodes: {
-      type: Array,
+      type: Array as PropType<Array<Node>>,
       required: true,
     },
     useTimeSlicing: { type: Boolean, default: () => true },
-    onChange: { type: Function, default: () => {} },
+    onChange: {
+      type: Function as PropType<OnChangeCallback>,
+      default: () => null,
+    },
     viewportHeight: {
       type: Number,
       default: () => 400,
@@ -55,21 +80,25 @@ export default defineComponent({
       type: Number,
       default: () => null,
     },
-    scrollBehaviour: { type: String, default: () => "auto" },
+    scrollBehaviour: {
+      // eslint-disable-next-line no-undef
+      type: String as PropType<ScrollBehavior>,
+      default: () => "auto",
+    },
     tolerance: {
       type: Number,
       default: () => 2,
     },
     getNodeHeight: {
-      type: Function,
+      type: Function as PropType<GetNodeHeight>,
       default: () => 40,
     },
     getNodeKey: {
-      type: Function,
-      default: (node, index) => node.key ?? index,
+      type: Function as PropType<GetNodeKey>,
+      default: (node: NodeModel, index: number) => node.key ?? index,
     },
     cellRenderer: {
-      type: Function,
+      type: Function as PropType<CellRenderer>,
       default: () => null,
     },
   },
@@ -80,31 +109,38 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { nodes, onChange } = props;
 
-    const scroller = ref(null);
-    const scrollToStart = ref(null);
-    const scrollToEnd = ref(null);
-    const scrollToIndex = ref(null);
-    const scrollToNode = ref(null);
+    const scroller = ref<typeof VirtualisedBaseScroller | null>(null);
+    const scrollToStart = ref<(() => void) | null>(null);
+    const scrollToEnd = ref<(() => void) | null>(null);
+    // eslint-disable-next-line no-unused-vars
+    const scrollToIndex = ref<((index: number) => void) | null>(null);
+    const scrollToNode = ref<
+      // eslint-disable-next-line no-unused-vars
+      ((conditionCallback: ConditionCallback) => void) | null
+    >(null);
 
     onMounted(() => {
-      scrollToStart.value = scroller.value.scrollToStart;
-      scrollToEnd.value = scroller.value.scrollToEnd;
-      scrollToIndex.value = scroller.value.scrollToIndex;
-      scrollToNode.value = scroller.value.scrollToNode;
+      scrollToStart.value = scroller.value?.scrollToStart;
+      scrollToEnd.value = scroller.value?.scrollToEnd;
+      scrollToIndex.value = scroller.value?.scrollToIndex;
+      scrollToNode.value = scroller.value?.scrollToNode;
     });
 
-    const getFlattenedTree = async (nodes, parents = []) => {
+    const getFlattenedTree = async (
+      nodes: Array<Node | NodeModel>,
+      parents: Array<number> = []
+    ): Promise<Array<NodeModel>> => {
       /**
        * Reactive object makes the iteration time-consuming.
        * To avoid expensive traversal, we have to markRaw object.
        */
-      const flattenedTree = markRaw([]);
+      const flattenedTree = markRaw<Array<NodeModel>>([]);
 
       // Make sure node pushed to the flattened tree is not reactive.
-      const addNodeToFlattenedTree = (node) =>
-        flattenedTree.push(markRaw(node));
+      const addNodeToFlattenedTree = (node: NodeModel) =>
+        flattenedTree.push(markRaw<NodeModel>(node));
 
-      const shouldTraverse = (node) =>
+      const shouldTraverse = (node: NodeModel): boolean =>
         nodeHasChildren(node) && isNodeExpanded(node);
 
       await traverse(
@@ -126,14 +162,20 @@ export default defineComponent({
      * Instead, we force refreshing VirtualisedBaseScroller view when updating nodes
      * as it contains limited amount of visible nodes so it's much faster.
      */
-    const flattenedTree = markRaw(await getFlattenedTree(nodes));
+    const flattenedTree = markRaw<Array<NodeModel>>(
+      await getFlattenedTree(nodes)
+    );
 
-    const updateTreeNode = (nodes, path, updateFn) => {
+    const updateTreeNode = (
+      nodes: Array<Node>,
+      path: Array<number>,
+      updateFn: UpdateNodeCallback
+    ): void => {
       // Traverse props tree by path to get target node to update.
       let parentNodes = nodes;
       const size = path.length - 1;
       for (let i = 0; i < size; i++)
-        parentNodes = parentNodes[path[i]].children;
+        parentNodes = parentNodes[path[i]].children ?? [];
 
       /**
        * The node referred from the tree will be updated.
@@ -143,11 +185,18 @@ export default defineComponent({
       );
     };
 
-    const changeAffectFlattenedTree = (node, updatedNode) => {
+    const changeAffectFlattenedTree = (
+      node: NodeModel,
+      updatedNode: NodeModel
+    ): boolean => {
       return isNodeExpanded(node) !== isNodeExpanded(updatedNode);
     };
 
-    const expandNodes = async (updatedNode, index, flattenedTree) => {
+    const expandNodes = async (
+      updatedNode: NodeModel,
+      index: number,
+      flattenedTree: Array<NodeModel>
+    ): Promise<void> => {
       // Expand node by inserting node's visible descendants to flattened tree.
       const visibleDescendants = await getFlattenedTree(
         [...updatedNode.children],
@@ -166,7 +215,11 @@ export default defineComponent({
       });
     };
 
-    const collapseNodes = async (node, index, flattenedTree) => {
+    const collapseNodes = async (
+      node: NodeModel,
+      index: number,
+      flattenedTree: Array<NodeModel>
+    ): Promise<void> => {
       // Collapse node by removing current node's descendants from flattened tree.
       const numberOfVisibleDescendants = await getNumberOfVisibleDescendants(
         node,
@@ -178,7 +231,7 @@ export default defineComponent({
     };
 
     // Update a single node.
-    const updateNode = async (nodes, node, index, updateFn) => {
+    const updateNode: UpdateFunction = async (nodes, node, index, updateFn) => {
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
 
       onChange(nodes);
@@ -201,17 +254,22 @@ export default defineComponent({
       flattenedTree[index] = updatedNode;
 
       // Force refresh data in child component to trigger UI update.
-      scroller.value.refreshView();
+      scroller.value?.refreshView();
     };
 
-    const updateNodes = async (nodes, node, index, updateFn) => {
+    const updateNodes: UpdateFunction = async (
+      nodes,
+      node,
+      index,
+      updateFn
+    ) => {
       // Update props tree nodes.
-      let pathsList = [[...node.parents, node.index]];
+      const pathsList = [[...node.parents, node.index]];
       // Give functions names to avoid creating multiple anonymous functions inside traverse().
-      const addNodeToPathsList = (node) =>
+      const addNodeToPathsList = (node: NodeModel) =>
         pathsList.push(node.parents.concat(node.index));
 
-      const shouldTraverse = () => true;
+      const shouldTraverse = (): boolean => true;
 
       await traverse(
         [...node.children],
@@ -245,18 +303,18 @@ export default defineComponent({
       flattenedTree[index] = updatedNode;
 
       // Force refresh data in child component to trigger UI update.
-      scroller.value.refreshView();
+      scroller.value?.refreshView();
     };
 
-    const handleScroll = (scrollTop) => {
+    const handleScroll = (scrollTop: number): void => {
       emit("onScroll", scrollTop);
     };
 
-    const handleStartReached = (scrollTop) => {
+    const handleStartReached = (scrollTop: number): void => {
       emit("onStartReached", scrollTop);
     };
 
-    const handleEndReached = (scrollTop) => {
+    const handleEndReached = (scrollTop: number): void => {
       emit("onEndReached", scrollTop);
     };
 
