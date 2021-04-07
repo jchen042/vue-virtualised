@@ -172,11 +172,15 @@ export default defineComponent({
       `initialScrollIndex value ${initialScrollIndex.value} is not Number`
     );
     invariant(
-      initialScrollIndex.value >= 0,
+      !isNil(initialScrollIndex.value) ||
+        (!isNaN(Number(initialScrollIndex.value)) &&
+          initialScrollIndex.value >= 0),
       `initialScrollIndex value out of range: requested index ${initialScrollIndex.value} but minimum is 0`
     );
     invariant(
-      initialScrollIndex.value < data.value.length,
+      isNil(initialScrollIndex.value) ||
+        (!isNaN(Number(initialScrollIndex.value)) &&
+          initialScrollIndex.value < data.value.length),
       `initialScrollIndex value out of range: requested index ${
         initialScrollIndex.value
       } is out of 0 to ${data.value.length - 1}`

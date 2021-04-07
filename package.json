@@ -1,6 +1,6 @@
 {
   "name": "vue-virtualised",
-  "version": "0.1.0-0",
+  "version": "0.1.0-1",
   "private": false,
   "description": "Vue components developed by Vue.js 3.0 for efficiently rendering large scrollable lists and hierarchical data. vue-virtualised is able to render and update 1 million nodes within a few seconds in front-end.",
   "author": {
