@@ -43,7 +43,9 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * inspired by Adam Klein
  * https://dev.to/adamklein/build-your-own-virtual-scroll-part-i-11ib
@@ -51,6 +53,7 @@
  */
 import {
   defineComponent,
+  PropType,
   toRefs,
   ref,
   triggerRef,
@@ -64,14 +67,27 @@ import {
 import VirtualisedBaseCell from "./VirtualisedBaseCell.vue";
 
 import invariant from "fbjs/lib/invariant";
-import { isNil, isNaN } from "lodash";
+/**
+ * This import below will bring all of lodash in bundle after introducing TypeScript.
+ * import { isNil, isNaN } from "lodash";
+ * Only portions of lodash should be imported.
+ */
+import isNil from "lodash/isNil";
+import isNaN from "lodash/isNaN";
+
+import {
+  GetNodeHeight,
+  GetNodeKey,
+  CellRenderer,
+  ConditionCallback,
+} from "../../types/types";
 
 export default defineComponent({
   name: "VirtualisedBaseScroller",
   components: { VirtualisedBaseCell },
   props: {
     data: {
-      type: Array,
+      type: Array as PropType<Array<any>>,
       required: true,
     },
     viewportHeight: {
@@ -86,13 +102,17 @@ export default defineComponent({
       type: Number,
       default: () => null,
     },
-    scrollBehaviour: { type: String, default: () => "auto" },
+    scrollBehaviour: {
+      // eslint-disable-next-line no-undef
+      type: String as PropType<ScrollBehavior>,
+      default: () => "auto",
+    },
     tolerance: {
       type: Number,
       default: () => 2,
     },
     getNodeHeight: {
-      type: Function,
+      type: Function as PropType<GetNodeHeight>,
       default: () => 40,
     },
     /**
@@ -101,11 +121,11 @@ export default defineComponent({
      * this key is necessary for virtualisation to work properly.
      */
     getNodeKey: {
-      type: Function,
-      default: (node, index) => node.key ?? index,
+      type: Function as PropType<GetNodeKey>,
+      default: (node: any, index: number) => node.key ?? index,
     },
     cellRenderer: {
-      type: Function,
+      type: Function as PropType<CellRenderer>,
       default: () => null,
     },
   },
@@ -123,6 +143,9 @@ export default defineComponent({
 
     const data = computed({
       get: () => props.data,
+      set: (val) => {
+        data.value = val;
+      },
     });
 
     // TODO: test invalid cases
@@ -171,11 +194,14 @@ export default defineComponent({
       `getNodeHeight is not a function`
     );
 
-    const virtualScroller = ref(null);
+    const virtualScroller = ref<HTMLElement | null>(null);
 
     // Store an array of child nodes positions from 0.
-    const getChildPositions = (nodes, getNodeHeight) => {
-      let results = [0];
+    const getChildPositions = (
+      nodes: Array<any>,
+      getNodeHeight: GetNodeHeight
+    ): Array<number> => {
+      const results = [0];
       if (nodes.length > 0) {
         for (let i = 1; i < nodes.length; i++) {
           invariant(
@@ -190,11 +216,11 @@ export default defineComponent({
 
       return results;
     };
-    const childPositions = ref(
+    const childPositions = ref<Array<number>>(
       getChildPositions(data.value, getNodeHeight.value)
     );
 
-    const scrollTop = ref(
+    const scrollTop = ref<number>(
       !isNil(initialScrollIndex.value)
         ? childPositions.value[initialScrollIndex.value]
         : initialScrollTop.value
@@ -202,31 +228,35 @@ export default defineComponent({
 
     // Calculte total content height.
     // TODO: Fix the content height limitation of 33554400px.
-    const getTotalHeight = (nodes, childPositions, getNodeHeight) => {
+    const getTotalHeight = (
+      nodes: Array<any>,
+      childPositions: Array<number>,
+      getNodeHeight: GetNodeHeight
+    ): number => {
       return nodes.length > 0
         ? childPositions[nodes.length - 1] +
             getNodeHeight(nodes[nodes.length - 1])
         : 0;
     };
-    const totalHeight = ref(
+    const totalHeight = ref<number>(
       getTotalHeight(data.value, childPositions.value, getNodeHeight.value)
     );
 
     // Start of rendered node's index.
-    const startIndex = ref(0);
+    const startIndex = ref<number>(0);
     // Offset start node.
-    const offsetY = ref(0);
+    const offsetY = ref<number>(0);
     // Visible nodes in the virtualised view.
-    const visibleNodes = ref([]);
+    const visibleNodes = ref<Array<any>>([]);
 
     // Binary search to find the first visible node's index in viewport.
     const getFirstVisibleIndex = (
-      scrollTop,
-      viewportHeight,
-      totalHeight,
-      childPositions,
-      itemCount
-    ) => {
+      scrollTop: number,
+      viewportHeight: number,
+      totalHeight: number,
+      childPositions: Array<number>,
+      itemCount: number
+    ): number => {
       // In the case we don't have enough elements to scroll, so return index 0
       if (totalHeight < scrollTop || totalHeight < viewportHeight) return 0;
       let startRange = 0;
@@ -249,11 +279,11 @@ export default defineComponent({
 
     // Find the last node's index in the viewport.
     const getLastVisibleIndex = (
-      childPositions,
-      firstVisibleIndex,
-      itemCount,
-      viewportHeight
-    ) => {
+      childPositions: Array<number>,
+      firstVisibleIndex: number,
+      itemCount: number,
+      viewportHeight: number
+    ): number => {
       let lastVisibleIndex;
       for (
         lastVisibleIndex = firstVisibleIndex;
@@ -274,7 +304,7 @@ export default defineComponent({
      * Calculate nodes to be rendered to the view,
      * and offset to be set to the rendered nodes.
      */
-    const setScrollState = async () => {
+    const setScrollState = async (): Promise<void> => {
       // first visible node's index
       const firstVisibleIndex = getFirstVisibleIndex(
         scrollTop.value,
@@ -319,35 +349,35 @@ export default defineComponent({
         });
     };
 
-    const handleScroll = () => {
+    const handleScroll = (): void => {
       requestAnimationFrame(() => {
-        scrollTop.value = virtualScroller.value.scrollTop;
-        emit("onScroll", virtualScroller.value.scrollTop);
+        scrollTop.value = virtualScroller.value?.scrollTop ?? 0;
+        emit("onScroll", virtualScroller.value?.scrollTop);
 
         if (scrollTop.value === 0)
-          emit("onStartReached", virtualScroller.value.scrollTop);
+          emit("onStartReached", virtualScroller.value?.scrollTop);
 
         // Hack: we might have 1px tolerance when scrolling to the end
         if (scrollTop.value >= totalHeight.value - viewportHeight.value - 1)
-          emit("onEndReached", virtualScroller.value.scrollTop);
+          emit("onEndReached", virtualScroller.value?.scrollTop);
       });
     };
 
-    const scrollToStart = () => {
-      virtualScroller.value.scrollTo({
+    const scrollToStart = (): void => {
+      virtualScroller.value?.scrollTo({
         top: 0,
         behavior: scrollBehaviour.value,
       });
     };
 
-    const scrollToEnd = () => {
-      virtualScroller.value.scrollTo({
+    const scrollToEnd = (): void => {
+      virtualScroller.value?.scrollTo({
         top: totalHeight.value,
         behavior: scrollBehaviour.value,
       });
     };
 
-    const scrollToIndex = (index) => {
+    const scrollToIndex = (index: number): void => {
       invariant(
         index >= 0,
         `index value out of range: requested index ${index} but minimum is 0`
@@ -361,7 +391,7 @@ export default defineComponent({
       scrollTop.value = childPositions.value[index];
     };
 
-    const scrollToNode = (conditionCallback) => {
+    const scrollToNode = (conditionCallback: ConditionCallback): void => {
       invariant(
         conditionCallback && typeof conditionCallback === "function",
         `input parameter ${conditionCallback} is not a function`
@@ -374,7 +404,7 @@ export default defineComponent({
       await setScrollState();
     });
 
-    const reCalculateHeights = () => {
+    const reCalculateHeights = (): void => {
       childPositions.value = getChildPositions(data.value, getNodeHeight.value);
       totalHeight.value = getTotalHeight(
         data.value,
@@ -383,7 +413,7 @@ export default defineComponent({
       );
     };
 
-    const refreshView = () => {
+    const refreshView = (): void => {
       triggerRef(data);
       reCalculateHeights();
     };

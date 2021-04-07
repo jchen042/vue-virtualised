@@ -20,16 +20,20 @@
   </virtualised-base-scroller>
 </template>
 
-<script>
-import { ref, onMounted } from "vue";
+<script lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { defineComponent, PropType, ref, onMounted } from "vue";
 import VirtualisedBaseScroller from "./Base/VirtualisedBaseScroller.vue";
 
-export default {
+import { GetNodeHeight, GetNodeKey, CellRenderer } from "../types/types";
+
+export default defineComponent({
   name: "VirtualisedList",
   components: { VirtualisedBaseScroller },
   props: {
     nodes: {
-      type: Array,
+      type: Array as PropType<Array<any>>,
       required: true,
     },
     viewportHeight: {
@@ -44,51 +48,55 @@ export default {
       type: Number,
       default: () => null,
     },
-    scrollBehaviour: { type: String, default: () => "auto" },
+    scrollBehaviour: {
+      // eslint-disable-next-line no-undef
+      type: String as PropType<ScrollBehavior>,
+      default: () => "auto",
+    },
     tolerance: {
       type: Number,
       default: () => 2,
     },
     getNodeHeight: {
-      type: Function,
+      type: Function as PropType<GetNodeHeight>,
       default: () => 40,
     },
     getNodeKey: {
-      type: Function,
-      default: (node, index) => node.key ?? index,
+      type: Function as PropType<GetNodeKey>,
+      default: (node: any, index: number) => node.key ?? index,
     },
     cellRenderer: {
-      type: Function,
+      type: Function as PropType<CellRenderer>,
       default: () => null,
     },
   },
   emits: ["onScroll", "onStartReached", "onEndReached"],
   setup(props, { emit }) {
-    const scroller = ref(null);
+    const scroller = ref<typeof VirtualisedBaseScroller | null>(null);
     const scrollToStart = ref(null);
     const scrollToEnd = ref(null);
     const scrollToIndex = ref(null);
     const scrollToNode = ref(null);
     const refreshView = ref(null);
 
-    const handleScroll = (scrollTop) => {
+    const handleScroll = (scrollTop: number): void => {
       emit("onScroll", scrollTop);
     };
 
-    const handleStartReached = (scrollTop) => {
+    const handleStartReached = (scrollTop: number): void => {
       emit("onStartReached", scrollTop);
     };
 
-    const handleEndReached = (scrollTop) => {
+    const handleEndReached = (scrollTop: number): void => {
       emit("onEndReached", scrollTop);
     };
 
     onMounted(() => {
-      scrollToStart.value = scroller.value.scrollToStart;
-      scrollToEnd.value = scroller.value.scrollToEnd;
-      scrollToIndex.value = scroller.value.scrollToIndex;
-      scrollToNode.value = scroller.value.scrollToNode;
-      refreshView.value = scroller.value.refreshView;
+      scrollToStart.value = scroller.value?.scrollToStart;
+      scrollToEnd.value = scroller.value?.scrollToEnd;
+      scrollToIndex.value = scroller.value?.scrollToIndex;
+      scrollToNode.value = scroller.value?.scrollToNode;
+      refreshView.value = scroller.value?.refreshView;
     });
 
     return {
@@ -103,7 +111,7 @@ export default {
       refreshView,
     };
   },
-};
+});
 </script>
 
 <style></style>
