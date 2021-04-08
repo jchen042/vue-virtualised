@@ -31,5 +31,5 @@ export interface UpdateFunction {
 }
 
 export interface RemoveFunction {
-  (nodes: Array<Node>, path: Array<number>): void;
+  (nodes: Array<Node>, path: Array<number>): Promise<void>;
 }

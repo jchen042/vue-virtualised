@@ -363,6 +363,8 @@ export default defineComponent({
       });
     };
 
+    const getScrollTop = (): number => scrollTop.value;
+
     const scrollToStart = (): void => {
       virtualScroller.value?.scrollTo({
         top: 0,
@@ -373,6 +375,14 @@ export default defineComponent({
     const scrollToEnd = (): void => {
       virtualScroller.value?.scrollTo({
         top: totalHeight.value,
+        behavior: scrollBehaviour.value,
+      });
+    };
+
+    const scrollToHeight = (height: number): void => {
+      console.log(height);
+      virtualScroller.value?.scrollTo({
+        top: height,
         behavior: scrollBehaviour.value,
       });
     };
@@ -434,8 +444,10 @@ export default defineComponent({
       offsetY,
       visibleNodes,
       handleScroll,
+      getScrollTop,
       scrollToStart,
       scrollToEnd,
+      scrollToHeight,
       scrollToIndex,
       scrollToNode,
       refreshView,
