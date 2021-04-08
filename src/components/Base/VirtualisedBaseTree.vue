@@ -308,6 +308,10 @@ export default defineComponent({
       scroller.value?.refreshView();
     };
 
+    /**
+     * This method removes a node with its decendant nodes,
+     * but it does not update the parents and index attributes.
+     */
     const removeNode: RemoveFunction = (nodes, path) => {
       console.log(path);
       const childIndex = path.pop();
@@ -324,15 +328,23 @@ export default defineComponent({
       console.log(parentNode);
       if (!isNil(childIndex)) {
         console.log("prepare for deleting", childIndex);
-        const indexToRemove = parentNode.children?.findIndex(
-          (node) => node.index === childIndex
-        );
+        // The real index of the node to be deleted is not always equal to the index attribute.
+        const indexToRemove =
+          parents.length > 0
+            ? parentNode.children?.findIndex(
+                (node) => node.index === childIndex
+              )
+            : // Edge case: root node to be deleted.
+              nodes.findIndex((node) => node.index === childIndex);
         console.log("index to remove", indexToRemove);
         if (!isNil(indexToRemove) && indexToRemove >= 0)
-          parentNodes[parents[parents.length - 1]].children?.splice(
-            indexToRemove,
-            1
-          );
+          parents.length > 0
+            ? parentNodes[parents[parents.length - 1]].children?.splice(
+                indexToRemove,
+                1
+              )
+            : // Edge case: delete root node.
+              nodes.splice(indexToRemove, 1);
       }
 
       onChange(nodes);
