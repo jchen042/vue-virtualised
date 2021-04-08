@@ -49,7 +49,7 @@ import {
   CellRenderer,
   ConditionCallback,
 } from "../types/types";
-import { NodeModel, UpdateFunction } from "../types/interfaces";
+import { NodeModel, UpdateFunction, RemoveFunction } from "../types/interfaces";
 
 export default defineComponent({
   name: "VirtualisedTree",
@@ -103,6 +103,7 @@ export default defineComponent({
     const virtualisedBaseTree = ref<typeof VirtualisedBaseTree | null>(null);
     const updateNode = ref<UpdateFunction | null>(null);
     const updateNodes = ref<UpdateFunction | null>(null);
+    const removeNode = ref<RemoveFunction | null>(null);
     const scrollToStart = ref<(() => void) | null>(null);
     const scrollToEnd = ref<(() => void) | null>(null);
     // eslint-disable-next-line no-unused-vars
@@ -129,6 +130,7 @@ export default defineComponent({
       () => {
         updateNode.value = virtualisedBaseTree.value?.updateNode;
         updateNodes.value = virtualisedBaseTree.value?.updateNodes;
+        removeNode.value = virtualisedBaseTree.value?.removeNode;
         scrollToStart.value = virtualisedBaseTree.value?.scrollToStart;
         scrollToEnd.value = virtualisedBaseTree.value?.scrollToEnd;
         scrollToIndex.value = virtualisedBaseTree.value?.scrollToIndex;
@@ -140,6 +142,7 @@ export default defineComponent({
       virtualisedBaseTree,
       updateNode,
       updateNodes,
+      removeNode,
       scrollToStart,
       scrollToEnd,
       scrollToIndex,

@@ -39,6 +39,7 @@ import {
   getNumberOfVisibleDescendants,
 } from "../../utils/nodesHelper";
 import chunk from "lodash/chunk";
+import isNil from "lodash/isNil";
 
 import {
   Node,
@@ -53,6 +54,7 @@ import {
   NodeModel,
   UpdateNodeCallback,
   UpdateFunction,
+  RemoveFunction,
 } from "../../types/interfaces";
 
 export default defineComponent({
@@ -306,6 +308,36 @@ export default defineComponent({
       scroller.value?.refreshView();
     };
 
+    const removeNode: RemoveFunction = (nodes, path) => {
+      console.log(path);
+      const childIndex = path.pop();
+      console.log(childIndex);
+      const parents = path;
+      console.log(parents);
+
+      let parentNodes = nodes;
+      const size = parents.length - 1;
+      for (let i = 0; i < size; i++)
+        parentNodes = parentNodes[path[i]].children ?? [];
+
+      const parentNode = parentNodes[parents[parents.length - 1]];
+      console.log(parentNode);
+      if (!isNil(childIndex)) {
+        console.log("prepare for deleting", childIndex);
+        const indexToRemove = parentNode.children?.findIndex(
+          (node) => node.index === childIndex
+        );
+        console.log("index to remove", indexToRemove);
+        if (!isNil(indexToRemove) && indexToRemove >= 0)
+          parentNodes[parents[parents.length - 1]].children?.splice(
+            indexToRemove,
+            1
+          );
+      }
+
+      onChange(nodes);
+    };
+
     const handleScroll = (scrollTop: number): void => {
       emit("onScroll", scrollTop);
     };
@@ -323,6 +355,7 @@ export default defineComponent({
       flattenedTree,
       updateNode,
       updateNodes,
+      removeNode,
       scrollToStart,
       scrollToEnd,
       scrollToIndex,

@@ -99,7 +99,7 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 |Prop|Type|Required?|Default|Description|
 |---|---|:---:|---|---|
 |nodes|`Array<Node>`|✓||Tree data with implementing the following keys: <ul><li>`name`: The primary label for the node.</li><li>`state?`: An object stores states of each node.<ul><li>`expanded?`: shows children of the node if `true`, or hides them if `false`. Defaults to `false`.</li></ul></li><li>`children`: An array of child nodes belonging to the node.</li></ul><div>e.g. `[{name: "Node 1", children: [{name: "Leaf 1"}]}, {name: "Node 2"}]`</div>|
-|useTimeSlicing|`boolean`||`false`|Time slicing is a technique allows for switching between micro tasks (i.e. DOM redrawing) and micro tasks (i.e. node updating) when traversing and manipulating enormous amount of nodes. If it's set to `true`, we can avoid blocking the whole web application. However, the total amount of traversal time will be longer.|
+|useTimeSlicing|`boolean`||`false`|Time slicing is a technique allows for switching between macro tasks (i.e. DOM redrawing) and micro tasks (i.e. node updating inside an iteration) when traversing and manipulating enormous amount of nodes. If it's set to `true`, we can avoid blocking the whole web application during the process. However, the total amount of traversal time will be longer because the application will switch between macro and micro tasks.|
 |onChange|`Function`|||A function that takes `nodes` prop as a parameter. This function will be called when executing `updateNode()` and `updateNodes()` methods.|
 
 ## Events

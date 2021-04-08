@@ -7,6 +7,7 @@ export interface NodeStateModel {
   expanded: boolean;
   isLeaf: boolean;
 }
+
 export interface NodeModel {
   key: string | number;
   name: string | number;
@@ -27,4 +28,8 @@ export interface UpdateFunction {
     index: number,
     updateFn: UpdateNodeCallback
   ): Promise<void>;
+}
+
+export interface RemoveFunction {
+  (nodes: Array<Node>, path: Array<number>): void;
 }

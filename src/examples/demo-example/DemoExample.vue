@@ -23,7 +23,7 @@
       <virtualised-tree
         ref="treeView"
         :nodes="nodes"
-        :use-time-slicing="true"
+        :use-time-slicing="false"
         :on-change="onChange"
         :viewport-height="viewportHeight"
         :initial-scroll-top="initialScrollTop"
@@ -95,23 +95,37 @@ export default {
             node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),
           h("div", {}, node.name),
-          h(
-            "div",
-            {
-              class: "update-button",
-              onClick: async () =>
-                await treeView.value.updateNodes(
-                  nodes,
-                  node,
-                  index,
-                  (node) => ({
-                    ...node,
-                    name: "current node and all descendants updated",
-                  })
-                ),
-            },
-            "Bulk update nodes"
-          ),
+          h("div", { class: "util-buttons" }, [
+            h(
+              "div",
+              {
+                class: "update-button",
+                onClick: async () =>
+                  await treeView.value.updateNodes(
+                    nodes,
+                    node,
+                    index,
+                    (node) => ({
+                      ...node,
+                      name: "current node and all descendants updated",
+                    })
+                  ),
+              },
+              "Bulk update nodes"
+            ),
+            h(
+              "div",
+              {
+                class: "delete-button",
+                onClick: () =>
+                  treeView.value.removeNode(nodes, [
+                    ...node.parents,
+                    node.index,
+                  ]),
+              },
+              "Delete"
+            ),
+          ]),
         ]
       ),
     ];
@@ -212,9 +226,15 @@ export default {
   cursor: pointer;
 }
 
-.update-button {
+.util-buttons {
   position: absolute;
   right: 20px;
+  display: flex;
+  flex-direction: row;
+  visibility: hidden;
+}
+
+.update-button {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -222,14 +242,24 @@ export default {
   background-color: #2ea44f;
   color: hsla(0, 0%, 100%, 0.8);
   padding: 5px 16px;
-  visibility: hidden;
+}
+
+.delete-button {
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: #2ea44f;
+  color: hsla(0, 0%, 100%, 0.8);
+  padding: 5px 16px;
 }
 
 .cell-container:hover {
   background-color: #f6f8fa;
 }
 
-.cell-container:hover .update-button {
+.cell-container:hover .update-button,
+.cell-container:hover .delete-button {
   visibility: visible;
 }
 </style>
