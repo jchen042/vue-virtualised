@@ -6,7 +6,7 @@
 
 > Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data. `vue-virtualised` is able to render and update 1 million nodes within a few seconds in front-end.
 
-![Demo](/src/assets/demo-20200331-60fps.gif)
+![Demo](/src/assets/demo-20200409.gif)
 
 ## Getting started
 
@@ -200,6 +200,8 @@ This method can be bound to the `cell` slot, which updates a single node in both
 ```ts
 updateFn(node: Node | NodeModel): NodeModel
 ```
+
+This method can be used to expand/collapse the current node by setting the boolean value of `state.expanded`.
 
 #### `updateNodes()`
 

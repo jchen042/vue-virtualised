@@ -23,7 +23,7 @@
       <virtualised-tree
         ref="treeView"
         :nodes="nodes"
-        :use-time-slicing="false"
+        :use-time-slicing="true"
         :on-change="onChange"
         :viewport-height="viewportHeight"
         :initial-scroll-top="initialScrollTop"
@@ -239,19 +239,35 @@ export default {
   font-weight: 500;
   cursor: pointer;
   border-radius: 5px;
+  border-color: rgba(27, 31, 35, 0.15);
   background-color: #2ea44f;
   color: hsla(0, 0%, 100%, 0.8);
   padding: 5px 16px;
 }
 
+.update-button:hover {
+  background-color: #2c974b;
+  border-color: rgba(27, 31, 35, 0.15);
+}
+
 .delete-button {
+  margin-left: 10px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   border-radius: 5px;
-  background-color: #2ea44f;
-  color: hsla(0, 0%, 100%, 0.8);
+  border-color: rgba(27, 31, 35, 0.15);
+  background-color: #fafbfc;
+  color: #d73a49;
   padding: 5px 16px;
+  transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  transition-property: color, background-color, border-color;
+}
+
+.delete-button:hover {
+  color: #fff;
+  background-color: #cb2431;
+  border-color: rgba(27, 31, 35, 0.15);
 }
 
 .cell-container:hover {
