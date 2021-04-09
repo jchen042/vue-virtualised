@@ -123,8 +123,10 @@ export default defineComponent({
     const getScrollTop = ref<(() => number) | null>(null);
     const scrollToStart = ref<(() => void) | null>(null);
     const scrollToEnd = ref<(() => void) | null>(null);
-    // eslint-disable-next-line no-unused-vars
-    const scrollToHeight = ref<((height: number) => void) | null>(null);
+    const scrollToHeight = ref<
+      // eslint-disable-next-line no-unused-vars, no-undef
+      ((height: number, behaviour?: ScrollBehavior) => void) | null
+    >(null);
     // eslint-disable-next-line no-unused-vars
     const scrollToIndex = ref<((index: number) => void) | null>(null);
     const scrollToNode = ref<
@@ -330,11 +332,8 @@ export default defineComponent({
      * and it also needs to update the parents and index attributes to make sure other node manipulations are correct.
      */
     const removeNode: RemoveFunction = async (nodes, path) => {
-      console.log(path);
       const childIndex = path.pop();
-      console.log(childIndex);
       const parents = path;
-      console.log(parents);
 
       let parentNodes = nodes;
       const size = parents.length - 1;
@@ -342,9 +341,7 @@ export default defineComponent({
         parentNodes = parentNodes[path[i]].children ?? [];
 
       const parentNode = parentNodes[parents[parents.length - 1]];
-      console.log(parentNode);
       if (!isNil(childIndex)) {
-        console.log("prepare for deleting", childIndex);
         // The real index of the node to be deleted is not always equal to the index attribute.
         const indexToRemove =
           parents.length > 0
@@ -353,7 +350,6 @@ export default defineComponent({
               )
             : // Edge case: root node to be deleted.
               nodes.findIndex((node) => node.index === childIndex);
-        console.log("index to remove", indexToRemove);
         if (!isNil(indexToRemove) && indexToRemove >= 0)
           parents.length > 0
             ? parentNodes[parents[parents.length - 1]].children?.splice(
@@ -372,7 +368,6 @@ export default defineComponent({
       if (flattenedTreeNodeIndexToRemove >= 0) {
         const flattenedTreeNodeToRemove =
           flattenedTree[flattenedTreeNodeIndexToRemove];
-        console.log("flattened tree node to remove", flattenedTreeNodeToRemove);
         if (flattenedTreeNodeToRemove.parents.length > 0) {
           flattenedTree.splice(flattenedTreeNodeIndexToRemove, 1);
           const parentNodeIndex = flattenedTree.findIndex((node) =>

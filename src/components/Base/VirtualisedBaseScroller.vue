@@ -379,11 +379,15 @@ export default defineComponent({
       });
     };
 
-    const scrollToHeight = (height: number): void => {
+    const scrollToHeight = (
+      height: number,
+      // eslint-disable-next-line no-undef
+      behaviour?: ScrollBehavior
+    ): void => {
       console.log(height);
       virtualScroller.value?.scrollTo({
         top: height,
-        behavior: scrollBehaviour.value,
+        behavior: behaviour ?? scrollBehaviour.value,
       });
     };
 

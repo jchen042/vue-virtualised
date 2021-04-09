@@ -113,8 +113,10 @@ export default defineComponent({
     const scrollTop = ref<number>(props.initialScrollTop);
     const scrollToStart = ref<(() => void) | null>(null);
     const scrollToEnd = ref<(() => void) | null>(null);
-    // eslint-disable-next-line no-unused-vars
-    const scrollToHeight = ref<((height: number) => void) | null>(null);
+    const scrollToHeight = ref<
+      // eslint-disable-next-line no-unused-vars, no-undef
+      ((height: number, behaviour?: ScrollBehavior) => void) | null
+    >(null);
     // eslint-disable-next-line no-unused-vars
     const scrollToIndex = ref<((index: number) => void) | null>(null);
     const scrollToNode = ref<
@@ -139,14 +141,12 @@ export default defineComponent({
     const forceUpdate = async (): Promise<void> => {
       isForcedUpdate = true;
       scrollTop.value = getScrollTop.value ? getScrollTop.value() : 0;
-      console.log(scrollTop);
       key.value++;
     };
 
     const renderComplete = (): void => {
-      console.log("complete render");
       isForcedUpdate && scrollToHeight.value
-        ? scrollToHeight.value(scrollTop.value)
+        ? scrollToHeight.value(scrollTop.value, "auto")
         : null;
       isForcedUpdate = false;
     };
