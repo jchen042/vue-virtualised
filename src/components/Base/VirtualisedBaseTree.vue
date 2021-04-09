@@ -28,6 +28,7 @@ import {
   ref,
   markRaw,
   onMounted,
+  nextTick,
 } from "vue";
 import VirtualisedBaseScroller from "./VirtualisedBaseScroller.vue";
 
@@ -105,7 +106,13 @@ export default defineComponent({
       default: () => null,
     },
   },
-  emits: ["onScroll", "onStartReached", "onEndReached", "forceUpdate"],
+  emits: [
+    "onScroll",
+    "onStartReached",
+    "onEndReached",
+    "forceUpdate",
+    "renderComplete",
+  ],
   async setup(props, { emit }) {
     const { useTimeSlicing } = toRefs(props);
     // NO REACTIVE
@@ -125,13 +132,16 @@ export default defineComponent({
       ((conditionCallback: ConditionCallback) => void) | null
     >(null);
 
-    onMounted(() => {
+    onMounted(async () => {
       getScrollTop.value = scroller.value?.getScrollTop;
       scrollToStart.value = scroller.value?.scrollToStart;
       scrollToEnd.value = scroller.value?.scrollToEnd;
       scrollToHeight.value = scroller.value?.scrollToHeight;
       scrollToIndex.value = scroller.value?.scrollToIndex;
       scrollToNode.value = scroller.value?.scrollToNode;
+
+      await nextTick();
+      emit("renderComplete");
     });
 
     const getFlattenedTree = async (

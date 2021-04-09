@@ -18,6 +18,7 @@
       @on-start-reached="handleStartReached"
       @on-end-reached="handleEndReached"
       @force-update="forceUpdate"
+      @render-complete="renderComplete"
     >
       <template #cell="slotProps">
         <slot
@@ -109,6 +110,7 @@ export default defineComponent({
     const updateNodes = ref<UpdateFunction | null>(null);
     const removeNode = ref<RemoveFunction | null>(null);
     const getScrollTop = ref<(() => number) | null>(null);
+    const scrollTop = ref<number>(props.initialScrollTop);
     const scrollToStart = ref<(() => void) | null>(null);
     const scrollToEnd = ref<(() => void) | null>(null);
     // eslint-disable-next-line no-unused-vars
@@ -119,6 +121,8 @@ export default defineComponent({
       // eslint-disable-next-line no-unused-vars
       ((conditionCallback: ConditionCallback) => void) | null
     >(null);
+
+    let isForcedUpdate = false;
 
     const handleScroll = (scrollTop: number): void => {
       emit("onScroll", scrollTop);
@@ -133,16 +137,18 @@ export default defineComponent({
     };
 
     const forceUpdate = async (): Promise<void> => {
-      const scrollTop = getScrollTop.value ? getScrollTop.value() : 0;
+      isForcedUpdate = true;
+      scrollTop.value = getScrollTop.value ? getScrollTop.value() : 0;
       console.log(scrollTop);
       key.value++;
-      // TODO: debug to make sure the scroller can be scrolling to the position
-      // await nextTick();
-      setTimeout(() => {
-        scrollToHeight.value ? scrollToHeight.value(scrollTop) : null;
-      }, 5000);
-      // scrollToHeight.value ? scrollToHeight.value(scrollTop) : null;
-      // scrollToEnd.value ? scrollToEnd.value() : null;
+    };
+
+    const renderComplete = (): void => {
+      console.log("complete render");
+      isForcedUpdate && scrollToHeight.value
+        ? scrollToHeight.value(scrollTop.value)
+        : null;
+      isForcedUpdate = false;
     };
 
     watch(
@@ -175,6 +181,7 @@ export default defineComponent({
       handleStartReached,
       handleEndReached,
       forceUpdate,
+      renderComplete,
     };
   },
 });
