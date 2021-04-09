@@ -2,6 +2,7 @@
   <suspense>
     <virtualised-base-tree
       ref="virtualisedBaseTree"
+      :key="key"
       :nodes="nodes"
       :use-time-slicing="useTimeSlicing"
       :on-change="onChange"
@@ -13,9 +14,11 @@
       :get-node-height="getNodeHeight"
       :get-node-key="getNodeKey"
       :cell-renderer="cellRenderer"
-      @onScroll="handleScroll"
-      @onStartReached="handleStartReached"
-      @onEndReached="handleEndReached"
+      @on-scroll="handleScroll"
+      @on-start-reached="handleStartReached"
+      @on-end-reached="handleEndReached"
+      @force-update="forceUpdate"
+      @render-complete="renderComplete"
     >
       <template #cell="slotProps">
         <slot
@@ -38,6 +41,7 @@ import {
   PropType,
   ref,
   watch,
+  nextTick,
 } from "vue";
 import VirtualisedBaseTree from "./Base/VirtualisedBaseTree.vue";
 
@@ -49,7 +53,7 @@ import {
   CellRenderer,
   ConditionCallback,
 } from "../types/types";
-import { NodeModel, UpdateFunction } from "../types/interfaces";
+import { NodeModel, UpdateFunction, RemoveFunction } from "../types/interfaces";
 
 export default defineComponent({
   name: "VirtualisedTree",
@@ -101,16 +105,26 @@ export default defineComponent({
   emits: ["onScroll", "onStartReached", "onEndReached"],
   setup(props, { emit }) {
     const virtualisedBaseTree = ref<typeof VirtualisedBaseTree | null>(null);
+    const key = ref<number>(0);
     const updateNode = ref<UpdateFunction | null>(null);
     const updateNodes = ref<UpdateFunction | null>(null);
+    const removeNode = ref<RemoveFunction | null>(null);
+    const getScrollTop = ref<(() => number) | null>(null);
+    const scrollTop = ref<number>(props.initialScrollTop);
     const scrollToStart = ref<(() => void) | null>(null);
     const scrollToEnd = ref<(() => void) | null>(null);
+    const scrollToHeight = ref<
+      // eslint-disable-next-line no-unused-vars, no-undef
+      ((height: number, behaviour?: ScrollBehavior) => void) | null
+    >(null);
     // eslint-disable-next-line no-unused-vars
     const scrollToIndex = ref<((index: number) => void) | null>(null);
     const scrollToNode = ref<
       // eslint-disable-next-line no-unused-vars
       ((conditionCallback: ConditionCallback) => void) | null
     >(null);
+
+    let isForcedUpdate = false;
 
     const handleScroll = (scrollTop: number): void => {
       emit("onScroll", scrollTop);
@@ -124,13 +138,29 @@ export default defineComponent({
       emit("onEndReached", scrollTop);
     };
 
+    const forceUpdate = async (): Promise<void> => {
+      isForcedUpdate = true;
+      scrollTop.value = getScrollTop.value ? getScrollTop.value() : 0;
+      key.value++;
+    };
+
+    const renderComplete = (): void => {
+      isForcedUpdate && scrollToHeight.value
+        ? scrollToHeight.value(scrollTop.value, "auto")
+        : null;
+      isForcedUpdate = false;
+    };
+
     watch(
       () => virtualisedBaseTree.value,
       () => {
         updateNode.value = virtualisedBaseTree.value?.updateNode;
         updateNodes.value = virtualisedBaseTree.value?.updateNodes;
+        removeNode.value = virtualisedBaseTree.value?.removeNode;
+        getScrollTop.value = virtualisedBaseTree.value?.getScrollTop;
         scrollToStart.value = virtualisedBaseTree.value?.scrollToStart;
         scrollToEnd.value = virtualisedBaseTree.value?.scrollToEnd;
+        scrollToHeight.value = virtualisedBaseTree.value?.scrollToHeight;
         scrollToIndex.value = virtualisedBaseTree.value?.scrollToIndex;
         scrollToNode.value = virtualisedBaseTree.value?.scrollToNode;
       }
@@ -138,15 +168,20 @@ export default defineComponent({
 
     return {
       virtualisedBaseTree,
+      key,
       updateNode,
       updateNodes,
+      removeNode,
       scrollToStart,
       scrollToEnd,
+      scrollToHeight,
       scrollToIndex,
       scrollToNode,
       handleScroll,
       handleStartReached,
       handleEndReached,
+      forceUpdate,
+      renderComplete,
     };
   },
 });

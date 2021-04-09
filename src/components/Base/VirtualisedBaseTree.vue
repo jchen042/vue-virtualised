@@ -10,9 +10,9 @@
     :get-node-height="getNodeHeight"
     :get-node-key="getNodeKey"
     :cell-renderer="cellRenderer"
-    @onScroll="handleScroll"
-    @onStartReached="handleStartReached"
-    @onEndReached="handleEndReached"
+    @on-scroll="handleScroll"
+    @on-start-reached="handleStartReached"
+    @on-end-reached="handleEndReached"
   >
     <template #cell="slotProps">
       <slot name="cell" :node="slotProps.node" :index="slotProps.index"></slot>
@@ -28,6 +28,7 @@ import {
   ref,
   markRaw,
   onMounted,
+  nextTick,
 } from "vue";
 import VirtualisedBaseScroller from "./VirtualisedBaseScroller.vue";
 
@@ -39,6 +40,8 @@ import {
   getNumberOfVisibleDescendants,
 } from "../../utils/nodesHelper";
 import chunk from "lodash/chunk";
+import isNil from "lodash/isNil";
+import isEqual from "lodash/isEqual";
 
 import {
   Node,
@@ -53,6 +56,7 @@ import {
   NodeModel,
   UpdateNodeCallback,
   UpdateFunction,
+  RemoveFunction,
 } from "../../types/interfaces";
 
 export default defineComponent({
@@ -102,7 +106,13 @@ export default defineComponent({
       default: () => null,
     },
   },
-  emits: ["onScroll", "onStartReached", "onEndReached"],
+  emits: [
+    "onScroll",
+    "onStartReached",
+    "onEndReached",
+    "forceUpdate",
+    "renderComplete",
+  ],
   async setup(props, { emit }) {
     const { useTimeSlicing } = toRefs(props);
     // NO REACTIVE
@@ -110,8 +120,13 @@ export default defineComponent({
     const { nodes, onChange } = props;
 
     const scroller = ref<typeof VirtualisedBaseScroller | null>(null);
+    const getScrollTop = ref<(() => number) | null>(null);
     const scrollToStart = ref<(() => void) | null>(null);
     const scrollToEnd = ref<(() => void) | null>(null);
+    const scrollToHeight = ref<
+      // eslint-disable-next-line no-unused-vars, no-undef
+      ((height: number, behaviour?: ScrollBehavior) => void) | null
+    >(null);
     // eslint-disable-next-line no-unused-vars
     const scrollToIndex = ref<((index: number) => void) | null>(null);
     const scrollToNode = ref<
@@ -119,11 +134,16 @@ export default defineComponent({
       ((conditionCallback: ConditionCallback) => void) | null
     >(null);
 
-    onMounted(() => {
+    onMounted(async () => {
+      getScrollTop.value = scroller.value?.getScrollTop;
       scrollToStart.value = scroller.value?.scrollToStart;
       scrollToEnd.value = scroller.value?.scrollToEnd;
+      scrollToHeight.value = scroller.value?.scrollToHeight;
       scrollToIndex.value = scroller.value?.scrollToIndex;
       scrollToNode.value = scroller.value?.scrollToNode;
+
+      await nextTick();
+      emit("renderComplete");
     });
 
     const getFlattenedTree = async (
@@ -215,6 +235,7 @@ export default defineComponent({
       });
     };
 
+    // Remove visible decendant nodes of the target node from the flattened tree.
     const collapseNodes = async (
       node: NodeModel,
       index: number,
@@ -306,6 +327,69 @@ export default defineComponent({
       scroller.value?.refreshView();
     };
 
+    /**
+     * This method removes a node with its decendant nodes,
+     * and it also needs to update the parents and index attributes to make sure other node manipulations are correct.
+     */
+    const removeNode: RemoveFunction = async (nodes, path) => {
+      const childIndex = path.pop();
+      const parents = path;
+
+      let parentNodes = nodes;
+      const size = parents.length - 1;
+      for (let i = 0; i < size; i++)
+        parentNodes = parentNodes[path[i]].children ?? [];
+
+      const parentNode = parentNodes[parents[parents.length - 1]];
+      if (!isNil(childIndex)) {
+        // The real index of the node to be deleted is not always equal to the index attribute.
+        const indexToRemove =
+          parents.length > 0
+            ? parentNode.children?.findIndex(
+                (node) => node.index === childIndex
+              )
+            : // Edge case: root node to be deleted.
+              nodes.findIndex((node) => node.index === childIndex);
+        if (!isNil(indexToRemove) && indexToRemove >= 0)
+          parents.length > 0
+            ? parentNodes[parents[parents.length - 1]].children?.splice(
+                indexToRemove,
+                1
+              )
+            : // Edge case: delete root node.
+              nodes.splice(indexToRemove, 1);
+      }
+
+      onChange(nodes);
+
+      const flattenedTreeNodeIndexToRemove = flattenedTree.findIndex(
+        (node) => isEqual(node.parents, parents) && node.index === childIndex
+      );
+      if (flattenedTreeNodeIndexToRemove >= 0) {
+        const flattenedTreeNodeToRemove =
+          flattenedTree[flattenedTreeNodeIndexToRemove];
+        if (flattenedTreeNodeToRemove.parents.length > 0) {
+          flattenedTree.splice(flattenedTreeNodeIndexToRemove, 1);
+          const parentNodeIndex = flattenedTree.findIndex((node) =>
+            isEqual(
+              [...node.parents, node.index],
+              flattenedTreeNodeToRemove.parents
+            )
+          );
+          if (parentNodeIndex >= 0) {
+            const parentNode = flattenedTree[parentNodeIndex];
+            await collapseNodes(parentNode, parentNodeIndex, flattenedTree);
+            await expandNodes(parentNode, parentNodeIndex, flattenedTree);
+
+            // Force refresh data in child component to trigger UI update.
+            scroller.value?.refreshView();
+          }
+        } else {
+          emit("forceUpdate");
+        }
+      }
+    };
+
     const handleScroll = (scrollTop: number): void => {
       emit("onScroll", scrollTop);
     };
@@ -323,8 +407,11 @@ export default defineComponent({
       flattenedTree,
       updateNode,
       updateNodes,
+      removeNode,
+      getScrollTop,
       scrollToStart,
       scrollToEnd,
+      scrollToHeight,
       scrollToIndex,
       scrollToNode,
       handleScroll,

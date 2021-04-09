@@ -6,7 +6,7 @@
 
 > Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data. `vue-virtualised` is able to render and update 1 million nodes within a few seconds in front-end.
 
-![Demo](/src/assets/demo-20200331-60fps.gif)
+![Demo](/src/assets/demo-20200409.gif)
 
 ## Getting started
 
@@ -99,7 +99,7 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 |Prop|Type|Required?|Default|Description|
 |---|---|:---:|---|---|
 |nodes|`Array<Node>`|✓||Tree data with implementing the following keys: <ul><li>`name`: The primary label for the node.</li><li>`state?`: An object stores states of each node.<ul><li>`expanded?`: shows children of the node if `true`, or hides them if `false`. Defaults to `false`.</li></ul></li><li>`children`: An array of child nodes belonging to the node.</li></ul><div>e.g. `[{name: "Node 1", children: [{name: "Leaf 1"}]}, {name: "Node 2"}]`</div>|
-|useTimeSlicing|`boolean`||`false`|Time slicing is a technique allows for switching between micro tasks (i.e. DOM redrawing) and micro tasks (i.e. node updating) when traversing and manipulating enormous amount of nodes. If it's set to `true`, we can avoid blocking the whole web application. However, the total amount of traversal time will be longer.|
+|useTimeSlicing|`boolean`||`false`|Time slicing is a technique allows for switching between macro tasks (i.e. DOM redrawing) and micro tasks (i.e. node updating inside an iteration) when traversing and manipulating enormous amount of nodes. If it's set to `true`, we can avoid blocking the whole web application during the process. However, the total amount of traversal time will be longer because the application will switch between macro and micro tasks.|
 |onChange|`Function`|||A function that takes `nodes` prop as a parameter. This function will be called when executing `updateNode()` and `updateNodes()` methods.|
 
 ## Events
@@ -178,22 +178,30 @@ Forces refresh rendered content.
 
 ### `VirtualisedTree` methods
 
+#### `scrollToHeight()`
+
+```ts
+scrollToHeight(height: number, behaviour: ScrollBehavior): void
+```
+
 #### `updateNode()`
 
 ```ts
 updateNode(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
 ```
 
-This method updates a single node in both original data and the view. Valid parameters are:
+This method can be bound to the `cell` slot, which updates a single node in both original data and the view. Valid parameters are:
 
 - `nodes`: `nodes` prop.
-- `node`: The current node that needs to be updated.
+- `node`: The current node of the slot that needs to be updated.
 - `index`: The index of the node that needs to be updated.
 - `updateFn`: The function that manipulates the current node and returns an updated node:
 
 ```ts
-updateFn(node: Node): Node
+updateFn(node: Node | NodeModel): NodeModel
 ```
+
+This method can be used to expand/collapse the current node by setting the boolean value of `state.expanded`.
 
 #### `updateNodes()`
 
@@ -201,16 +209,44 @@ updateFn(node: Node): Node
 updateNodes(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
 ```
 
-This method updates a single node including all its descendants in both original data and the view. Valid parameters are:
+This method can be bound to `cell` slot, which updates a single node including all its descendants in both original data and the view. Valid parameters are:
 
 - `nodes`: `nodes` prop.
-- `node`: The current node that needs to be updated.
+- `node`: The current node of the slot that needs to be updated.
 - `index`: The index of the node that needs to be updated.
 - `updateFn`: The function that manipulates the current node and returns an updated node:
 
 ```ts
-updateFn(node: Node): Node
+updateFn(node: Node | NodeModel): Node | NodeModel
 ```
+
+#### `removeNode()`
+
+```ts
+removeNode(nodes: Array<Node | NodeModel>, path: Array<number>): Promise<void>
+```
+
+This method removes a single node as well as its descendants, and it can be bound to the `cell` slot. Valid parameters are:
+
+- `nodes`: `nodes` prop.
+- `path`: The path of the node in the tree structure. e.g. For the following tree structure, the paths are showing in the comment for each:
+
+  ```ts
+  [
+    {
+      name: 'Node 1', // path: [0]
+      children: [{ name: 'Leaf 1' /* path: [0, 0] */ }],
+      state: { expanded: true },
+    },
+    { name: 'Node 2' }, // path: [1]
+  ]
+  ```
+
+  In addition, `path` can be composed by the `node` slot prop in the `cell` slot:
+
+  ```ts
+  const path = [...node.parents, node.index];
+  ```
 
 ## Contributing
 
