@@ -178,21 +178,27 @@ Forces refresh rendered content.
 
 ### `VirtualisedTree` methods
 
+#### `scrollToHeight()`
+
+```ts
+scrollToHeight(height: number, behaviour: ScrollBehavior): void
+```
+
 #### `updateNode()`
 
 ```ts
 updateNode(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
 ```
 
-This method updates a single node in both original data and the view. Valid parameters are:
+This method can be bound to the `cell` slot, which updates a single node in both original data and the view. Valid parameters are:
 
 - `nodes`: `nodes` prop.
-- `node`: The current node that needs to be updated.
+- `node`: The current node of the slot that needs to be updated.
 - `index`: The index of the node that needs to be updated.
 - `updateFn`: The function that manipulates the current node and returns an updated node:
 
 ```ts
-updateFn(node: Node): Node
+updateFn(node: Node | NodeModel): NodeModel
 ```
 
 #### `updateNodes()`
@@ -201,16 +207,44 @@ updateFn(node: Node): Node
 updateNodes(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
 ```
 
-This method updates a single node including all its descendants in both original data and the view. Valid parameters are:
+This method can be bound to `cell` slot, which updates a single node including all its descendants in both original data and the view. Valid parameters are:
 
 - `nodes`: `nodes` prop.
-- `node`: The current node that needs to be updated.
+- `node`: The current node of the slot that needs to be updated.
 - `index`: The index of the node that needs to be updated.
 - `updateFn`: The function that manipulates the current node and returns an updated node:
 
 ```ts
-updateFn(node: Node): Node
+updateFn(node: Node | NodeModel): Node | NodeModel
 ```
+
+#### `removeNode()`
+
+```ts
+removeNode(nodes: Array<Node | NodeModel>, path: Array<number>): Promise<void>
+```
+
+This method removes a single node as well as its descendants, and it can be bound to the `cell` slot. Valid parameters are:
+
+- `nodes`: `nodes` prop.
+- `path`: The path of the node in the tree structure. e.g. For the following tree structure, the paths are showing in the comment for each:
+
+  ```ts
+  [
+    {
+      name: 'Node 1', // path: [0]
+      children: [{ name: 'Leaf 1' /* path: [0, 0] */ }],
+      state: { expanded: true },
+    },
+    { name: 'Node 2' }, // path: [1]
+  ]
+  ```
+
+  In addition, `path` can be composed by the `node` slot prop in the `cell` slot:
+
+  ```ts
+  const path = [...node.parents, node.index];
+  ```
 
 ## Contributing
 

@@ -384,7 +384,6 @@ export default defineComponent({
       // eslint-disable-next-line no-undef
       behaviour?: ScrollBehavior
     ): void => {
-      console.log(height);
       virtualScroller.value?.scrollTo({
         top: height,
         behavior: behaviour ?? scrollBehaviour.value,
