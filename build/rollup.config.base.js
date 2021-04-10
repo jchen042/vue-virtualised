@@ -16,7 +16,7 @@ import replace from "@rollup/plugin-replace";
 import config from "../package.json";
 
 export default {
-  input: "src/index.js",
+  input: "src/index.ts",
   plugins: [
     resolve({
       mainFields: ["module", "jsnext:main", "main", "browser"],
