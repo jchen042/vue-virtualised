@@ -41,9 +41,8 @@ import {
   PropType,
   ref,
   watch,
-  nextTick,
 } from "vue";
-import VirtualisedBaseTree from "./Base/VirtualisedBaseTree.vue";
+import VirtualisedBaseTree from "@/components/Base/VirtualisedBaseTree.vue";
 
 import {
   Node,
@@ -52,8 +51,8 @@ import {
   GetNodeKey,
   CellRenderer,
   ConditionCallback,
-} from "../types/types";
-import { NodeModel, UpdateFunction, RemoveFunction } from "../types/interfaces";
+} from "@/types/types";
+import { NodeModel, UpdateFunction, RemoveFunction } from "@/types/interfaces";
 
 export default defineComponent({
   name: "VirtualisedTree",
