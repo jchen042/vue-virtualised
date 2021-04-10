@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 
-import { VNode, VNodeArrayChildren } from "@vue/runtime-core";
+import { VNode, VNodeArrayChildren } from "vue";
 
 type NodeState = {
   expanded?: boolean;
