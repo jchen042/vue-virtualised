@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 
+import alias from "@rollup/plugin-alias";
 import resolve from "@rollup/plugin-node-resolve";
 import eslint from "@rollup/plugin-eslint";
 import babel from "rollup-plugin-babel";
@@ -18,6 +19,11 @@ import config from "../package.json";
 export default {
   input: "src/index.ts",
   plugins: [
+    alias({
+      entries: [
+        { find: "@", replacement: `${path.resolve(__dirname, "../src")}` },
+      ],
+    }),
     resolve({
       mainFields: ["module", "jsnext:main", "main", "browser"],
       extensions: ["js", "ts", "vue"],
