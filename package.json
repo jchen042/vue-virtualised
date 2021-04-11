@@ -16,7 +16,7 @@
     "build:browser": "rollup --config build/rollup.config.browser.js",
     "build:es": "rollup --config build/rollup.config.es.js",
     "build:umd": "rollup --config build/rollup.config.umd.js",
-    "lib": "vue-cli-service build --target lib --name vue-virtualised --dest lib ./src/index.js",
+    "lib": "vue-cli-service build --target lib --name vue-virtualised --dest lib ./src/index.ts",
     "prepublishOnly": "npm run lint && npm run build"
   },
   "main": "dist/vue-virtualised.umd.js",

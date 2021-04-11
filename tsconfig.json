@@ -16,7 +16,7 @@
     "types": [
       "webpack-env",
       // https://stackoverflow.com/questions/45445976/tsc-cannot-find-name-of-global-object
-      // "node"
+      "node"
     ],
     "paths": {
       "@/*": [
