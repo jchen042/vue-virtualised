@@ -14,7 +14,9 @@
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
-      "webpack-env"
+      "webpack-env",
+      // https://stackoverflow.com/questions/45445976/tsc-cannot-find-name-of-global-object
+      "node"
     ],
     "paths": {
       "@/*": [
@@ -26,7 +28,10 @@
       "dom",
       "dom.iterable",
       "scripthost"
-    ]
+    ],
+  "declaration": true,
+  // "declarationDir": "./types"
+  // "outDir": "types"
   },
   "include": [
     "src/**/*.ts",
@@ -36,6 +41,6 @@
     "tests/**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
-  ]
+    "node_modules",
+  ],
 }

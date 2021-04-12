@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 
-import { Node } from "./types";
+import { Node, NodeState } from "@/types/types";
 
-export interface NodeStateModel {
+export interface NodeStateModel extends NodeState {
   expanded: boolean;
   isLeaf: boolean;
 }
 
-export interface NodeModel {
+export interface NodeModel extends Node {
   key: string | number;
   name: string | number;
   index: number;

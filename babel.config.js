@@ -4,5 +4,6 @@ module.exports = {
   presets: [
     "@vue/cli-plugin-babel/preset",
     ["@babel/env", { targets: { node: 6 } }],
+    "@babel/preset-typescript",
   ],
 };

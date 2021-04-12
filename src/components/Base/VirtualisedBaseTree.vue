@@ -30,15 +30,15 @@ import {
   onMounted,
   nextTick,
 } from "vue";
-import VirtualisedBaseScroller from "./VirtualisedBaseScroller.vue";
+import VirtualisedBaseScroller from "@/components/Base/VirtualisedBaseScroller.vue";
 
-import { sliceTask } from "../../utils/index";
+import { sliceTask } from "@/utils/index";
 import {
   nodeHasChildren,
   isNodeExpanded,
   traverse,
   getNumberOfVisibleDescendants,
-} from "../../utils/nodesHelper";
+} from "@/utils/nodesHelper";
 import chunk from "lodash/chunk";
 import isNil from "lodash/isNil";
 import isEqual from "lodash/isEqual";
@@ -50,14 +50,14 @@ import {
   GetNodeKey,
   CellRenderer,
   ConditionCallback,
-} from "../../types/types";
+} from "@/types/types";
 
 import {
   NodeModel,
   UpdateNodeCallback,
   UpdateFunction,
   RemoveFunction,
-} from "../../types/interfaces";
+} from "@/types/interfaces";
 
 export default defineComponent({
   name: "VirtualisedBaseTree",

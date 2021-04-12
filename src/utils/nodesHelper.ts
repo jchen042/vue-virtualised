@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { sliceTask } from "./index";
+import { sliceTask } from "@/utils/index";
 
-import { Node } from "../types/types";
-import { NodeModel } from "../types/interfaces";
+import { Node } from "@/types/types";
+import { NodeModel } from "@/types/interfaces";
 
 export const nodeHasChildren = (node: Node | NodeModel): boolean =>
   !!(node.children && node.children.length);
@@ -19,19 +19,19 @@ export const isNodeExpanded = (node: Node | NodeModel): boolean =>
 const constructBfsTraverseStack = (
   nodes: Array<Node | NodeModel>,
   parents: Array<number> = [],
-  stack: Array<Node | NodeModel> = []
-): Array<Node | NodeModel> => {
+  stack: Array<NodeModel> = []
+): Array<NodeModel> => {
   const _nodes = stack;
 
   for (let index = nodes.length - 1; index >= 0; index--) {
-    const node = nodes[index];
+    const node = <NodeModel>nodes[index];
 
     node.key = node.key ? node.key : parents.concat(index).toString();
     node.parents = parents;
     node.index = index;
     node.children = node.children ?? [];
 
-    node.state = node.state ? node.state : {};
+    node.state = node.state ? node.state : { expanded: false, isLeaf: false };
     node.state.expanded = !!isNodeExpanded(node);
     node.state.isLeaf = !nodeHasChildren(node);
 

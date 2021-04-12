@@ -1,6 +1,6 @@
 {
   "name": "vue-virtualised",
-  "version": "0.1.0-2",
+  "version": "0.1.0-3",
   "private": false,
   "description": "Vue components developed by Vue.js 3.0 for efficiently rendering large scrollable lists and hierarchical data. vue-virtualised is able to render and update 1 million nodes within a few seconds in front-end.",
   "author": {
@@ -8,6 +8,7 @@
     "email": "chenfrey920417@outlook.com",
     "url": "https://github.com/FallingCeilingS"
   },
+  "types": "vue-virtualised.d.ts",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "npm run build:umd && npm run build:es && npm run build:browser",
@@ -15,7 +16,7 @@
     "build:browser": "rollup --config build/rollup.config.browser.js",
     "build:es": "rollup --config build/rollup.config.es.js",
     "build:umd": "rollup --config build/rollup.config.umd.js",
-    "lib": "vue-cli-service build --target lib --name vue-virtualised --dest lib ./src/index.js",
+    "lib": "vue-cli-service build --target lib --name vue-virtualised --dest lib ./src/index.ts",
     "prepublishOnly": "npm run lint && npm run build"
   },
   "main": "dist/vue-virtualised.umd.js",
@@ -32,6 +33,7 @@
     "@babel/eslint-plugin": "^7.12.13",
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-typescript": "^7.13.0",
+    "@rollup/plugin-alias": "^3.1.2",
     "@rollup/plugin-buble": "^0.21.3",
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-eslint": "^8.0.1",

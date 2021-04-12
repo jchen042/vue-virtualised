@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 
-import { VNode, VNodeArrayChildren } from "@vue/runtime-core";
+import { VNode, VNodeArrayChildren } from "vue";
 
-type NodeState = {
+export type NodeState = {
   expanded?: boolean;
   isLeaf?: boolean;
+  [key: string]: any;
 };
 
 export type Node = {
@@ -15,6 +16,7 @@ export type Node = {
   parents?: Array<number>;
   state?: NodeState;
   children?: Array<Node>;
+  [key: string]: any;
 };
 
 export type GetNodeHeight = (node: any) => number;
