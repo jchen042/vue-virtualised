@@ -21,6 +21,10 @@ export interface UpdateNodeCallback {
   (node: Node | NodeModel): NodeModel;
 }
 
+export interface CreateFunction {
+  (nodes: Array<Node>, node: Node, path: Array<number>): void;
+}
+
 export interface UpdateFunction {
   (
     nodes: Array<Node>,

@@ -23,7 +23,7 @@
       <virtualised-tree
         ref="treeView"
         :nodes="nodes"
-        :use-time-slicing="true"
+        :use-time-slicing="false"
         :on-change="onChange"
         :viewport-height="viewportHeight"
         :initial-scroll-top="initialScrollTop"
@@ -110,6 +110,20 @@ export default defineComponent({
           ),
           h("div", {}, node.name),
           h("div", { class: "util-buttons" }, [
+            h(
+              "div",
+              {
+                class: "create-button",
+                onClick: () =>
+                  treeView.value
+                    ? treeView.value.createNode(nodes, { name: "new node" }, [
+                        ...node.parents,
+                        node.index,
+                      ])
+                    : null,
+              },
+              "Create"
+            ),
             h(
               "div",
               {
@@ -252,6 +266,17 @@ export default defineComponent({
   visibility: hidden;
 }
 
+.create-button {
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 5px;
+  border-color: rgba(27, 31, 35, 0.15);
+  background-color: #2ea44f;
+  color: hsla(0, 0%, 100%, 0.8);
+  padding: 5px 16px;
+}
+
 .update-button {
   font-size: 14px;
   font-weight: 500;
@@ -261,6 +286,9 @@ export default defineComponent({
   background-color: #2ea44f;
   color: hsla(0, 0%, 100%, 0.8);
   padding: 5px 16px;
+}
+
+.create-button:hover {
 }
 
 .update-button:hover {
@@ -292,6 +320,7 @@ export default defineComponent({
   background-color: #f6f8fa;
 }
 
+.cell-container:hover .create-button,
 .cell-container:hover .update-button,
 .cell-container:hover .delete-button {
   visibility: visible;

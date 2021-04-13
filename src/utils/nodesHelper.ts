@@ -72,6 +72,11 @@ export const traverse = async (
   }
 };
 
+export const getNodePath = (node: NodeModel): Array<number> => [
+  ...node.parents,
+  node.index,
+];
+
 // count the amount of visible descendants based on the node
 export const getNumberOfVisibleDescendants = async (
   node: NodeModel,

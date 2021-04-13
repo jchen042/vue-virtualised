@@ -278,6 +278,35 @@ export default defineComponent({
       scroller.value?.refreshView();
     };
 
+    const createNode = (
+      nodes: Array<Node | NodeModel>,
+      node: Node,
+      path: Array<number>
+    ): void => {
+      console.log(path);
+      const childIndex = path.pop();
+      const parents = path;
+
+      let parentNodes = nodes;
+      const size = parents.length - 1;
+      for (let i = 0; i < size; i++)
+        parentNodes = parentNodes[path[i]].children ?? [];
+
+      const parentNode = parentNodes[parents[parents.length - 1]];
+      if (!isNil(childIndex)) {
+        parents.length > 0
+          ? parentNodes[parents[parents.length - 1]].children?.splice(
+              childIndex,
+              0,
+              node
+            )
+          : // Edge case: delete root node.
+            nodes.splice(childIndex, 0, node);
+      }
+
+      onChange(nodes);
+    };
+
     const updateNodes: UpdateFunction = async (
       nodes,
       node,
@@ -405,6 +434,7 @@ export default defineComponent({
     return {
       scroller,
       flattenedTree,
+      createNode,
       updateNode,
       updateNodes,
       removeNode,

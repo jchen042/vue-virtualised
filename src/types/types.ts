@@ -12,8 +12,6 @@ export type NodeState = {
 export type Node = {
   key?: string | number;
   name: string | number;
-  index?: number;
-  parents?: Array<number>;
   state?: NodeState;
   children?: Array<Node>;
   [key: string]: any;
