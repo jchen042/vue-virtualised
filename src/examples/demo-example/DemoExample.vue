@@ -43,31 +43,35 @@
   </div>
 </template>
 
-<script>
-import { ref, h } from "vue";
-import VirtualisedList from "../../components/VirtualisedList";
-import VirtualisedTree from "../../components/VirtualisedTree";
+<script lang="ts">
+import { defineComponent, ref, h } from "vue";
+import VirtualisedList from "@/components/VirtualisedList.vue";
+import VirtualisedTree from "@/components/VirtualisedTree.vue";
 
 import { constructFixedTree } from "../../utils/mock";
 
-export default {
+import { Node } from "@/types/types";
+import { NodeModel } from "@/types/interfaces";
+
+export default defineComponent({
   name: "DemoExample",
   components: {
-    VirtualisedTree,
     VirtualisedList,
+    VirtualisedTree,
   },
   setup() {
-    const treeView = ref(null);
+    const treeView = ref<typeof VirtualisedTree | null>(null);
 
     const nodes = constructFixedTree(6, 15, 5);
 
-    const onChange = (nodes) => console.log("on change", nodes);
+    const onChange = (nodes: Array<Node | NodeModel>) =>
+      console.log("on change", nodes);
 
-    const listCellRenderer = (node) => [
+    const listCellRenderer = (node: NodeModel) => [
       h("div", { class: "cell-container list-cell-container" }, node.label),
     ];
 
-    const treeCellRenderer = (node, index) => [
+    const treeCellRenderer = (node: NodeModel, index: number) => [
       h(
         "div",
         {
@@ -87,10 +91,20 @@ export default {
               },
               class: "expansion-button",
               onClick: async () =>
-                await treeView.value.updateNode(nodes, node, index, (node) => ({
-                  ...node,
-                  state: { ...node.state, expanded: !node.state.expanded },
-                })),
+                treeView.value
+                  ? await treeView.value.updateNode(
+                      nodes,
+                      node,
+                      index,
+                      (node: NodeModel) => ({
+                        ...node,
+                        state: {
+                          ...node.state,
+                          expanded: !node.state.expanded,
+                        },
+                      })
+                    )
+                  : null,
             },
             node.state.isLeaf ? "" : node.state.expanded ? "-" : "+"
           ),
@@ -101,15 +115,17 @@ export default {
               {
                 class: "update-button",
                 onClick: async () =>
-                  await treeView.value.updateNodes(
-                    nodes,
-                    node,
-                    index,
-                    (node) => ({
-                      ...node,
-                      name: "current node and all descendants updated",
-                    })
-                  ),
+                  treeView.value
+                    ? await treeView.value.updateNodes(
+                        nodes,
+                        node,
+                        index,
+                        (node: NodeModel) => ({
+                          ...node,
+                          name: "current node and all descendants updated",
+                        })
+                      )
+                    : null,
               },
               "Bulk update nodes"
             ),
@@ -117,11 +133,13 @@ export default {
               "div",
               {
                 class: "delete-button",
-                onClick: () =>
-                  treeView.value.removeNode(nodes, [
-                    ...node.parents,
-                    node.index,
-                  ]),
+                onClick: async () =>
+                  treeView.value
+                    ? await treeView.value.removeNode(nodes, [
+                        ...node.parents,
+                        node.index,
+                      ])
+                    : null,
               },
               "Delete"
             ),
@@ -130,14 +148,14 @@ export default {
       ),
     ];
 
-    const handleScroll = (scrollTop) => {
+    const handleScroll = (scrollTop: number) => {
       console.log(scrollTop);
     };
 
-    const handleStartReached = (scrollTop) =>
+    const handleStartReached = (scrollTop: number) =>
       console.log("start reached", scrollTop);
 
-    const handleEndReached = (scrollTop) => {
+    const handleEndReached = (scrollTop: number) => {
       console.log("end reached", scrollTop);
     };
 
@@ -161,10 +179,10 @@ export default {
       viewportHeight: 500,
       initialScrollTop: 300,
       initialScrollIndex: 0,
-      getNodeHeight: (node) => 40 + (node.index % 10),
+      getNodeHeight: (node: NodeModel) => 40 + (node.index % 10),
     };
   },
-};
+});
 </script>
 
 <style>
