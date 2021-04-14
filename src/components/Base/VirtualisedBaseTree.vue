@@ -54,6 +54,7 @@ import {
 
 import {
   NodeModel,
+  CreateFunction,
   UpdateNodeCallback,
   UpdateFunction,
   RemoveFunction,
@@ -278,12 +279,7 @@ export default defineComponent({
       scroller.value?.refreshView();
     };
 
-    const createNode = (
-      nodes: Array<Node | NodeModel>,
-      node: Node,
-      path: Array<number>
-    ): void => {
-      console.log(path);
+    const createNode: CreateFunction = async (nodes, node, path) => {
       const childIndex = path.pop();
       const parents = path;
 
@@ -292,7 +288,6 @@ export default defineComponent({
       for (let i = 0; i < size; i++)
         parentNodes = parentNodes[path[i]].children ?? [];
 
-      const parentNode = parentNodes[parents[parents.length - 1]];
       if (!isNil(childIndex)) {
         parents.length > 0
           ? parentNodes[parents[parents.length - 1]].children?.splice(
@@ -305,6 +300,30 @@ export default defineComponent({
       }
 
       onChange(nodes);
+
+      if (parents.length > 0) {
+        const flattenedTreeParentNodeIndex = flattenedTree.findIndex((node) =>
+          isEqual([...node.parents, node.index], parents)
+        );
+        if (flattenedTreeParentNodeIndex >= 0 && !isNil(childIndex)) {
+          const flattenedTreeParentNode =
+            flattenedTree[flattenedTreeParentNodeIndex];
+          await collapseNodes(
+            flattenedTreeParentNode,
+            flattenedTreeParentNodeIndex,
+            flattenedTree
+          );
+          await expandNodes(
+            flattenedTreeParentNode,
+            flattenedTreeParentNodeIndex,
+            flattenedTree
+          );
+
+          scroller.value?.refreshView();
+        }
+      } else {
+        emit("forceUpdate");
+      }
     };
 
     const updateNodes: UpdateFunction = async (

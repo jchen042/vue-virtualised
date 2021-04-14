@@ -22,7 +22,11 @@ export interface UpdateNodeCallback {
 }
 
 export interface CreateFunction {
-  (nodes: Array<Node>, node: Node, path: Array<number>): void;
+  (
+    nodes: Array<Node | NodeModel>,
+    node: Node,
+    path: Array<number>
+  ): Promise<void>;
 }
 
 export interface UpdateFunction {

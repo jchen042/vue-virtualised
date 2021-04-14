@@ -114,12 +114,13 @@ export default defineComponent({
               "div",
               {
                 class: "create-button",
-                onClick: () =>
+                onClick: async () =>
                   treeView.value
-                    ? treeView.value.createNode(nodes, { name: "new node" }, [
-                        ...node.parents,
-                        node.index,
-                      ])
+                    ? await treeView.value.createNode(
+                        nodes,
+                        { name: "new node" },
+                        [...node.parents, node.index]
+                      )
                     : null,
               },
               "Create"
