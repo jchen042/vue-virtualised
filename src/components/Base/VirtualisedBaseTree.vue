@@ -54,6 +54,7 @@ import {
 
 import {
   NodeModel,
+  CreateFunction,
   UpdateNodeCallback,
   UpdateFunction,
   RemoveFunction,
@@ -251,6 +252,54 @@ export default defineComponent({
       flattenedTree.splice(index + 1, numberOfVisibleDescendants);
     };
 
+    const createNode: CreateFunction = async (nodes, node, path) => {
+      const childIndex = path.pop();
+      const parents = path;
+
+      let parentNodes = nodes;
+      const size = parents.length - 1;
+      for (let i = 0; i < size; i++)
+        parentNodes = parentNodes[path[i]].children ?? [];
+
+      if (!isNil(childIndex)) {
+        parents.length > 0
+          ? parentNodes[parents[parents.length - 1]].children?.splice(
+              childIndex,
+              0,
+              node
+            )
+          : // Edge case: delete root node.
+            nodes.splice(childIndex, 0, node);
+      }
+
+      onChange(nodes);
+
+      if (parents.length > 0) {
+        const flattenedTreeParentNodeIndex = flattenedTree.findIndex((node) =>
+          isEqual([...node.parents, node.index], parents)
+        );
+        if (flattenedTreeParentNodeIndex >= 0 && !isNil(childIndex)) {
+          const flattenedTreeParentNode =
+            flattenedTree[flattenedTreeParentNodeIndex];
+          await collapseNodes(
+            flattenedTreeParentNode,
+            flattenedTreeParentNodeIndex,
+            flattenedTree
+          );
+          await expandNodes(
+            flattenedTreeParentNode,
+            flattenedTreeParentNodeIndex,
+            flattenedTree
+          );
+
+          scroller.value?.refreshView();
+        }
+      } else {
+        emit("forceUpdate");
+      }
+    };
+
+    // TODO: change parameter index to path.
     // Update a single node.
     const updateNode: UpdateFunction = async (nodes, node, index, updateFn) => {
       updateTreeNode(nodes, [...node.parents, node.index], updateFn);
@@ -278,6 +327,7 @@ export default defineComponent({
       scroller.value?.refreshView();
     };
 
+    // TODO: change parameter index to path.
     const updateNodes: UpdateFunction = async (
       nodes,
       node,
@@ -405,6 +455,7 @@ export default defineComponent({
     return {
       scroller,
       flattenedTree,
+      createNode,
       updateNode,
       updateNodes,
       removeNode,

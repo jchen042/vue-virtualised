@@ -26,7 +26,8 @@ const constructBfsTraverseStack = (
   for (let index = nodes.length - 1; index >= 0; index--) {
     const node = <NodeModel>nodes[index];
 
-    node.key = node.key ? node.key : parents.concat(index).toString();
+    // TODO: accept client specified key in the future
+    node.key = parents.concat(index).toString();
     node.parents = parents;
     node.index = index;
     node.children = node.children ?? [];
@@ -71,6 +72,11 @@ export const traverse = async (
     useTimeSlicing && (await sliceTask(i++, 1000, 1));
   }
 };
+
+export const getNodePath = (node: NodeModel): Array<number> => [
+  ...node.parents,
+  node.index,
+];
 
 // count the amount of visible descendants based on the node
 export const getNumberOfVisibleDescendants = async (

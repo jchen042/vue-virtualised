@@ -12,9 +12,9 @@
         :get-node-height="getNodeHeight"
         :get-node-key="(node, index) => index"
         :cell-renderer="listCellRenderer"
-        @onScroll="handleScroll"
-        @onStartReached="handleStartReached"
-        @onEndReached="handleEndReached"
+        @on-scroll="handleScroll"
+        @on-start-reached="handleStartReached"
+        @on-end-reached="handleEndReached"
       >
       </virtualised-list>
     </div>
@@ -33,9 +33,9 @@
         :get-node-height="getNodeHeight"
         :get-node-key="(node, index) => node.key"
         :cell-renderer="treeCellRenderer"
-        @onScroll="handleScroll"
-        @onStartReached="handleStartReached"
-        @onEndReached="handleEndReached"
+        @on-scroll="handleScroll"
+        @on-start-reached="handleStartReached"
+        @on-end-reached="handleEndReached"
       >
         <template #fallback><div>Loading tree...</div></template>
       </virtualised-tree>
@@ -110,6 +110,21 @@ export default defineComponent({
           ),
           h("div", {}, node.name),
           h("div", { class: "util-buttons" }, [
+            h(
+              "div",
+              {
+                class: "create-button",
+                onClick: async () =>
+                  treeView.value
+                    ? await treeView.value.createNode(
+                        nodes,
+                        { name: "new node" },
+                        [...node.parents, node.index]
+                      )
+                    : null,
+              },
+              "Create"
+            ),
             h(
               "div",
               {
@@ -252,7 +267,7 @@ export default defineComponent({
   visibility: hidden;
 }
 
-.update-button {
+.create-button {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -263,9 +278,28 @@ export default defineComponent({
   padding: 5px 16px;
 }
 
-.update-button:hover {
+.create-button:hover {
   background-color: #2c974b;
   border-color: rgba(27, 31, 35, 0.15);
+}
+
+.update-button {
+  margin-left: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 5px;
+  border-color: rgba(27, 31, 35, 0.15);
+  background-color: #fafbfc;
+  color: #2ea44f;
+  padding: 5px 16px;
+  transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  transition-property: color, background-color, border-color;
+}
+
+.update-button:hover {
+  background-color: #2c974b;
+  color: hsla(0, 0%, 100%, 0.8);
 }
 
 .delete-button {
@@ -292,6 +326,7 @@ export default defineComponent({
   background-color: #f6f8fa;
 }
 
+.cell-container:hover .create-button,
 .cell-container:hover .update-button,
 .cell-container:hover .delete-button {
   visibility: visible;

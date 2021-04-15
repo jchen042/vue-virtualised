@@ -21,6 +21,14 @@ export interface UpdateNodeCallback {
   (node: Node | NodeModel): NodeModel;
 }
 
+export interface CreateFunction {
+  (
+    nodes: Array<Node | NodeModel>,
+    node: Node,
+    path: Array<number>
+  ): Promise<void>;
+}
+
 export interface UpdateFunction {
   (
     nodes: Array<Node>,

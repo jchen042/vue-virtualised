@@ -52,7 +52,12 @@ import {
   CellRenderer,
   ConditionCallback,
 } from "@/types/types";
-import { NodeModel, UpdateFunction, RemoveFunction } from "@/types/interfaces";
+import {
+  NodeModel,
+  CreateFunction,
+  UpdateFunction,
+  RemoveFunction,
+} from "@/types/interfaces";
 
 export default defineComponent({
   name: "VirtualisedTree",
@@ -105,6 +110,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const virtualisedBaseTree = ref<typeof VirtualisedBaseTree | null>(null);
     const key = ref<number>(0);
+    const createNode = ref<CreateFunction | null>(null);
     const updateNode = ref<UpdateFunction | null>(null);
     const updateNodes = ref<UpdateFunction | null>(null);
     const removeNode = ref<RemoveFunction | null>(null);
@@ -153,6 +159,7 @@ export default defineComponent({
     watch(
       () => virtualisedBaseTree.value,
       () => {
+        createNode.value = virtualisedBaseTree.value?.createNode;
         updateNode.value = virtualisedBaseTree.value?.updateNode;
         updateNodes.value = virtualisedBaseTree.value?.updateNodes;
         removeNode.value = virtualisedBaseTree.value?.removeNode;
@@ -168,6 +175,7 @@ export default defineComponent({
     return {
       virtualisedBaseTree,
       key,
+      createNode,
       updateNode,
       updateNodes,
       removeNode,
