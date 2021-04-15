@@ -252,33 +252,6 @@ export default defineComponent({
       flattenedTree.splice(index + 1, numberOfVisibleDescendants);
     };
 
-    // Update a single node.
-    const updateNode: UpdateFunction = async (nodes, node, index, updateFn) => {
-      updateTreeNode(nodes, [...node.parents, node.index], updateFn);
-
-      onChange(nodes);
-
-      /**
-       * Operation is expensive if we call this method to update the entire flattened tree list:
-       * flattenedTree = getFlattenedTree(nodes);
-       * Instead, we only update affected area in the list.
-       */
-      const updatedNode = updateFn(node);
-
-      if (changeAffectFlattenedTree(node, updatedNode)) {
-        if (isNodeExpanded(updatedNode)) {
-          await expandNodes(updatedNode, index, flattenedTree);
-        } else {
-          await collapseNodes(node, index, flattenedTree);
-        }
-      }
-
-      flattenedTree[index] = updatedNode;
-
-      // Force refresh data in child component to trigger UI update.
-      scroller.value?.refreshView();
-    };
-
     const createNode: CreateFunction = async (nodes, node, path) => {
       const childIndex = path.pop();
       const parents = path;
@@ -326,6 +299,35 @@ export default defineComponent({
       }
     };
 
+    // TODO: change parameter index to path.
+    // Update a single node.
+    const updateNode: UpdateFunction = async (nodes, node, index, updateFn) => {
+      updateTreeNode(nodes, [...node.parents, node.index], updateFn);
+
+      onChange(nodes);
+
+      /**
+       * Operation is expensive if we call this method to update the entire flattened tree list:
+       * flattenedTree = getFlattenedTree(nodes);
+       * Instead, we only update affected area in the list.
+       */
+      const updatedNode = updateFn(node);
+
+      if (changeAffectFlattenedTree(node, updatedNode)) {
+        if (isNodeExpanded(updatedNode)) {
+          await expandNodes(updatedNode, index, flattenedTree);
+        } else {
+          await collapseNodes(node, index, flattenedTree);
+        }
+      }
+
+      flattenedTree[index] = updatedNode;
+
+      // Force refresh data in child component to trigger UI update.
+      scroller.value?.refreshView();
+    };
+
+    // TODO: change parameter index to path.
     const updateNodes: UpdateFunction = async (
       nodes,
       node,

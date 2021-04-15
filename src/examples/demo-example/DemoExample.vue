@@ -23,7 +23,7 @@
       <virtualised-tree
         ref="treeView"
         :nodes="nodes"
-        :use-time-slicing="false"
+        :use-time-slicing="true"
         :on-change="onChange"
         :viewport-height="viewportHeight"
         :initial-scroll-top="initialScrollTop"

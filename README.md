@@ -6,7 +6,7 @@
 
 > Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data. `vue-virtualised` is able to render and update 1 million nodes within a few seconds in front-end.
 
-![Demo](/src/assets/demo-20200409.gif)
+![Demo](/src/assets/demo-20200415.gif)
 
 ## Getting started
 
@@ -191,7 +191,7 @@ scrollToHeight(height: number, behaviour: ScrollBehavior): void
 #### `createNode()`
 
 ```ts
-createNode(nodes: Array<Node>, node: Node, path: Array<number>): void
+createNode(nodes: Array<Node | NodeModel>, node: NodeModel, path: Array<number>): void
 ```
 
 This method creates a single node (node allows contain children) as well as its descendants, and it can be bound to the `cell` slot. Valid parameters are:
@@ -231,7 +231,7 @@ This method can be bound to the `cell` slot, which updates a single node in both
 - `updateFn`: The function that manipulates the current node and returns an updated node:
 
 ```ts
-updateFn(node: Node | NodeModel): NodeModel
+updateFn(node: NodeModel): NodeModel
 ```
 
 This method can be used to expand/collapse the current node by setting the boolean value of `state.expanded`.
@@ -242,7 +242,7 @@ This method can be used to expand/collapse the current node by setting the boole
 updateNodes(nodes: Array<Node>, node: NodeModel, index: number, updateFn: Function): void
 ```
 
-This method can be bound to `cell` slot, which updates a single node including all its descendants in both original data and the view. Valid parameters are:
+This method can be bound to `cell` slot, which updates a single node in the tree view including all its descendants in both original data and the view. Valid parameters are:
 
 - `nodes`: `nodes` prop.
 - `node`: The current node of the slot that needs to be updated.
@@ -250,7 +250,7 @@ This method can be bound to `cell` slot, which updates a single node including a
 - `updateFn`: The function that manipulates the current node and returns an updated node:
 
 ```ts
-updateFn(node: Node | NodeModel): Node | NodeModel
+updateFn(node: NodeModel): NodeModel
 ```
 
 #### `removeNode()`
@@ -266,7 +266,7 @@ This method removes a single node as well as its descendants, and it can be boun
 
 ## Contributing
 
-Pull requests are welcome!
+Pull requests and issues are welcome!
 
 ### Project setup
 
