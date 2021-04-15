@@ -1,9 +1,11 @@
+import { Node } from "@/types/types";
+
 export const constructRandomTree = (
-  maxDeepness,
-  maxNumberOfChildren,
-  minNumOfNodes,
+  maxDeepness: number,
+  maxNumberOfChildren: number,
+  minNumOfNodes: number,
   deepness = 1
-) => {
+): Array<Node> => {
   return new Array(minNumOfNodes).fill(deepness).map((value, i) => {
     const id = i;
     const numberOfChildren =
@@ -32,11 +34,11 @@ export const constructRandomTree = (
 };
 
 export const constructFixedTree = (
-  maxDeepness,
-  numberOfChildren,
-  numOfNodes,
+  maxDeepness: number,
+  numberOfChildren: number,
+  numOfNodes: number,
   deepness = 1
-) => {
+): Array<Node> => {
   return new Array(numOfNodes).fill(deepness).map((value, i) => {
     const id = i;
 

@@ -12,9 +12,9 @@
         :get-node-height="getNodeHeight"
         :get-node-key="(node, index) => index"
         :cell-renderer="listCellRenderer"
-        @onScroll="handleScroll"
-        @onStartReached="handleStartReached"
-        @onEndReached="handleEndReached"
+        @on-scroll="handleScroll"
+        @on-start-reached="handleStartReached"
+        @on-end-reached="handleEndReached"
       >
       </virtualised-list>
     </div>
@@ -33,9 +33,9 @@
         :get-node-height="getNodeHeight"
         :get-node-key="(node, index) => node.key"
         :cell-renderer="treeCellRenderer"
-        @onScroll="handleScroll"
-        @onStartReached="handleStartReached"
-        @onEndReached="handleEndReached"
+        @on-scroll="handleScroll"
+        @on-start-reached="handleStartReached"
+        @on-end-reached="handleEndReached"
       >
         <template #fallback><div>Loading tree...</div></template>
       </virtualised-tree>
@@ -278,23 +278,28 @@ export default defineComponent({
   padding: 5px 16px;
 }
 
+.create-button:hover {
+  background-color: #2c974b;
+  border-color: rgba(27, 31, 35, 0.15);
+}
+
 .update-button {
+  margin-left: 10px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   border-radius: 5px;
   border-color: rgba(27, 31, 35, 0.15);
-  background-color: #2ea44f;
-  color: hsla(0, 0%, 100%, 0.8);
+  background-color: #fafbfc;
+  color: #2ea44f;
   padding: 5px 16px;
-}
-
-.create-button:hover {
+  transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  transition-property: color, background-color, border-color;
 }
 
 .update-button:hover {
   background-color: #2c974b;
-  border-color: rgba(27, 31, 35, 0.15);
+  color: hsla(0, 0%, 100%, 0.8);
 }
 
 .delete-button {

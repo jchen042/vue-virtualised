@@ -70,6 +70,10 @@ import { VirtualisedTree as Tree } from "vue-virtualised";
 </virtualised-tree>
 ```
 
+## Types
+
+A static type system can help prevent many potential runtime errors as applications grow, which is why this project is written in TypeScript. When the documentation is referred to any specific type, please check [types](src/types) folder for more information.
+
 ## Props
 
 ### Mutual props
@@ -122,7 +126,7 @@ Slots are provided for rendering content dynamically. Here are slots that are id
 
 |Slot|Props|Description|
 |---|---|---|
-|cell|<ul><li>`node`: The current node for rendering.<ul><li>`index`: The current index of the node in `children` of its parent node.</li><li>`parents`: An array of indices of all parent nodes ordered from the root node.</li><li>`key`: A unique identifier of the node.</li><li>`name`: The name of the node.</li><li>`state`: An object stores states of each node.<ul><li>`expanded`: shows children of the node if `true`, or hides them if `false`.</li><li>`isLeaf`: A boolean that indicates if the current node is the leaf node.</li></ul></li><li>`children`: An array of child nodes belonging to the node.</li></ul></li><li>`index`: The current node's index in the rendered content.</li></ul>|The slot for rendering a single node in the content. If `cellRenderer` props is specified, this slot won't have effect.|
+|cell|<ul><li>`node`: The current node for rendering with type `NodeModel`.<ul><li>`index`: The current index of the node in `children` of its parent node.</li><li>`parents`: An array of indices of all parent nodes ordered from the root node.</li><li>`key`: A unique identifier of the node.</li><li>`name`: The name of the node.</li><li>`state`: An object stores states of each node.<ul><li>`expanded`: shows children of the node if `true`, or hides them if `false`.</li><li>`isLeaf`: A boolean that indicates if the current node is the leaf node.</li></ul></li><li>`children`: An array of child nodes belonging to the node.</li></ul></li><li>`index`: The current node's index in the rendered content.</li></ul>|The slot for rendering a single node in the content. If `cellRenderer` props is specified, this slot won't have effect.|
 
 ### `VirtualisedTree` slots
 
@@ -184,10 +188,39 @@ Forces refresh rendered content.
 scrollToHeight(height: number, behaviour: ScrollBehavior): void
 ```
 
+#### `createNode()`
+
+```ts
+createNode(nodes: Array<Node>, node: Node, path: Array<number>): void
+```
+
+This method creates a single node (node allows contain children) as well as its descendants, and it can be bound to the `cell` slot. Valid parameters are:
+
+- `nodes`: `nodes` prop.
+- `node`: The node to be created.
+- `path`: The path of the node in the tree structure. e.g. For the following tree structure, the paths are showing in the comment for each:
+
+  ```ts
+  [
+    {
+      name: 'Node 1', // path: [0]
+      children: [{ name: 'Leaf 1' /* path: [0, 0] */ }],
+      state: { expanded: true },
+    },
+    { name: 'Node 2' }, // path: [1]
+  ]
+  ```
+
+  In addition, `path` can be composed by the `node` slot prop in the `cell` slot:
+
+  ```ts
+  const path = [...node.parents, node.index];
+  ```
+
 #### `updateNode()`
 
 ```ts
-updateNode(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
+updateNode(nodes: Array<Node>, node: NodeModel, index: number, updateFn: Function): void
 ```
 
 This method can be bound to the `cell` slot, which updates a single node in both original data and the view. Valid parameters are:
@@ -206,7 +239,7 @@ This method can be used to expand/collapse the current node by setting the boole
 #### `updateNodes()`
 
 ```ts
-updateNodes(nodes: Array<Node>, node: Node, index: number, updateFn: Function): void
+updateNodes(nodes: Array<Node>, node: NodeModel, index: number, updateFn: Function): void
 ```
 
 This method can be bound to `cell` slot, which updates a single node including all its descendants in both original data and the view. Valid parameters are:
@@ -229,24 +262,7 @@ removeNode(nodes: Array<Node | NodeModel>, path: Array<number>): Promise<void>
 This method removes a single node as well as its descendants, and it can be bound to the `cell` slot. Valid parameters are:
 
 - `nodes`: `nodes` prop.
-- `path`: The path of the node in the tree structure. e.g. For the following tree structure, the paths are showing in the comment for each:
-
-  ```ts
-  [
-    {
-      name: 'Node 1', // path: [0]
-      children: [{ name: 'Leaf 1' /* path: [0, 0] */ }],
-      state: { expanded: true },
-    },
-    { name: 'Node 2' }, // path: [1]
-  ]
-  ```
-
-  In addition, `path` can be composed by the `node` slot prop in the `cell` slot:
-
-  ```ts
-  const path = [...node.parents, node.index];
-  ```
+- `path`: The path of the node in the tree structure.
 
 ## Contributing
 
