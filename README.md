@@ -191,7 +191,7 @@ scrollToHeight(height: number, behaviour: ScrollBehavior): void
 #### `createNode()`
 
 ```ts
-createNode(nodes: Array<Node | NodeModel>, node: NodeModel, path: Array<number>): void
+createNode(nodes: Array<Node | NodeModel>, node: NodeModel, path: Array<number>): Promise<void>
 ```
 
 This method creates a single node (node allows contain children) as well as its descendants, and it can be bound to the `cell` slot. Valid parameters are:
