@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/vue-virtualised.svg)](https://www.npmjs.com/package/vue-virtualised)
 [![license](https://img.shields.io/npm/l/vue-virtualised.svg?style=flat)](LICENSE)
 [![vue3](https://img.shields.io/badge/vue-3.x-brightgreen.svg)](https://v3.vuejs.org/)
+[![npm type definitions](https://img.shields.io/npm/types/vue-virtualised)](https://www.typescriptlang.org/)
 
 > Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data. `vue-virtualised` is able to render and update 1 million nodes within a few seconds in front-end.
 
