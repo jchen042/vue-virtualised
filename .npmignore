@@ -4,5 +4,9 @@ examples
 .editorconfig
 babel.config.js
 .eslintrc.js
+babel.config.js
+tsconfig.json
+vue.config.js
 *.gif
 *.log
+*.lock
