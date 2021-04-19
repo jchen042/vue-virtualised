@@ -26,7 +26,12 @@
 import { defineComponent, PropType, ref, onMounted } from "vue";
 import VirtualisedBaseScroller from "./Base/VirtualisedBaseScroller.vue";
 
-import { GetNodeHeight, GetNodeKey, CellRenderer } from "../types/types";
+import {
+  GetNodeHeight,
+  GetNodeKey,
+  CellRenderer,
+  ConditionCallback,
+} from "../types/types";
 
 export default defineComponent({
   name: "VirtualisedList",
@@ -73,11 +78,20 @@ export default defineComponent({
   emits: ["onScroll", "onStartReached", "onEndReached"],
   setup(props, { emit }) {
     const scroller = ref<typeof VirtualisedBaseScroller | null>(null);
-    const scrollToStart = ref(null);
-    const scrollToEnd = ref(null);
-    const scrollToIndex = ref(null);
-    const scrollToNode = ref(null);
-    const refreshView = ref(null);
+    const getScrollTop = ref<(() => number) | null>(null);
+    const scrollToStart = ref<(() => void) | null>(null);
+    const scrollToEnd = ref<(() => void) | null>(null);
+    const scrollToHeight = ref<
+      // eslint-disable-next-line no-unused-vars, no-undef
+      ((height: number, behaviour?: ScrollBehavior) => void) | null
+    >(null);
+    // eslint-disable-next-line no-unused-vars
+    const scrollToIndex = ref<((index: number) => void) | null>(null);
+    const scrollToNode = ref<
+      // eslint-disable-next-line no-unused-vars
+      ((conditionCallback: ConditionCallback) => void) | null
+    >(null);
+    const refreshView = ref<(() => void) | null>(null);
 
     const handleScroll = (scrollTop: number): void => {
       emit("onScroll", scrollTop);
@@ -92,8 +106,10 @@ export default defineComponent({
     };
 
     onMounted(() => {
+      getScrollTop.value = scroller.value?.getScrollTop;
       scrollToStart.value = scroller.value?.scrollToStart;
       scrollToEnd.value = scroller.value?.scrollToEnd;
+      scrollToHeight.value = scroller.value?.scrollToHeight;
       scrollToIndex.value = scroller.value?.scrollToIndex;
       scrollToNode.value = scroller.value?.scrollToNode;
       refreshView.value = scroller.value?.refreshView;
@@ -101,8 +117,10 @@ export default defineComponent({
 
     return {
       scroller,
+      getScrollTop,
       scrollToStart,
       scrollToEnd,
+      scrollToHeight,
       scrollToIndex,
       scrollToNode,
       handleScroll,

@@ -6,7 +6,7 @@
 
 > Vue components developed by [Vue.js 3.0](https://v3.vuejs.org/) for efficiently rendering large scrollable lists and hierarchical data. `vue-virtualised` is able to render and update 1 million nodes within a few seconds in front-end.
 
-![Demo](/src/assets/demo-20200415.gif)
+![Demo](/src/assets/demo-20200419.gif)
 
 ## Getting started
 
@@ -191,7 +191,7 @@ scrollToHeight(height: number, behaviour: ScrollBehavior): void
 #### `createNode()`
 
 ```ts
-createNode(nodes: Array<Node | NodeModel>, node: NodeModel, path: Array<number>): void
+createNode(nodes: Array<Node | NodeModel>, node: NodeModel, path: Array<number>): Promise<void>
 ```
 
 This method creates a single node (node allows contain children) as well as its descendants, and it can be bound to the `cell` slot. Valid parameters are:
@@ -263,6 +263,14 @@ This method removes a single node as well as its descendants, and it can be boun
 
 - `nodes`: `nodes` prop.
 - `path`: The path of the node in the tree structure.
+
+#### `forceUpdate()`
+
+```ts
+forceUpdate(): void
+```
+
+Forces refresh rendered content.
 
 ## Contributing
 
