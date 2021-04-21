@@ -44,6 +44,19 @@
       </div>
     </template>
   </virtualised-tree>
+  <virtualised-tree v-if="selectedComponent === 'VirtualisedTree'">
+    <template #cell="slotProps">
+      <!-- node.parents is an array that contains all parent nodes' index -->
+      <div
+        :style="{
+          textAlign: 'left',
+          marginLeft: `${slotProps.node.parents.length * 30}px`,
+        }"
+      >
+        {{ slotProps.node.name }}
+      </div>
+    </template>
+  </virtualised-tree>
 </template>
 
 <script>
