@@ -44,6 +44,9 @@ import {
 } from "vue";
 import VirtualisedBaseTree from "@/components/Base/VirtualisedBaseTree.vue";
 
+import invariant from "fbjs/lib/invariant";
+import isNil from "lodash/isNil";
+
 import {
   Node,
   OnChangeCallback,
@@ -108,6 +111,11 @@ export default defineComponent({
   },
   emits: ["onScroll", "onStartReached", "onEndReached"],
   setup(props, { emit }) {
+    invariant(
+      !isNil(props.nodes),
+      `Missing required prop: "nodes". Got  ${props.nodes}, but Array<Node> is expected`
+    );
+
     const virtualisedBaseTree = ref<typeof VirtualisedBaseTree | null>(null);
     const key = ref<number>(0);
     const createNode = ref<CreateFunction | null>(null);
