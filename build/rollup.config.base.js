@@ -39,6 +39,9 @@ export default {
     }),
     typescript({
       tsconfig: path.resolve(__dirname, "../tsconfig.json"),
+      tsconfigOverride: {
+        compilerOptions: { declaration: false },
+      },
     }),
     commonjs(),
     css({
