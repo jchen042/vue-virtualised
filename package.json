@@ -8,7 +8,7 @@
     "email": "chenfrey920417@outlook.com",
     "url": "https://github.com/FallingCeilingS"
   },
-  "types": "vue-virtualised.d.ts",
+  "types": "src/types/vue-virtualised.d.ts",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "npm run build:umd && npm run build:es && npm run build:browser",
