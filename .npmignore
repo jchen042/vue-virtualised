@@ -1,6 +1,7 @@
 .vscode
 public
 examples
+build
 .editorconfig
 babel.config.js
 .eslintrc.js
