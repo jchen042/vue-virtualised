@@ -46,13 +46,13 @@ export default {
       tsconfigOverride: {
         compilerOptions: {
           // declaration: false,
-          plugins: [
-            { transform: "typescript-transform-paths" },
-            {
-              transform: "typescript-transform-paths",
-              afterDeclarations: true,
-            },
-          ],
+          // plugins: [
+          //   { transform: "typescript-transform-paths" },
+          //   {
+          //     transform: "typescript-transform-paths",
+          //     afterDeclarations: true,
+          //   },
+          // ],
         },
       },
     }),
