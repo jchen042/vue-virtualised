@@ -7,6 +7,7 @@ import eslint from "@rollup/plugin-eslint";
 import babel from "rollup-plugin-babel";
 import vue from "rollup-plugin-vue";
 import typescript from "rollup-plugin-typescript2";
+import ttypescript from "ttypescript";
 import commonjs from "@rollup/plugin-commonjs";
 import autoprefixer from "autoprefixer";
 import css from "rollup-plugin-css-only";
@@ -38,20 +39,32 @@ export default {
       runtimeHelpers: true,
     }),
     typescript({
+      typescript: ttypescript,
       tsconfig: path.resolve(__dirname, "../tsconfig.json"),
+      // https://github.com/ezolenko/rollup-plugin-typescript2/issues/201#issuecomment-726802613
+      useTsconfigDeclarationDir: true,
       tsconfigOverride: {
-        compilerOptions: { declaration: false },
+        compilerOptions: {
+          // declaration: false,
+          plugins: [
+            { transform: "typescript-transform-paths" },
+            {
+              transform: "typescript-transform-paths",
+              afterDeclarations: true,
+            },
+          ],
+        },
       },
     }),
     commonjs(),
-    css({
-      output: (styles) => {
-        fs.writeFileSync(
-          "dist/vue-virtualised.css",
-          new CleanCSS().minify(styles).styles
-        );
-      },
-    }),
+    // css({
+    //   output: (styles) => {
+    //     fs.writeFileSync(
+    //       "dist/vue-virtualised.css",
+    //       new CleanCSS().minify(styles).styles
+    //     );
+    //   },
+    // }),
     // buble(),
   ],
   watch: { include: "src/**" },
