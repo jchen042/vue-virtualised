@@ -29,9 +29,17 @@
       "dom.iterable",
       "scripthost"
     ],
-  "declaration": true,
-  // "declarationDir": "./types"
-  // "outDir": "types"
+    "declaration": true,
+    // "declarationMap": true,
+    "declarationDir": "dist",
+    "outDir": "dist",
+    "plugins": [
+      { "transform": "typescript-transform-paths" },
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true,
+      },
+    ],
   },
   "include": [
     "src/**/*.ts",
