@@ -19,6 +19,7 @@ export {
   Node,
   GetNodeHeight,
   GetNodeKey,
+  CellRenderer,
   ConditionCallback,
   OnChangeCallback,
 } from "@/types/types";

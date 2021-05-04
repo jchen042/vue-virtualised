@@ -75,6 +75,11 @@ import { VirtualisedTree as Tree } from "vue-virtualised";
 ## Types
 
 A static type system can help prevent many potential runtime errors as applications grow, which is why this project is written in TypeScript. When the documentation is referred to any specific type, please check [types](src/types) folder for more information.
+For TypeScript project, types can be imported directly from the library. For example:
+
+```ts
+import type { Node, NodeModel } from "vue-virtualised";
+```
 
 ## Props
 
@@ -90,9 +95,9 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 |initialScrollIndex|`Number`||`0`|The initial scroll index. If this prop is specified, it will override `initialScrollTop` prop.|
 |scrollBehaviour|`String`||`auto`|Inherited from [`ScrollToOptions.behavior`](https://developer.mozilla.org/en-US/docs/Web/API/ScrollToOptions/behavior) that specifies whether the scrolling should animate smoothly, or happen instantly in a single jump. Value is an enum, which can be one of the following: <ul><li>`smooth`: The scrolling animates smoothly.</li><li>`auto`: The scrolling happens in a single jump. </li></ul>|
 |tolerance|`Number`||`2`|Padding of nodes outside of the viewport to allow for smooth scrolling.|
-|getNodeHeight|`Function`||`(node) => 40`|A function that takes the current node as a parameter, and returns the height (px) of the node. <div>e.g. `(node) => 30 + (node.index % 10)`</div>|
-|getNodeKey|`Function`|||A function that takes the current node and the index of the node in the virtual scroller as parameters, and returns the key of the node. Key is a unique identifier for the virtualised scroller. <div>e.g. `(node, index) => node.key`</div>|
-|cellRenderer|`Function`|||A function that takes the current node and its current index in the virtualised scroller as parameters, and returns an array of Children VNodes, built using [`h()`](https://v3.vuejs.org/guide/render-function.html#h-arguments), or using strings to get "text VNodes" or an object with slots. If this prop is specified, the `cell` slot in the template will be override. <div>e.g. `(node, index) => [h("div", {style: {height: "100%"}}, node.name)]`</div>|
+|getNodeHeight|`GetNodeHeight`||`(node) => 40`|A function that takes the current node as a parameter, and returns the height (px) of the node. <div>e.g. `(node) => 30 + (node.index % 10)`</div>|
+|getNodeKey|`GetNodeKey`|||A function that takes the current node and the index of the node in the virtual scroller as parameters, and returns the key of the node. Key is a unique identifier for the virtualised scroller. <div>e.g. `(node, index) => node.key`</div>|
+|cellRenderer|`CellRenderer`|||A function that takes the current node and its current index in the virtualised scroller as parameters, and returns an array of Children VNodes, built using [`h()`](https://v3.vuejs.org/guide/render-function.html#h-arguments), or using strings to get "text VNodes" or an object with slots. If this prop is specified, the `cell` slot in the template will be override. <div>e.g. `(node, index) => [h("div", {style: {height: "100%"}}, node.name)]`</div>|
 
 ### `VirtualisedList` props
 
@@ -106,7 +111,7 @@ Here are props that are identical in both `VirtualisedList` and `VirtualisedTree
 |---|---|:---:|---|---|
 |nodes|`Array<Node>`|✓||Tree data with implementing the following keys: <ul><li>`name`: The primary label for the node.</li><li>`state?`: An object stores states of each node.<ul><li>`expanded?`: shows children of the node if `true`, or hides them if `false`. Defaults to `false`.</li></ul></li><li>`children`: An array of child nodes belonging to the node.</li></ul><div>e.g. `[{name: "Node 1", children: [{name: "Leaf 1"}]}, {name: "Node 2"}]`</div>|
 |useTimeSlicing|`boolean`||`false`|Time slicing is a technique allows for switching between macro tasks (i.e. DOM redrawing) and micro tasks (i.e. node updating inside an iteration) when traversing and manipulating enormous amount of nodes. If it's set to `true`, we can avoid blocking the whole web application during the process. However, the total amount of traversal time will be longer because the application will switch between macro and micro tasks.|
-|onChange|`Function`|||A function that takes `nodes` prop as a parameter. This function will be called when executing `updateNode()` and `updateNodes()` methods.|
+|onChange|`OnChangeCallback`|||A function that takes `nodes` prop as a parameter. This function will be called when executing `updateNode()` and `updateNodes()` methods.|
 
 ## Events
 
@@ -163,7 +168,7 @@ Valid `index` should be in the range from `0` to `nodes.length - 1`.
 #### `scrollToNode()`
 
 ```ts
-scrollToNode(conditionCallback: Function): void
+scrollToNode(conditionCallback: ConditionCallback): void
 ```
 
 Valid `conditionCallback` should be a function that takes a node as a parameter and returns a `boolean`:
@@ -190,7 +195,7 @@ Forces refresh rendered content.
 scrollToHeight(height: number, behaviour: ScrollBehavior): void
 ```
 
-#### `createNode()`
+#### `createNode(): CreateFunction`
 
 ```ts
 createNode(nodes: Array<Node | NodeModel>, node: NodeModel, path: Array<number>): Promise<void>
@@ -219,10 +224,10 @@ This method creates a single node (node allows contain children) as well as its 
   const path = [...node.parents, node.index];
   ```
 
-#### `updateNode()`
+#### `updateNode(): UpdateFunction`
 
 ```ts
-updateNode(nodes: Array<Node>, node: NodeModel, index: number, updateFn: Function): void
+updateNode(nodes: Array<Node>, node: NodeModel, index: number, updateFn: UpdateNodeCallback): void
 ```
 
 This method can be bound to the `cell` slot, which updates a single node in both original data and the view. Valid parameters are:
@@ -238,10 +243,10 @@ updateFn(node: NodeModel): NodeModel
 
 This method can be used to expand/collapse the current node by setting the boolean value of `state.expanded`.
 
-#### `updateNodes()`
+#### `updateNodes(): UpdateFunction`
 
 ```ts
-updateNodes(nodes: Array<Node>, node: NodeModel, index: number, updateFn: Function): void
+updateNodes(nodes: Array<Node>, node: NodeModel, index: number, updateFn: UpdateNodeCallback): void
 ```
 
 This method can be bound to `cell` slot, which updates a single node in the tree view including all its descendants in both original data and the view. Valid parameters are:
@@ -255,7 +260,7 @@ This method can be bound to `cell` slot, which updates a single node in the tree
 updateFn(node: NodeModel): NodeModel
 ```
 
-#### `removeNode()`
+#### `removeNode(): RemoveFunction`
 
 ```ts
 removeNode(nodes: Array<Node | NodeModel>, path: Array<number>): Promise<void>
