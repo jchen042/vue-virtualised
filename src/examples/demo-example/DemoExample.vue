@@ -2,7 +2,19 @@
   <div class="app-container">
     <div class="list-container">
       <div class="title">VirtualisedList</div>
+      <div>
+        <button @click="scrollListToStart">Scroll To Start</button>
+        <button @click="scrollListToEnd">Scroll To End</button>
+        <button @click="scrollListToIndex">Scroll To Index</button>
+        <input
+          type="number"
+          min="0"
+          :modelValue="listIndex"
+          :value="listIndex"
+        />
+      </div>
       <virtualised-list
+        ref="listView"
         :nodes="data"
         :viewport-height="viewportHeight"
         :initial-scroll-top="initialScrollTop"
@@ -60,7 +72,17 @@ export default defineComponent({
     VirtualisedTree,
   },
   setup() {
+    const listView = ref<typeof VirtualisedList | null>(null);
     const treeView = ref<typeof VirtualisedTree | null>(null);
+
+    const listIndex = ref<number>(0);
+
+    const scrollListToStart = () => listView.value?.scrollToStart();
+    const scrollListToEnd = () => listView.value?.scrollToEnd();
+    const scrollListToIndex = () => {
+      // console.log(listIndex);
+      // listView.value?.scrollToIndex(listIndex.value);
+    };
 
     const nodes = constructFixedTree(6, 15, 5);
 
@@ -175,7 +197,12 @@ export default defineComponent({
     };
 
     return {
+      listView,
       treeView,
+      listIndex,
+      scrollListToStart,
+      scrollListToEnd,
+      scrollListToIndex,
       nodes,
       onChange,
       listCellRenderer,

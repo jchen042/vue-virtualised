@@ -226,7 +226,7 @@ export default defineComponent({
         : initialScrollTop.value
     );
 
-    // Calculte total content height.
+    // Calculate total content height.
     // TODO: Fix the content height limitation of 33554400px.
     const getTotalHeight = (
       nodes: Array<any>,
@@ -363,6 +363,7 @@ export default defineComponent({
       });
     };
 
+    // TODO: add parameter to set behaviour
     const getScrollTop = (): number => scrollTop.value;
 
     const scrollToStart = (): void => {
