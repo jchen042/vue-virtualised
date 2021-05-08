@@ -36,6 +36,7 @@
         <input v-model="treeIndex" type="number" min="0" />
         <button @click="scrollTreeToHeight">Scroll To Height</button>
         <input v-model="treeHeight" type="number" min="0" />
+        <button @click="forceUpdate">Force Refresh</button>
       </div>
       <virtualised-tree
         ref="treeView"
@@ -108,6 +109,8 @@ export default defineComponent({
       treeView.value?.scrollToIndex(treeIndex.value);
     const scrollTreeToHeight = () =>
       treeView.value?.scrollToHeight(treeHeight.value);
+
+    const forceUpdate = async () => await treeView.value?.forceUpdate();
 
     const treeCellRenderer = (node: NodeModel, index: number) => [
       h(
@@ -231,6 +234,7 @@ export default defineComponent({
       scrollTreeToEnd,
       scrollTreeToIndex,
       scrollTreeToHeight,
+      forceUpdate,
       handleScroll,
       handleStartReached,
       handleEndReached,

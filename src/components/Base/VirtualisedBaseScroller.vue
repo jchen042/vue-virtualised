@@ -80,7 +80,7 @@ import {
   GetNodeKey,
   CellRenderer,
   ConditionCallback,
-} from "../../types/types";
+} from "@/types/types";
 
 export default defineComponent({
   name: "VirtualisedBaseScroller",
