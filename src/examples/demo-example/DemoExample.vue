@@ -2,7 +2,16 @@
   <div class="app-container">
     <div class="list-container">
       <div class="title">VirtualisedList</div>
+      <div>
+        <button @click="scrollListToStart">Scroll To Start</button>
+        <button @click="scrollListToEnd">Scroll To End</button>
+        <button @click="scrollListToIndex">Scroll To Index</button>
+        <input v-model="listIndex" type="number" min="0" />
+        <button @click="scrollListToHeight">Scroll To Height</button>
+        <input v-model="listHeight" type="number" min="0" />
+      </div>
       <virtualised-list
+        ref="listView"
         :nodes="data"
         :viewport-height="viewportHeight"
         :initial-scroll-top="initialScrollTop"
@@ -20,6 +29,15 @@
     </div>
     <div class="tree-container">
       <div class="title">VirtualisedTree</div>
+      <div>
+        <button @click="scrollTreeToStart">Scroll To Start</button>
+        <button @click="scrollTreeToEnd">Scroll To End</button>
+        <button @click="scrollTreeToIndex">Scroll To Index</button>
+        <input v-model="treeIndex" type="number" min="0" />
+        <button @click="scrollTreeToHeight">Scroll To Height</button>
+        <input v-model="treeHeight" type="number" min="0" />
+        <button @click="forceUpdate">Force Refresh</button>
+      </div>
       <virtualised-tree
         ref="treeView"
         :nodes="nodes"
@@ -60,7 +78,18 @@ export default defineComponent({
     VirtualisedTree,
   },
   setup() {
+    const listView = ref<typeof VirtualisedList | null>(null);
     const treeView = ref<typeof VirtualisedTree | null>(null);
+
+    const listIndex = ref<number>(0);
+    const listHeight = ref<number>(0);
+
+    const scrollListToStart = () => listView.value?.scrollToStart();
+    const scrollListToEnd = () => listView.value?.scrollToEnd();
+    const scrollListToIndex = () =>
+      listView.value?.scrollToIndex(listIndex.value);
+    const scrollListToHeight = () =>
+      listView.value?.scrollToHeight(listHeight.value);
 
     const nodes = constructFixedTree(6, 15, 5);
 
@@ -70,6 +99,18 @@ export default defineComponent({
     const listCellRenderer = (node: NodeModel) => [
       h("div", { class: "cell-container list-cell-container" }, node.label),
     ];
+
+    const treeIndex = ref<number>(0);
+    const treeHeight = ref<number>(0);
+
+    const scrollTreeToStart = () => treeView.value?.scrollToStart();
+    const scrollTreeToEnd = () => treeView.value?.scrollToEnd();
+    const scrollTreeToIndex = () =>
+      treeView.value?.scrollToIndex(treeIndex.value);
+    const scrollTreeToHeight = () =>
+      treeView.value?.scrollToHeight(treeHeight.value);
+
+    const forceUpdate = async () => await treeView.value?.forceUpdate();
 
     const treeCellRenderer = (node: NodeModel, index: number) => [
       h(
@@ -175,11 +216,25 @@ export default defineComponent({
     };
 
     return {
+      listView,
       treeView,
+      listIndex,
+      listHeight,
+      scrollListToStart,
+      scrollListToEnd,
+      scrollListToIndex,
+      scrollListToHeight,
       nodes,
       onChange,
       listCellRenderer,
       treeCellRenderer,
+      treeIndex,
+      treeHeight,
+      scrollTreeToStart,
+      scrollTreeToEnd,
+      scrollTreeToIndex,
+      scrollTreeToHeight,
+      forceUpdate,
       handleScroll,
       handleStartReached,
       handleEndReached,

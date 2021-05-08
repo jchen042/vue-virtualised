@@ -60,11 +60,11 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
-import VirtualisedList from "../../components/VirtualisedList";
-import VirtualisedTree from "../../components/VirtualisedTree";
+import { defineComponent, ref, onMounted } from "vue";
+import VirtualisedList from "@/components/VirtualisedList";
+import VirtualisedTree from "@/components/VirtualisedTree";
 
-export default {
+export default defineComponent({
   name: "SimpleExample",
   components: { VirtualisedList, VirtualisedTree },
   setup() {
@@ -85,7 +85,7 @@ export default {
       onSelectedComponentChange,
     };
   },
-};
+});
 </script>
 
 <style></style>
