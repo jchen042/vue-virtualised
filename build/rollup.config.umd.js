@@ -6,7 +6,7 @@ const config = Object.assign({}, base, {
     name: "VueVertualised",
     file: "dist/vue-virtualised.umd.js",
     format: "umd",
-    sourcemap: true,
+    sourcemap: false,
     // https://github.com/lukeed/navaid/issues/5
     inlineDynamicImports: true,
   },

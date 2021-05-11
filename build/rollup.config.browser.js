@@ -7,7 +7,7 @@ const config = Object.assign({}, base, {
     name: "VueVirtualised",
     file: "dist/vue-virtualised.min.js",
     format: "iife",
-    sourcemap: true,
+    sourcemap: false,
     inlineDynamicImports: true,
   },
 });

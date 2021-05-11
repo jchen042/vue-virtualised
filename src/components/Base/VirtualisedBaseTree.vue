@@ -273,6 +273,7 @@ export default defineComponent({
       }
 
       onChange(nodes);
+      // console.log("onChange", nodes);
 
       if (parents.length > 0) {
         const flattenedTreeParentNodeIndex = flattenedTree.findIndex((node) =>
