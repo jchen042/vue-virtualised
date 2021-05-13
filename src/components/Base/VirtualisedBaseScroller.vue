@@ -353,6 +353,7 @@ export default defineComponent({
       requestAnimationFrame(() => {
         scrollTop.value = virtualScroller.value?.scrollTop ?? 0;
         emit("onScroll", virtualScroller.value?.scrollTop);
+        // console.log("onScroll", virtualScroller.value?.scrollTop);
 
         if (scrollTop.value === 0)
           emit("onStartReached", virtualScroller.value?.scrollTop);

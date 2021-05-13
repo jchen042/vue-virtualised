@@ -2,12 +2,14 @@
 public
 examples
 build
+src
 .editorconfig
 babel.config.js
 .eslintrc.js
 babel.config.js
-tsconfig.json
 vue.config.js
+tsconfig.json
+api-extractor.json
 *.gif
 *.log
 *.lock
