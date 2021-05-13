@@ -2,6 +2,7 @@
 public
 examples
 build
+src
 .editorconfig
 babel.config.js
 .eslintrc.js
