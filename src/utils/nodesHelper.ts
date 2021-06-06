@@ -26,7 +26,6 @@ const constructBfsTraverseStack = (
   for (let index = nodes.length - 1; index >= 0; index--) {
     const node = <NodeModel>nodes[index];
 
-    // TODO: accept client specified key in the future
     node.key = parents.concat(index).toString();
     node.parents = parents;
     node.index = index;
